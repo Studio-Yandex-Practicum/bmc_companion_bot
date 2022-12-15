@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "bmc_companion_bot"
+version = "0.1.0"
+description = "bmc_companion_bot"
+authors = ["Denis <xczdenis@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^0.21.0"
+gunicorn = "^20.1.0"
+loguru = "^0.6.0"
+Flask = "^2.2.2"
+flask-sqlalchemy = "^3.0.2"
+Flask-Migrate = "^3.1.0"
+redis = "^4.3.4"
+pydantic = "^1.10.2"
+Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
+psycopg2-binary = "2.9.3"
+python-telegram-bot = "^13.15"
+flask-admin = "^1.6.0"
+
+
+[tool.poetry.group.lint.dependencies]
+flake8 = "^5.0.4"
+flake8-quotes = "^3.3.1"
+pep8-naming = "^0.13.2"
+flake8-broken-line = "^0.6.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+isort = "^5.10.1"
+pre-commit = "^2.20.0"
+
+
+[tool.poetry.group.tests.dependencies]
+pytest = "^7.2.0"
+
+
+[tool.black]
+line-length = 100
+
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+default_section = "THIRDPARTY"
+skip = "venv/"
+skip_glob = "**/migrations/*.py"
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
+
+[tool.pytest.ini_options]
+pythonpath = ["webapi/src"]
+addopts = "-v -p no:warnings"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

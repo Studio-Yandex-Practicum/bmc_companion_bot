@@ -1,0 +1,27 @@
+repos:
+    -   repo: https://github.com/commitizen-tools/commitizen
+        rev: v2.32.2
+        hooks:
+              -   id: commitizen
+                  stages: [ commit-msg ]
+    -   repo: local
+        hooks:
+            -   id: black
+                name: black
+                description: Format the code using black
+                entry: black
+                language: python
+                types: [ python ]
+            -   id: isort
+                name: isort
+                description: isort enforcement
+                entry: isort .
+                language: python
+                types: [ python ]
+            -   id: flake8
+                name: flake8
+                description: Flake8 enforcement
+                entry: flake8
+                language: python
+                types: [ python ]
+                exclude: /(migrations)/
