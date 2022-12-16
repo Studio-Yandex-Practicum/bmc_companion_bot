@@ -1,8 +1,19 @@
 [tool.poetry]
 name = "bmc_companion_bot"
 version = "0.1.0"
-description = "bmc_companion_bot"
-authors = ["Denis <xczdenis@gmail.com>"]
+description = """
+    Telegram bot "Are you okey" 
+    for making an appointment with a psychologist
+"""
+authors = [
+    "Denis <xczdenis@gmail.com>",
+    "Alexander <drakon.a.v@yandex.ru>",
+    "Alexander <alkh0304@yandex.ru>",
+    "Alexey <learies@ya.ru>",
+    "Alexander <precipitance@gmail.com>",
+    "Tanya <tanya.halquist2013@yandex.ru>",
+    "Sergey <ser5olovjew@yandex.ru>"
+]
 readme = "README.md"
 
 [tool.poetry.dependencies]
