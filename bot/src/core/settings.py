@@ -9,6 +9,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 
 class Settings(BaseSettings):
     BOT_TOKEN: str
+    APP_HOST: str
+    APP_PORT: str
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")
