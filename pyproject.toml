@@ -19,6 +19,7 @@ Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
 psycopg2-binary = "2.9.3"
 python-telegram-bot = "^13.15"
 flask-admin = "^1.6.0"
+httpx = "^0.23.1"
 
 
 [tool.poetry.group.lint.dependencies]
