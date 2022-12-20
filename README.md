@@ -407,4 +407,4 @@ git commit -m 'feat: commit description'
 git push origin feat/model_user
 ```
 
-6. Создай pull request в ветку `develop`
+6. Создай pull request из своей ветки в ветку `develop`
