@@ -1,1 +1,2 @@
-from app.models.users import User
+from app.models.base import BaseModel
+from app.models.general import Role, User
