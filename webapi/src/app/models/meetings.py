@@ -1,15 +1,13 @@
-import uuid
 from datetime import datetime
 
 from app import db
+from app.models import General
 from sqlalchemy.dialects.postgresql import UUID
 
 
-class Meeting(db.Model):
+class Meeting(General):
     """Запись на консультацию к психологу.
     Attributes:
-        id(uuid):
-            Уникальный идентификационный номер. Обязательное поле.
         client_id(uuid):
             Клиент - берётся из модели `User`. Обязательное поле.
         user_id(uuid):
@@ -29,7 +27,6 @@ class Meeting(db.Model):
     """
 
     __tablename__ = "meetings"
-    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     client_id = db.Column("Клиент", UUID, db.ForeignKey("users.id"), nullable=False)
     user_id = db.Column("Психолог", UUID, db.ForeignKey("users.id"), nullable=False)
     type_id = db.Column("Тип встречи", UUID, db.ForeignKey("meeting_types.id"), nullable=False)
