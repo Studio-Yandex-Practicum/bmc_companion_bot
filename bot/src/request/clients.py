@@ -5,58 +5,69 @@ from pydantic import ValidationError
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
 
-class APIException(Exception):
+class APIClientException(Exception):
     pass
 
 
 class APIClient:
-    def __init__(self, endpoint, model) -> None:
+    def __init__(self, endpoint, model, manymodel):
         self.model = model
-        self.base_url = f"{WEB_API_URL}/{endpoint}"
+        self.manymodel = manymodel
+        self.base_url = f"http://{WEB_API_URL}/{endpoint}"
 
-    def __validate__(self, json):
+    def __assert_response_ok(self, response):
         try:
-            obj = self.model.parse_obj(json)
+            response.raise_for_status()
+        except httpx.HTTPStatusError as e:
+            raise APIClientException(
+                f"Error response {e.response.status_code} after requesting {e.request.url}"
+            )
+        return response
+
+    def __process_response(self, response, pydantic_model):
+        response = self.__assert_response_ok(response)
+        try:
+            obj = pydantic_model.parse_obj(response.json())
         except ValidationError as e:
-            raise APIException(e.json())
+            raise APIClientException(f"Unexpected format of API response: {e.json()}")
         return obj
 
-    def __obj_url__(self, id=None):
-        if id:
-            return self.base_url + f"/{id}"
-        return self.base_url
+    def __safe_request(self, method, url, json=None, params=None):
+        try:
+            response = httpx.request(method=method, url=url, json=json, params=params)
+        except httpx.RequestError as e:
+            raise APIClientException(f"Error while requesting {e.request.url}")
+        return response
+
+    def __obj_url(self, id):
+        return f"{self.base_url}/{id}"
 
     def get(self, id=None, offset=None, limit=None):
         if id is not None:
-            url = self.__obj_url__(id=id)
-            response = httpx.get(url)
-            obj = self.__validate__(response.json())
+            response = self.__safe_request("GET", self.__obj_url(id))
+            obj = self.__process_response(response, self.model)
             return obj
         params = {}
         if limit:
             params["limit"] = limit
         if offset:
             params["offset"] = offset
-        response = httpx.get(self.base_url, params=params)
-        objs = []
-        for json in response.json():
-            objs.append(self.__validate__(json))
+        print(params)
+        response = self.__safe_request("GET", self.base_url, params=params)
+        objs = self.__process_response(response, self.manymodel)
         return objs
 
     def create(self, obj):
-        url = self.__obj_url__()
-        response = httpx.post(url, data=obj.json())
-        obj = self.__validate__(response.json())
+        response = self.__safe_request("POST", self.base_url, json=obj.json())
+        obj = self.__process_response(response, self.model)
         return obj
 
     def update(self, id, obj):
-        url = self.__obj_url__(id=id)
-        response = httpx.patch(url, data=obj.json())
-        obj = self.__validate__(response.json())
+        response = self.__safe_request("PATCH", self.__obj_url(id), json=obj.json())
+        obj = self.__process_response(response, self.model)
         return obj
 
     def delete(self, id):
-        url = self.__obj_url__(id=id)
-        response = httpx.delete(url)
-        obj = self.__validate__(response.json())
+        response = self.__safe_request("DELETE", self.__obj_url(id))
+        obj = self.__process_response(response, self.model)
         return obj
