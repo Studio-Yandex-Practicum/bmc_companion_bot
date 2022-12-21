@@ -1,5 +1,6 @@
 # О проекте
-
+[![Code style: black](https://badgen.net/badge/codestyle/black/black)](https://github.com/psf/black)
+[![PyPI pyversions](https://badgen.net/badge/python/3.10/green)](https://www.python.org)
 
 Телеграм-бот **Ты в порядке** для записи людей на консультации с психологом
 
