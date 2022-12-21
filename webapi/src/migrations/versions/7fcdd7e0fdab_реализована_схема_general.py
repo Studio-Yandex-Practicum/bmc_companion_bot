@@ -1,15 +1,15 @@
 """Реализована схема general
 
-Revision ID: f7cc230c4714
+Revision ID: 7fcdd7e0fdab
 Revises:
-Create Date: 2022-12-20 20:52:38.573045
+Create Date: 2022-12-21 16:44:34.139595
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "f7cc230c4714"
+revision = "7fcdd7e0fdab"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -20,7 +20,7 @@ def upgrade():
     op.execute("CREATE SCHEMA general")
     op.create_table(
         "roles",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("Время создания", sa.DateTime(), nullable=True),
         sa.Column("Время обновления", sa.DateTime(), nullable=True),
         sa.Column("Наименование роли", sa.String(length=256), nullable=False),
@@ -29,7 +29,7 @@ def upgrade():
     )
     op.create_table(
         "users",
-        sa.Column("id", sa.Integer(), nullable=False),
+        sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
         sa.Column("Время создания", sa.DateTime(), nullable=True),
         sa.Column("Время обновления", sa.DateTime(), nullable=True),
         sa.Column("Имя", sa.String(length=150), nullable=True),
