@@ -1,11 +1,10 @@
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-
-from . import constants as const
+from ui import constants as const
 
 
 class MenuElement:
-    def __init__(self, name, result, answers):
+    def __init__(self, name: str, result: str, answers: dict[str, str]) -> None:
         self.name = name
         self.result = result
         self.answers = answers
@@ -24,7 +23,7 @@ class MenuNames:
     )
 
 
-def main_menu(update: Update, context: CallbackContext):
+def main_menu(update: Update, context: CallbackContext) -> None:
     buttons = ReplyKeyboardMarkup(
         [[MenuNames.start_menu("to_test")], [MenuNames.start_menu("to_meeting")]],
         resize_keyboard=True,
