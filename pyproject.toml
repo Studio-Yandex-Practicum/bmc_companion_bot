@@ -56,7 +56,7 @@ use_parentheses = true
 
 
 [tool.pytest.ini_options]
-pythonpath = ["webapi/src"]
+pythonpath = ["webapi/src", "bot/src"]
 addopts = "-v -p no:warnings"
 
 
