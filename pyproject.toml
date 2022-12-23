@@ -19,8 +19,10 @@ Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
 psycopg2-binary = "2.9.3"
 python-telegram-bot = "^13.15"
 flask-admin = "^1.6.0"
+flask-pydantic = "^0.11.0"
+flask-restful = "^0.3.9"
+spectree = "^1.0.3"
 httpx = "^0.23.1"
-
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^5.0.4"
