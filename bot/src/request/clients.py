@@ -4,34 +4,15 @@ import httpx
 from core.constants import Endpoint, HTTPMethod
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
+from request.exceptions import (
+    APIClientRequestError,
+    APIClientResponseError,
+    APIClientValidationError,
+)
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
-
-
-class APIClientException(Exception):
-    """Общий класс исключений HTTP-обвязки APIClient."""
-
-    pass
-
-
-class APIClientRequestError(APIClientException):
-    """Исключение ошибок соединения с Web-API."""
-
-    pass
-
-
-class APIClientResponseError(APIClientException):
-    """Исключение неуспешных запросов к Web_API (статусы ответа 4xx и 5xx)."""
-
-    pass
-
-
-class APIClientValidationError(APIClientException):
-    """Исключение ошибок валидации pydantic-моделей."""
-
-    pass
 
 
 class APIClient:
