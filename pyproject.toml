@@ -24,6 +24,7 @@ flask-restful = "^0.3.9"
 spectree = "^1.0.3"
 httpx = "^0.23.1"
 
+
 [tool.poetry.group.lint.dependencies]
 flake8 = "^5.0.4"
 flake8-quotes = "^3.3.1"
