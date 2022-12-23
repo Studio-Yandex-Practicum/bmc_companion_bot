@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type, TypeVar, Union
+from typing import Dict, Optional, Type, TypeVar, Union
 
 import httpx
 from core.constants import Endpoint, HTTPMethod
@@ -11,26 +11,49 @@ ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
 class APIClientException(Exception):
+    """Общий класс исключений HTTP-обвязки APIClient."""
+
+    pass
+
+
+class APIClientRequestError(APIClientException):
+    """Исключение ошибок соединения с Web-API."""
+
+    pass
+
+
+class APIClientResponseError(APIClientException):
+    """Исключение неуспешных запросов к Web_API (статусы ответа 4xx и 5xx)."""
+
+    pass
+
+
+class APIClientValidationError(APIClientException):
+    """Исключение ошибок валидации pydantic-моделей."""
+
     pass
 
 
 class APIClient:
+    """
+    Класс обвязки HTTP-запросов к Web-API. Конструктор принимает адрес эндпойнта, тип
+    pydantic-модели отдельного объекта и тип pydantic-модели их набора. Поддерживаются методы
+    get(), create(), patch() и delete().
+    """
+
     def __init__(
-        self, endpoint: Endpoint, model: Type[ModelType], manymodel: Type[ModelType]
+        self, endpoint: Endpoint, model: Type[ModelType], many_model: Type[ModelType]
     ) -> None:
         self.model = model
-        self.manymodel = manymodel
+        self.many_model = many_model
         self.base_url = f"http://{WEB_API_URL}/{endpoint}"
 
     def _assert_response_ok(self, response: httpx.Response) -> httpx.Response:
-        """
-        Проверяет, что статус-код соответствует значению OK, и бросает исключение,
-        если это не так.
-        """
+        """Выбрасывает APIClientResponseError, если код состояния HTTP-ответа не OK."""
         try:
             response.raise_for_status()
         except httpx.HTTPStatusError as e:
-            raise APIClientException(
+            raise APIClientResponseError(
                 f"Error response {e.response.status_code} after requesting {e.request.url}"
             )
         return response
@@ -39,14 +62,15 @@ class APIClient:
         self, response: httpx.Response, pydantic_model: Type[ModelType]
     ) -> ModelType:
         """
-        Принимает HTTP-запрос, проверяет, что статус-код соответствует OK, и преобразует его
-        в объект модели pydantic.
+        Принимает HTTP-ответ, проверяет, что код состояния -- OK, и преобразует его
+        в объект модели pydantic. Выбрасывает APIClientValidationError, если полученный JSON
+        не соответствует модели.
         """
         response = self._assert_response_ok(response)
         try:
             obj = pydantic_model.parse_obj(response.json())
         except ValidationError as e:
-            raise APIClientException(f"Unexpected format of API response: {e.json()}")
+            raise APIClientValidationError(f"Unexpected format of API response: {e.json()}")
         return obj
 
     def _safe_request(
@@ -56,15 +80,15 @@ class APIClient:
         json: Optional[str] = None,
         params: Optional[Dict[str, str]] = None,
     ) -> httpx.Response:
-        """Метод, реализующий HTTP-запрос и перехват возникающих при этом исключений."""
+        """Выполняет HTTP-запрос и перехватывает исключения, выбрасывая APIClientRequestError."""
         try:
             response = httpx.request(method=method, url=url, json=json, params=params)
         except httpx.RequestError as e:
-            raise APIClientException(f"Error while requesting {e.request.url}")
+            raise APIClientRequestError(f"Error while requesting {e.request.url}")
         return response
 
-    def _obj_url(self, id):
-        """Конструирует URL ресурса, используя переданный id."""
+    def _obj_url(self, id: Union[int, str]) -> str:
+        """Конструирует URL конкретного ресурса, используя переданный id."""
         return f"{self.base_url}/{id}"
 
     def get(
@@ -72,7 +96,11 @@ class APIClient:
         id: Optional[Union[int, str]] = None,
         offset: Optional[int] = None,
         limit: Optional[int] = None,
-    ) -> Union[ModelType, List[ModelType]]:
+    ) -> ModelType:
+        """
+        Получение объекта(-ов). Принимает id объекта или необязательные значения offset и/или
+        limit, возвращает pydantic-модель одиночного объекта или их набора.
+        """
         if id is not None:
             response = self._safe_request(HTTPMethod.GET, self._obj_url(id))
             obj = self._process_response(response, self.model)
@@ -84,20 +112,32 @@ class APIClient:
             params["offset"] = offset
         print(params)
         response = self._safe_request(HTTPMethod.GET, self.base_url, params=params)
-        objs = self._process_response(response, self.manymodel)
+        objs = self._process_response(response, self.many_model)
         return objs
 
     def create(self, obj: ModelType) -> ModelType:
+        """
+        Создание объекта. Принимает pydantic-модель одиночного объекта, возвращает pydantic-модель
+        одиночного объекта, сконструированную по json-данным ответа Web-API.
+        """
         response = self._safe_request(HTTPMethod.POST, self.base_url, json=obj.json())
         obj = self._process_response(response, self.model)
         return obj
 
     def update(self, id: Union[int, str], obj: ModelType) -> ModelType:
+        """
+        Редактирование объекта. Принимает id объекта в базе и pydantic-модель одиночного объекта,
+        возвращает pydantic-модель, сконструированную по json-данным ответа Web-API.
+        """
         response = self._safe_request(HTTPMethod.PATCH, self._obj_url(id), json=obj.json())
         obj = self._process_response(response, self.model)
         return obj
 
     def delete(self, id: Union[int, str]) -> ModelType:
+        """
+        Удаление объектов. Принимает id объекта в базе, возвращает pydantic-модель,
+        сконструированную по json-данным ответа Web-API.
+        """
         response = self._safe_request(HTTPMethod.DELETE, self._obj_url(id))
         obj = self._process_response(response, self.model)
         return obj
