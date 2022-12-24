@@ -26,7 +26,7 @@ class MeetingType(BaseModel):
 
     __tablename__ = "meetings_meeting_types"
 
-    name = Column("Название встречи", String(256))
+    name = Column("Название встречи", String(256), unique=True, nullable=False)
 
 
 class MeetingFeedbacksCompleted(BaseModel):
