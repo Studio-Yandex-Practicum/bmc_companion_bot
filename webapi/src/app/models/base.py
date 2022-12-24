@@ -15,5 +15,5 @@ class BaseModel(db.Model):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column("Время создания", DateTime, default=fresh_timestamp)
-    updated_at = Column("Время обновления", DateTime, onupdate=fresh_timestamp)
+    created_at = Column("Время создания", DateTime, default=fresh_timestamp())
+    updated_at = Column("Время обновления", DateTime, onupdate=fresh_timestamp())
