@@ -22,4 +22,4 @@ class Role(BaseModel):
 
     __tablename__ = "users_roles"
 
-    name = Column("Наименование роли", String(256), nullable=False)
+    name = Column("Наименование роли", String(256), unique=True, nullable=False)
