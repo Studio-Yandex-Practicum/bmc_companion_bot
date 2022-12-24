@@ -5,15 +5,14 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, Stri
 class Meeting(BaseModel):
     """Запись на встречу с психологом."""
 
-    __tablename__ = "meetings"
-    __table_args__ = {"schema": "meetings"}
+    __tablename__ = "meetings_meetings"
 
-    client_id = Column("Клиент", Integer, ForeignKey("general.users.id"), nullable=False)
-    user_id = Column("Психолог", Integer, ForeignKey("general.users.id"), nullable=False)
+    client_id = Column("Клиент", Integer, ForeignKey("users_users.id"), nullable=False)
+    user_id = Column("Психолог", Integer, ForeignKey("users_users.id"), nullable=False)
     type_id = Column(
         "Тип встречи",
         Integer,
-        ForeignKey("meetings.meeting_types.id"),
+        ForeignKey("meetings_meeting_types.id"),
         nullable=False,
     )
     comment = Column("Обращение к психологу", Text)
@@ -25,8 +24,7 @@ class Meeting(BaseModel):
 class MeetingType(BaseModel):
     """Тип встречи."""
 
-    __tablename__ = "meeting_types"
-    __table_args__ = {"schema": "meetings"}
+    __tablename__ = "meetings_meeting_types"
 
     name = Column("Название встречи", String(256))
 
@@ -34,8 +32,7 @@ class MeetingType(BaseModel):
 class MeetingFeedbacksCompleted(BaseModel):
     """Обратная связь после встречи с психологом."""
 
-    __tablename__ = "meeting_feedbacks_completed"
-    __table_args__ = {"schema": "meetings"}
+    __tablename__ = "meetings_meeting_feedbacks_completed"
 
-    meeting_id = Column("Встреча", Integer, ForeignKey("meetings.meetings.id"), nullable=False)
-    user_id = Column("Клиент", Integer, ForeignKey("general.users.id"), nullable=False)
+    meeting_id = Column("Встреча", Integer, ForeignKey("meetings_meetings.id"), nullable=False)
+    user_id = Column("Клиент", Integer, ForeignKey("users_users.id"), nullable=False)
