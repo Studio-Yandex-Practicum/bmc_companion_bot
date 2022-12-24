@@ -1,1 +1,1 @@
-from app.api.v1.users.routes import register_router
+from app.api.v1.users import routes
