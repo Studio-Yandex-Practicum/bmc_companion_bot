@@ -1,38 +1,37 @@
+from app import db
 from app.models import BaseModel
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, SmallInteger, String, Text
 
 
 class Meeting(BaseModel):
     """Запись на встречу с психологом."""
 
-    __tablename__ = "meetings_meetings"
+    __tablename__ = "meetings"
 
-    client_id = Column("Клиент", Integer, ForeignKey("users_users.id"), nullable=False)
-    user_id = Column("Психолог", Integer, ForeignKey("users_users.id"), nullable=False)
-    type_id = Column(
-        "Тип встречи",
-        Integer,
-        ForeignKey("meetings_meeting_types.id"),
+    client_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    type_id = db.Column(
+        db.Integer,
+        db.ForeignKey("meeting_types.id"),
         nullable=False,
     )
-    comment = Column("Обращение к психологу", Text)
-    target_test_score = Column("Бал за тест", SmallInteger, nullable=False)
-    time_slot = Column("Временной слот", DateTime, nullable=False)
-    deleted_at = Column("Время удаления", DateTime)
+    comment = db.Column(db.Text)
+    target_test_score = db.Column(db.SmallInteger, nullable=False)
+    time_slot = db.Column(db.DateTime, nullable=False)
+    deleted_at = db.Column(db.DateTime)
 
 
 class MeetingType(BaseModel):
     """Тип встречи."""
 
-    __tablename__ = "meetings_meeting_types"
+    __tablename__ = "meeting_types"
 
-    name = Column("Название встречи", String(256), unique=True, nullable=False)
+    name = db.Column(db.String(256), unique=True, nullable=False)
 
 
 class MeetingFeedbacksCompleted(BaseModel):
     """Обратная связь после встречи с психологом."""
 
-    __tablename__ = "meetings_meeting_feedbacks_completed"
+    __tablename__ = "meeting_feedbacks_completed"
 
-    meeting_id = Column("Встреча", Integer, ForeignKey("meetings_meetings.id"), nullable=False)
-    user_id = Column("Клиент", Integer, ForeignKey("users_users.id"), nullable=False)
+    meeting_id = db.Column(db.Integer, db.ForeignKey("meetings.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)

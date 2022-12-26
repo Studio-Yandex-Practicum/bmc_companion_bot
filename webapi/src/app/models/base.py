@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from app import db
-from sqlalchemy import Column, DateTime, Integer
 
 
 def fresh_timestamp() -> datetime:
@@ -14,6 +13,6 @@ class BaseModel(db.Model):
 
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column("Время создания", DateTime, default=fresh_timestamp)
-    updated_at = Column("Время обновления", DateTime, onupdate=fresh_timestamp)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime, default=fresh_timestamp())
+    updated_at = db.Column(db.DateTime, onupdate=fresh_timestamp())
