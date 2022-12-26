@@ -53,3 +53,10 @@ for event in ya_calendar.events():
     if event.vobject_instance.vevent.summary.value == "Слот1":
         print(f"Событие найдено, его uid {event.vobject_instance.vevent.uid.value}")
         event.delete()
+
+# Добавление нового ивента.
+# ya_calendar.save_event(
+#         dtstart=datetime(2022, 12, 26, 12),
+#         dtend=datetime(2022, 12, 26, 13),
+#         summary="Слот 1",
+#     )
