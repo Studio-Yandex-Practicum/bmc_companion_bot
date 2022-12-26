@@ -10,8 +10,6 @@ caldav_url = os.getenv("CAL_URL")
 username = os.getenv("CAL_USER")
 password = os.getenv("CAL_PASS")
 
-SCHELDUE_SUCCESS_MSG = "Вы успешно записались"
-
 client = caldav.DAVClient(url=caldav_url, username=username, password=password)
 
 # Процесс выбора и получения календаря.
