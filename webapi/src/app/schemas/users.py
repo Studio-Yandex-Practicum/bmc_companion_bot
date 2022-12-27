@@ -1,8 +1,8 @@
 from datetime import datetime
 from typing import List, Optional, Union
 
-from app.utils import get_paginated_list
-from pydantic import BaseModel, Extra, Field, PositiveInt
+from app.schemas.core import ObjectList
+from pydantic import BaseModel, Extra, PositiveInt
 
 
 class UserCreate(BaseModel):
@@ -51,23 +51,7 @@ class UserFull(UserBare):
     deleted_at: Optional[datetime]
 
 
-class GetMultiQueryParams(BaseModel):
-    """Схема параметров запроса."""
-
-    start: int = Field(1, description="Смещение выбоки объектов")
-    limit: int = Field(10, le=100, description="Количество объектов на одной странице")
-    count: int = Field(None, description="Общее количество объектов")
-    previous: str = Field(None, description="Предыдущая страница")
-    next: str = Field(None, description="Следующая страница")
-
-
-class UserList(GetMultiQueryParams):
+class UserList(ObjectList):
     """Схема для получения списка пользователей."""
 
     data: List[UserBare]
-
-    def pagination(self, data, query):
-        return get_paginated_list(data, "/api/v1/users", query)
-
-    class Config:
-        orm_mode = True

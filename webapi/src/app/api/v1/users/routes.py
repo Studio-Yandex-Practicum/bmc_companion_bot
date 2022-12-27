@@ -3,15 +3,8 @@ from http import HTTPStatus
 
 from app.db.pg import db
 from app.models import Role, User
-from app.schemas.core import StatusResponse
-from app.schemas.users import (
-    GetMultiQueryParams,
-    UserBare,
-    UserCreate,
-    UserFull,
-    UserList,
-    UserUpdate,
-)
+from app.schemas.core import GetMultiQueryParams, StatusResponse
+from app.schemas.users import UserBare, UserCreate, UserFull, UserList, UserUpdate
 from flask import abort
 from flask_pydantic import validate
 from flask_restful import Resource
@@ -23,7 +16,9 @@ class ApiUserWithoutID(Resource):
         """Получение данных всех пользователей."""
         users = User.query.all()
         users_data = [(dict(UserBare.from_orm(user))) for user in users]
-        paginated_data = UserList.pagination(self, users_data, query)
+        paginated_data = UserList.pagination(
+            self, data=users_data, url="/api/v1/users", query=query
+        )
         return UserList(**paginated_data)
 
     @validate(on_success_status=HTTPStatus.CREATED)
