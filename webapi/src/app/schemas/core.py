@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import List, Optional, TypeVar
 
 from app.utils import get_paginated_list
@@ -40,6 +41,6 @@ class StatusResponse(BaseModel):
     Формат ответа для запросов, в которых не требуется отдавать данные
     """
 
-    status: str = "ok"
-    message: Optional[str] = None
+    status: int = HTTPStatus.OK
+    warning: Optional[str] = None
     warning_info: list[dict] = Field(default_factory=list)
