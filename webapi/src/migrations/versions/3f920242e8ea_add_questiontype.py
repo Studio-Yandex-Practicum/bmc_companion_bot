@@ -1,16 +1,16 @@
-"""feat: add QuestionType model
+"""add QuestionType
 
-Revision ID: 4ff4236078f0
-Revises: 07931b05a239
-Create Date: 2022-12-26 14:56:29.604561
+Revision ID: 3f920242e8ea
+Revises: 72e4b471e41b
+Create Date: 2022-12-27 13:29:32.407149
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "4ff4236078f0"
-down_revision = "07931b05a239"
+revision = "3f920242e8ea"
+down_revision = "72e4b471e41b"
 branch_labels = None
 depends_on = None
 
@@ -20,8 +20,8 @@ def upgrade():
     op.create_table(
         "question_types",
         sa.Column("id", sa.Integer(), autoincrement=True, nullable=False),
-        sa.Column("Время создания", sa.DateTime(), nullable=True),
-        sa.Column("Время обновления", sa.DateTime(), nullable=True),
+        sa.Column("created_at", sa.DateTime(), nullable=True),
+        sa.Column("updated_at", sa.DateTime(), nullable=True),
         sa.Column("name", sa.String(length=256), nullable=True, comment="Название типа вопроса"),
         sa.Column(
             "validation_regexp",
