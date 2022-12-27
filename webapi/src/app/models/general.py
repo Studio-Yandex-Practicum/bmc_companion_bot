@@ -17,6 +17,24 @@ class User(BaseModel):
     role_id = Column("Роль пользователя", Integer, ForeignKey("general.roles.id"), nullable=False)
     deleted_at = Column("Время удаления", DateTime)
 
+    def to_dict(self):
+        return dict(
+            first_name=self.first_name,
+            last_name=self.last_name,
+            middle_name=self.middle_name,
+            birthday=self.birthday,
+            phone=self.phone,
+            telegram_id=self.telegram_id,
+            role_id=self.role_id,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            deleted_at=self.deleted_at,
+        )
+
+    def from_dict(self, data):
+        for key, item in data.items():
+            setattr(self, key, item)
+
 
 class Role(BaseModel):
     """Роль пользователя."""
