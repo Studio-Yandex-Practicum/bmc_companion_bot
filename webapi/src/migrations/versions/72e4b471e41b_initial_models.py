@@ -1,15 +1,15 @@
 """initial models
 
-Revision ID: 7cfe7d75230b
+Revision ID: 72e4b471e41b
 Revises: 
-Create Date: 2022-12-27 09:55:51.689628
+Create Date: 2022-12-27 10:03:02.391844
 
 """
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision = "7cfe7d75230b"
+revision = "72e4b471e41b"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -91,6 +91,11 @@ def upgrade():
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_meeting_feedbacks_completed")),
     )
+    op.execute("INSERT INTO meeting_types (id, created_at, name) VALUES (1, NOW(), 'internal')")
+    op.execute("INSERT INTO meeting_types (id, created_at, name) VALUES (2, NOW(), 'online')")
+    op.execute("INSERT INTO user_roles (id, created_at, name) VALUES (1, NOW(), 'root')")
+    op.execute("INSERT INTO user_roles (id, created_at, name) VALUES (2, NOW(), 'admin')")
+    op.execute("INSERT INTO user_roles (id, created_at, name) VALUES (3, NOW(), 'user')")
     # ### end Alembic commands ###
 
 
