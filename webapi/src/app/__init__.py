@@ -1,10 +1,13 @@
+from app.core.exceptions import errors
 from app.core.settings import settings
 from app.db.pg import db, migrate
 from flask import Flask
+
 from flask_rest_paginate import Pagination
 from flask_restful import Api
 
 pagination = Pagination()
+
 
 
 def create_app():
@@ -22,6 +25,7 @@ def create_app():
 
     app.register_blueprint(api_bp)
     router(api)
+
 
     return app
 
