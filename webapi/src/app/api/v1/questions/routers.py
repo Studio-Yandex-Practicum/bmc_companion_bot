@@ -76,8 +76,3 @@ class QuestionTypeAPIList(Resource):
     def get(self):
         question_type_db = QuestionType.query.filter_by(deleted_at=None).all()
         return pagination.paginate(question_type_db, test_fields)
-
-
-def register_router(api):
-    api.add_resource(QuestionTypeApi, "/api/v1/questions/<int:id>")
-    api.add_resource(QuestionTypeAPIList, "/api/v1/questions/")
