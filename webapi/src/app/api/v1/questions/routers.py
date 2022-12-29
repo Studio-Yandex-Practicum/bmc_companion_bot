@@ -80,7 +80,7 @@ class QuestionTypeAPIList(Resource):
         """Получение данных всех типов вопросов."""
         question_type_db = QuestionType.query.filter_by(deleted_at=None).all()
         question_type_data = [
-            (dict(QuestionTypeAPIList.from_orm(question_type)))
+            (dict(QuestionTypeResponse.from_orm(question_type)))
             for question_type in question_type_db
         ]
         paginated_data = QuestionTypeList.pagination(
