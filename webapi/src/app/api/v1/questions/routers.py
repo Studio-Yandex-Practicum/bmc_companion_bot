@@ -1,18 +1,18 @@
 from datetime import datetime
 from http import HTTPStatus
 
-from app import pagination
 from app.db.pg import db
 from app.models import QuestionType
-from app.schemas.core import StatusResponse
+from app.schemas.core import GetMultiQueryParams, StatusResponse
 from app.schemas.questions import (
     QuestionTypeCreate,
+    QuestionTypeList,
     QuestionTypeResponse,
     QuestionTypeUpdate,
 )
 from flask import abort
 from flask_pydantic import validate
-from flask_restful import Resource, fields
+from flask_restful import Resource
 
 FORMAT = "%Y/%m/%d %H:%M:%S"
 
@@ -20,12 +20,18 @@ FORMAT = "%Y/%m/%d %H:%M:%S"
 class QuestionTypeApi(Resource):
     @validate()
     def get(self, id: int) -> QuestionTypeResponse:
+        """Получение данных типа вопроса по id."""
         question_type = QuestionType.query.get(id)
+        if question_type is None:
+            return abort(HTTPStatus.NOT_FOUND, "Тип вопроса с заданным id не существует.")
         return QuestionTypeResponse.from_orm(question_type)
 
     @validate()
     def patch(self, id: int, body: QuestionTypeUpdate) -> QuestionTypeResponse:
+        """Изменение данных определенного типа вопроса по id."""
         question_type = QuestionType.query.get(id)
+        if question_type is None:
+            return abort(HTTPStatus.NOT_FOUND, "Типа вопроса с заданным id не существует.")
         question_type_exists = (
             db.session.query(QuestionType).where(QuestionType.name == body.name).first()
         )
@@ -38,7 +44,12 @@ class QuestionTypeApi(Resource):
 
     @validate()
     def delete(self, id: int) -> StatusResponse:
+        """Soft-delete типа вопроса."""
         question_type = QuestionType.query.get(id)
+        if question_type is None:
+            return abort(HTTPStatus.NOT_FOUND, "Типа вопроса с заданным id не существует.")
+        if question_type.deleted_at is not None:
+            return abort(HTTPStatus.CONFLICT, "Тип вопроса уже заблокирован!")
         question_type.deleted_at = datetime.utcnow().strftime(FORMAT)
         db.session.commit()
         message = StatusResponse(
@@ -47,18 +58,10 @@ class QuestionTypeApi(Resource):
         return message
 
 
-test_fields = {
-    "id": fields.Integer,
-    "name": fields.String,
-    "validation_regexp": fields.String,
-    "created_at": fields.DateTime(dt_format="iso8601"),
-    "updated_at": fields.DateTime(dt_format="iso8601"),
-}
-
-
 class QuestionTypeAPIList(Resource):
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: QuestionTypeCreate) -> QuestionTypeResponse:
+        """Создание типа вопроса."""
         question_type = QuestionType()
         question_type_exists = (
             db.session.query(QuestionType).where(QuestionType.name == body.name).first()
@@ -73,6 +76,14 @@ class QuestionTypeAPIList(Resource):
         return QuestionTypeResponse.from_orm(question_type)
 
     @validate()
-    def get(self):
+    def get(self, query: GetMultiQueryParams) -> QuestionTypeList:
+        """Получение данных всех типов вопросов."""
         question_type_db = QuestionType.query.filter_by(deleted_at=None).all()
-        return pagination.paginate(question_type_db, test_fields)
+        question_type_data = [
+            (dict(QuestionTypeAPIList.from_orm(question_type)))
+            for question_type in question_type_db
+        ]
+        paginated_data = QuestionTypeList.pagination(
+            self, data=question_type_data, url="/api/v1/questions/", query=query
+        )
+        return QuestionTypeList(**paginated_data)
