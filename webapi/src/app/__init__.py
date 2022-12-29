@@ -19,9 +19,7 @@ def create_app():
     pagination.init_app(app, db)
 
     from app.api import bp as api_bp
-
     from app.api.v1.register_routes import register_routes as router
-
 
     app.register_blueprint(api_bp)
     router(api)

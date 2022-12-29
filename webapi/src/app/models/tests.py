@@ -1,7 +1,5 @@
-from datetime import datetime
-
 from app.models import BaseModel
-from sqlalchemy import Column, DateTime, String, Text, Integer
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 
 
 class QuestionType(BaseModel):
@@ -31,11 +29,12 @@ class QuestionType(BaseModel):
 
 class Test(BaseModel):
     """Тесты."""
+
     __tablename__ = "tests"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(256), comment="Название теста", nullable=False)
-    # created_by = Column(Integer, ForeignKey='user.id')
+    created_by = Column(Integer, ForeignKey("users.id"))
     deleted_at = Column(DateTime, default=None)
 
     def to_dict(self):
@@ -45,7 +44,7 @@ class Test(BaseModel):
             created_at=self.created_at,
             # created_by=test.created_by,
             updated_at=self.updated_at,
-            deleted_at=self.deleted_at
+            deleted_at=self.deleted_at,
         )
 
     def from_dict(self, data):

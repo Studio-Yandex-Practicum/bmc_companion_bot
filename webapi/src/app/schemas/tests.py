@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
+from app.schemas.core import ObjectList
 from pydantic import BaseModel
 
 
@@ -17,7 +18,11 @@ class TestCreate(BaseModel):
 class TestResponse(TestCreate):
     id: int
     created_at: datetime
-    # created_by: int
+    created_by: int
 
     class Config:
         orm_mode = True
+
+
+class TestList(ObjectList):
+    data: List[TestResponse]
