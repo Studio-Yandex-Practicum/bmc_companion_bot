@@ -87,8 +87,3 @@ class QuestionTypeAPIList(Resource):
             self, data=question_type_data, url="/api/v1/questions/", query=query
         )
         return QuestionTypeList(**paginated_data)
-
-
-def register_router(api):
-    api.add_resource(QuestionTypeApi, "/api/v1/questions/<int:id>")
-    api.add_resource(QuestionTypeAPIList, "/api/v1/questions/")

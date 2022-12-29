@@ -2,7 +2,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 from app.db.pg import db
-from app.models import Role, User
+from app.models import User, UserRole
 from app.schemas.core import GetMultiQueryParams, StatusResponse
 from app.schemas.users import UserBare, UserCreate, UserFull, UserList, UserUpdate
 from flask import abort
@@ -28,7 +28,7 @@ class ApiUserWithoutID(Resource):
         user_exists = db.session.query(User).where(User.phone == body.phone).first()
         if user_exists and body.phone is not None:
             return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = db.session.query(Role).where(Role.id == body.role_id).first()
+        role = db.session.query(UserRole).where(UserRole.id == body.role_id).first()
         if role is None:
             return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
         user.from_dict(dict(body))
@@ -55,7 +55,7 @@ class ApiUserWithID(Resource):
         phone_in_use = db.session.query(User).where(User.phone == body.phone).first()
         if phone_in_use and body.phone is not None:
             return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = db.session.query(Role).where(Role.id == body.role_id).first()
+        role = db.session.query(UserRole).where(UserRole.id == body.role_id).first()
         if role is None:
             return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
         user.from_dict(dict(body))
