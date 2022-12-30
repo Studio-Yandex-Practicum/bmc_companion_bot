@@ -15,14 +15,14 @@ DT_FORMAT = "%Y/%m/%d %H:%M:%S"
 class TestAPI(Resource):
     @validate()
     def get(self, test_id) -> TestResponse:
-        test = Test.query.get_or_404(test_id)
+        test = Test.query.filter_by(id=test_id).one_or_none()
         if test.deleted_at is not None:
             return abort(HTTPStatus.NOT_FOUND, "Данный тест был удален!")
         return TestResponse.from_orm(test)
 
     @validate()
     def delete(self, test_id) -> StatusResponse:
-        test = Test.query.get_or_404(test_id)
+        test = Test.query.filter_by(id=test_id).one_or_none()
         test.deleted_at = datetime.utcnow().strftime(DT_FORMAT)
         db.session.commit()
         message = StatusResponse(
@@ -31,8 +31,8 @@ class TestAPI(Resource):
         return message
 
     @validate()
-    def put(self, test_id, body: TestCreate) -> TestResponse:
-        test = Test.query.get_or_404(test_id)
+    def patch(self, test_id, body: TestCreate) -> TestResponse:
+        test = Test.query.filter_by(id=test_id).one_or_none()
         if test.deleted_at is not None:
             return abort(HTTPStatus.NOT_FOUND, "Данный тест был удален!")
         test.from_dict(dict(body))
