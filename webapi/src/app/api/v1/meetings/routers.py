@@ -14,29 +14,33 @@ from flask_pydantic import validate
 from flask_restful import Resource
 
 
+def get_object_by_id(obj_id):
+    """Получить объект по id."""
+    obj = MeetingType.query.get(obj_id)
+    if not obj:
+        return abort(HTTPStatus.NOT_FOUND, "Тип встречи с заданным id не существует.")
+    return obj
+
+
+def check_exists_object(body):
+    """Проверка на существование объекта."""
+    obj_exists = db.session.query(MeetingType).where(MeetingType.name == body.name).first()
+    if obj_exists:
+        return abort(HTTPStatus.CONFLICT, "Такой тип встречи уже существует!")
+
+
 class MeetingTypeAPI(Resource):
     @validate()
     def get(self, meeting_type_id: int) -> MeetingTypeResponse:
         """Получение данных о типе встречи по id."""
-        meeting_type = MeetingType.query.get(meeting_type_id)
-        if not meeting_type:
-            return abort(HTTPStatus.NOT_FOUND, "Тип встречи с заданным id не существует.")
-
+        meeting_type = get_object_by_id(meeting_type_id)
         return MeetingTypeResponse.from_orm(meeting_type)
 
     @validate()
     def patch(self, meeting_type_id: int, body: MeetingTypeUpdate) -> MeetingTypeResponse:
         """Изменение данных о типе встречи по id."""
-        meeting_type = MeetingType.query.get(meeting_type_id)
-        if not meeting_type:
-            return abort(HTTPStatus.NOT_FOUND, "Тип встречи с заданным id не существует.")
-
-        meeting_type_exists = (
-            db.session.query(MeetingType).where(MeetingType.name == body.name).first()
-        )
-        if not meeting_type_exists:
-            return abort(HTTPStatus.CONFLICT, "Такой тип встречи уже есть!")
-
+        meeting_type = get_object_by_id(meeting_type_id)
+        check_exists_object(body)
         meeting_type.from_dict(dict(body))
         db.session.commit()
         return MeetingTypeResponse.from_orm(meeting_type)
@@ -44,15 +48,10 @@ class MeetingTypeAPI(Resource):
     @validate()
     def delete(self, meeting_type_id: int) -> StatusResponse:
         """Hard-delete типа встречи."""
-        meeting_type = MeetingType.query.get(meeting_type_id)
-        if not meeting_type:
-            return abort(HTTPStatus.NOT_FOUND, "Вопроса с заданным id не существует.")
-
+        meeting_type = get_object_by_id(meeting_type_id)
         db.session.delete(meeting_type)
         db.session.commit()
-        return StatusResponse(
-            warning="Ресурс удалён.",
-        )
+        return StatusResponse(warning="Ресурс удалён.")
 
 
 class MeetingTypeAPIList(Resource):
@@ -72,13 +71,7 @@ class MeetingTypeAPIList(Resource):
     def post(self, body: MeetingTypeCreate) -> MeetingTypeResponse:
         """Создаёт новый тип встречи."""
         meeting_type = MeetingType()
-
-        meeting_type_exists = (
-            db.session.query(MeetingType).where(MeetingType.name == body.name).first()
-        )
-        if not meeting_type_exists:
-            return abort(HTTPStatus.CONFLICT, "Такой тип встречи уже есть!")
-
+        check_exists_object(body)
         meeting_type.from_dict(dict(body))
         db.session.add(meeting_type)
         db.session.commit()
