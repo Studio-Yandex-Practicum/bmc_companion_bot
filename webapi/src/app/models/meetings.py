@@ -27,6 +27,10 @@ class MeetingType(BaseModel):
 
     name = db.Column(db.String(256), unique=True, nullable=False)
 
+    def from_dict(self, data):
+        for key, item in data.items():
+            setattr(self, key, item)
+
 
 class MeetingFeedbacksCompleted(BaseModel):
     """Обратная связь после встречи с психологом."""
