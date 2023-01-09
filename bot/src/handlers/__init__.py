@@ -1,1 +1,1 @@
-from .start import start
+from .start import start, test_menu

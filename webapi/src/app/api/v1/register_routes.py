@@ -1,10 +1,10 @@
-from app.api.v1.tests.routers import TestAPI, TestAPIList
 from app.api.v1.questions.routers import (
     QuestionAPIList,
     QuestionTypeAPI,
     QuestionTypeAPIList,
     QuetionAPI,
 )
+from app.api.v1.tests.routers import TestAPI, TestAPIList
 from app.api.v1.users.routes import ApiUserWithID, ApiUserWithoutID
 
 
