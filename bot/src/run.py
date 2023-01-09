@@ -1,7 +1,8 @@
 import logging
 
 from core.settings import settings
-from handlers import start, test_menu
+from handlers import start
+from mock.codebase import choose_test_handler, question_handler
 from telegram import Update
 from telegram.ext import (
     CallbackContext,
@@ -25,12 +26,12 @@ def echo(update: Update, context: CallbackContext):
 
 start_handler = CommandHandler("start", start)
 dispatcher.add_handler(start_handler)
-
-test_handler = MessageHandler(Filters.regex("Тесты"), test_menu)
-dispatcher.add_handler(test_handler)
+dispatcher.add_handler(question_handler)
+dispatcher.add_handler(choose_test_handler)
 
 echo_handler = MessageHandler(Filters.text & (~Filters.command), echo)
 dispatcher.add_handler(echo_handler)
 
 if __name__ == "__main__":
     updater.start_polling()
+    updater.idle()
