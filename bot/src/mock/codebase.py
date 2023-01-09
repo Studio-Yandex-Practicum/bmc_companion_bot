@@ -1,6 +1,5 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext, ConversationHandler, Filters, MessageHandler
-from ui import MenuNames
 
 ANSWER, CHOICE, TESTING = range(3)
 
@@ -14,7 +13,7 @@ def choose_test(update: Update, context: CallbackContext) -> None:
     )
     context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text=MenuNames.test_menus.result,
+        text="Вы можете пройти один из следующих тестов:",
         reply_markup=buttons,
     )
 
@@ -43,7 +42,7 @@ def ask_question(update, context):
 
 def show_result(update, context):
     score = context.user_data["current_score"]
-    keyboard = [["Пройти тестирование", "Записаться к психологу"]]
+    keyboard = [["Пройти тестирование"], ["Записаться к психологу"]]
     reply_markup = ReplyKeyboardMarkup(keyboard, resize_keyboard=True)
     update.message.reply_text(
         f"Тест закончен! Вы набрали {score} баллов.", reply_markup=reply_markup
@@ -94,7 +93,7 @@ question_handler = ConversationHandler(
 )
 
 choose_test_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.regex("Тесты"), test_menu)],
+    entry_points=[MessageHandler(Filters.regex("Пройти тестирование"), test_menu)],
     fallbacks=[MessageHandler(Filters.regex("Пройти тестирование"), test_menu)],
     states={CHOICE: [MessageHandler(Filters.text, test_choice)], TESTING: [question_handler]},
 )
