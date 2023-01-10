@@ -16,3 +16,7 @@ class BaseModel(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime, default=fresh_timestamp())
     updated_at = db.Column(db.DateTime, onupdate=fresh_timestamp())
+
+    def from_dict(self, data):
+        for key, item in data.items():
+            setattr(self, key, item)
