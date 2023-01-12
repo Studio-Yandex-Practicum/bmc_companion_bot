@@ -33,6 +33,15 @@ def scheldue_appointment(summary_old, summary_new):
         return "Кто-то уже записался в этот слот"
 
 
+def add_event(date_start, summary):
+    ya_calendar.save_event(
+        dtstart=date_start,
+        dtend=(date_start + timedelta(hours=1)),
+        dtstamp=datetime.now(),
+        summary=f"{summary}",
+    )
+
+
 if __name__ == "__main__":
     # Ищет ивент и печатает его саммари.
     events_fetched = ya_calendar.search(
@@ -48,3 +57,11 @@ if __name__ == "__main__":
         start=datetime(2022, 12, 27), end=datetime(2022, 12, 31), event=True, expand=True
     )
     print(events_fetched2[0].vobject_instance.vevent.summary.value)
+
+    ev_date = datetime(2023, 1, 13, 14)
+    ev_summ = "Иванов к доктору Петрову"
+    # add_event(ev_date, ev_summ)
+    events_fetched3 = ya_calendar.search(
+        start=datetime(2023, 1, 12), end=datetime(2023, 1, 14), event=True, expand=True
+    )
+    print(events_fetched3[0].data)
