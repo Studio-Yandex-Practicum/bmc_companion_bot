@@ -89,7 +89,7 @@ class Test(BaseModel):
 class TestProgress(BaseModel):
     """Модель прогресса прохождения теста пользователем."""
 
-    __tablename__ = "test_progress"
+    __tablename__ = "tests_progress"
     __table_args__ = (UniqueConstraint("user_id", "test_question_id", name="unique_progress"),)
 
     test_question_id = Column(Integer, ForeignKey("test_questions.id"), nullable=False)
@@ -113,7 +113,7 @@ class TestQuestion(BaseModel):
 class TestCompleted(BaseModel):
     """Модель пройденых пользователями тестов."""
 
-    __tablename__ = "test_completed"
+    __tablename__ = "completed_tests"
     __table_args__ = (UniqueConstraint("user_id", "test_id", name="unique_test_completed"),)
 
     value = Column(Integer, nullable=False)

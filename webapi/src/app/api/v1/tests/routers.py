@@ -2,7 +2,8 @@ from datetime import datetime
 from http import HTTPStatus
 
 from app.db.pg import db
-from app.models import Question, Test, TestCompleted, TestProgress, User
+from app.internal.api_services import test_completed_service, test_progress_service
+from app.models import Test
 from app.schemas.core import GetMultiQueryParams, StatusResponse
 from app.schemas.tests import (
     TestCompletedBare,
@@ -78,42 +79,19 @@ class TestProgressAPI(Resource):
     @validate()
     def get(self, progress_id: int) -> TestProgressFull:
         """Получение данных определенного прогресса по id."""
-        test_progress = TestProgress.query.get(progress_id)
-        if test_progress is None:
-            return abort(HTTPStatus.NOT_FOUND, "Прогресса с заданным id не существует.")
+        test_progress = test_progress_service.get_object_by_id(progress_id)
         return TestProgressFull.from_orm(test_progress)
 
     @validate()
     def patch(self, progress_id: int, body: TestProgressUpdate) -> TestProgressFull:
         """Изменение данных определенного прогресса по id."""
-        progress = TestProgress.query.get(progress_id)
-        question = db.session.query(Question).where(Question.id == body.test_question_id).first()
-        if question is None:
-            return abort(HTTPStatus.NOT_FOUND, "Вопроса с заданным id не существует.")
-        progress_exists = (
-            db.session.query(TestProgress)
-            .where(
-                TestProgress.user_id == progress.user_id,
-                TestProgress.test_question_id == body.test_question_id,
-            )
-            .first()
-        )
-        if progress_exists:
-            return abort(HTTPStatus.CONFLICT, "Прогресс уже существует.")
-        progress.from_dict(dict(body))
-        db.session.commit()
+        progress = test_progress_service.progress_update(progress_id, body)
         return TestProgressFull.from_orm(progress)
 
     @validate()
     def delete(self, progress_id: int):
         """Блокировка прогресса пользователя."""
-        progress = TestProgress.query.get(progress_id)
-        if progress is None:
-            return abort(HTTPStatus.NOT_FOUND, "Прогресса с заданным id не существует.")
-        if progress.deleted_at is not None:
-            return abort(HTTPStatus.CONFLICT, "Прогресс уже заблокирован!")
-        progress.deleted_at = datetime.utcnow()
-        db.session.commit()
+        test_progress_service.remove_object(progress_id)
         return StatusResponse(warning="Прогресс заблокирован.")
 
 
@@ -121,36 +99,18 @@ class TestProgressAPIList(Resource):
     @validate()
     def get(self, query: GetMultiQueryParams) -> TestProgressList:
         """Получение списка прогресса всех пользователей."""
-        test_progress_db = TestProgress.query.all()
-        test_data = [(dict(TestProgressBare.from_orm(test))) for test in test_progress_db]
-        paginated_data = TestList.pagination(
-            self, data=test_data, url="/api/v1/tests/progress/", query=query
+        paginated_data = test_progress_service.get_paginated_objects_list(
+            schema_singl_object=TestProgressBare,
+            schema_list=TestProgressList,
+            url="/api/v1/tests/progress/",
+            query=query,
         )
         return TestProgressList(**paginated_data)
 
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: TestProgressCreate) -> TestProgressBare:
         """Создание прогресса прохождения теста пользователем."""
-        progress = TestProgress()
-        user = db.session.query(User).where(User.id == body.user_id).first()
-        if user is None:
-            return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        question = db.session.query(Question).where(Question.id == body.test_question_id).first()
-        if question is None:
-            return abort(HTTPStatus.NOT_FOUND, "Вопроса с заданным id не существует.")
-        progress_exists = (
-            db.session.query(TestProgress)
-            .where(
-                TestProgress.user_id == body.user_id,
-                TestProgress.test_question_id == body.test_question_id,
-            )
-            .first()
-        )
-        if progress_exists:
-            return abort(HTTPStatus.CONFLICT, "Прогресс уже существует.")
-        progress.from_dict(dict(body))
-        db.session.add(progress)
-        db.session.commit()
+        progress = test_progress_service.progress_create(body)
         return TestProgressBare.from_orm(progress)
 
 
@@ -158,31 +118,19 @@ class TestCompletedAPI(Resource):
     @validate()
     def get(self, completed_id: int) -> TestCompletedFull:
         """Получение данных определенного завершенного теста по id."""
-        test_completed = TestCompleted.query.get(completed_id)
-        if test_completed is None:
-            return abort(HTTPStatus.NOT_FOUND, "Завершенных тестов с заданным id не существует.")
+        test_completed = test_completed_service.get_object_by_id(completed_id)
         return TestCompletedFull.from_orm(test_completed)
 
     @validate()
     def patch(self, completed_id: int, body: TestCompletedUpdate) -> TestCompletedFull:
         """Изменение данных определенного завершенного теста по id."""
-        test_completed = TestCompleted.query.get(completed_id)
-        if test_completed is None:
-            return abort(HTTPStatus.NOT_FOUND, "Завершенного теста с заданным id не существует.")
-        test_completed.from_dict(dict(body))
-        db.session.commit()
+        test_completed = test_completed_service.completed_update(completed_id, body)
         return TestCompletedFull.from_orm(test_completed)
 
     @validate()
     def delete(self, completed_id: int):
         """Блокировка завершенного теста."""
-        test_completed = TestCompleted.query.get(completed_id)
-        if test_completed is None:
-            return abort(HTTPStatus.NOT_FOUND, "Завершенного теста с заданным id не существует.")
-        if test_completed.deleted_at is not None:
-            return abort(HTTPStatus.CONFLICT, "Результат уже заблокирован!")
-        test_completed.deleted_at = datetime.utcnow()
-        db.session.commit()
+        test_completed_service.remove_object(completed_id)
         return StatusResponse(warning="Результат заблокирован.")
 
 
@@ -190,34 +138,16 @@ class TestCompletedAPIList(Resource):
     @validate()
     def get(self, query: GetMultiQueryParams) -> TestCompletedList:
         """Получение списка завершенных тестов."""
-        completed_tests_db = TestCompleted.query.all()
-        test_data = [(dict(TestCompletedBare.from_orm(test))) for test in completed_tests_db]
-        paginated_data = TestCompletedList.pagination(
-            self, data=test_data, url="/api/v1/tests/completed/", query=query
+        paginated_data = test_completed_service.get_paginated_objects_list(
+            schema_singl_object=TestCompletedBare,
+            schema_list=TestCompletedList,
+            url="/api/v1/tests/completed/",
+            query=query,
         )
         return TestCompletedList(**paginated_data)
 
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: TestCompletedCreate) -> TestCompletedBare:
         """Завершение теста."""
-        test_completed = TestCompleted()
-        user = db.session.query(User).where(User.id == body.user_id).first()
-        if user is None:
-            return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        test = db.session.query(Test).where(Test.id == body.test_id).first()
-        if test is None:
-            return abort(HTTPStatus.NOT_FOUND, "Теста с заданным id не существует.")
-        test_completed_exists = (
-            db.session.query(TestCompleted)
-            .where(
-                TestCompleted.user_id == body.user_id,
-                TestCompleted.test_id == body.test_id,
-            )
-            .first()
-        )
-        if test_completed_exists:
-            return abort(HTTPStatus.CONFLICT, "Тест уже пройден.")
-        test_completed.from_dict(dict(body))
-        db.session.add(test_completed)
-        db.session.commit()
+        test_completed = test_completed_service.completed_create(body)
         return TestCompletedBare.from_orm(test_completed)
