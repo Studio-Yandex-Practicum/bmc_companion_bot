@@ -2006,4 +2006,4 @@ pytz = "*"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "17ef59f0225dcebbc05db8c99d5d900c4fae57c8232641d8c375c0e6f96bb0a4"
+content-hash = "7634d1bf1ce19cb9799692bd1989fb1bb136e8e3eba903ad68379306a51068f0"
