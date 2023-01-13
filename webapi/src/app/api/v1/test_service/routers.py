@@ -25,6 +25,7 @@ from app.services.exceptions import (
     TestQuestionNotFound,
 )
 from app.services.test_service import TestService
+from app.utils import obj_or_abort_404
 from flask import abort
 from flask_pydantic import validate
 from flask_restful import Resource, reqparse
@@ -53,32 +54,31 @@ class TestResult(Resource):
     @validate()
     def get(self) -> TestResultResponse:
         """Получение результата конкретного теста юзера с данным id."""
-        try:
-            test_result = TestService.get_test_result(TestResultRequest(**test_parser.parse_args()))
-        except TestNotFound:
-            return abort(HTTPStatus.NOT_FOUND, "Результата теста с заданным id не существует.")
-        return test_result
+        return obj_or_abort_404(
+            TestService.get_test_result,
+            TestResultRequest(**test_parser.parse_args()),
+            TestNotFound,
+            "Результата теста с заданным id не существует.",
+        )
 
 
 class TestStatus(Resource):
     @validate()
     def get(self) -> TestStatusResponse:
         """Получение статуса конкретного теста для юзера с данным id."""
-        try:
-            test_status = TestService.get_test_status(TestStatusRequest(**test_parser.parse_args()))
-        except TestNotFound:
-            return abort(HTTPStatus.NOT_FOUND, "Теста с заданным id не существует.")
-        return test_status
+        return obj_or_abort_404(
+            TestService.get_test_status,
+            TestStatusRequest(**test_parser.parse_args()),
+            TestNotFound,
+            "Теста с заданным id не существует.",
+        )
 
 
 class AllTestStatuses(Resource):
     @validate()
     def get(self) -> AllTestStatusesResponse:
         """Получение статуса всех тестов для юзера с даннным id."""
-        test_results = TestService.get_all_test_statuses(
-            AllTestStatusesRequest(**user_parser.parse_args())
-        )
-        return test_results
+        return TestService.get_all_test_statuses(AllTestStatusesRequest(**user_parser.parse_args()))
 
 
 class NextQuestion(Resource):
@@ -86,33 +86,35 @@ class NextQuestion(Resource):
     def get(self) -> QuestionResponse:
         """Получение следующего вопроса из укаанного теста для указанного юзера."""
         try:
-            next_question = TestService.get_next_question(
-                NextQuestionRequest(**test_parser.parse_args())
+            return obj_or_abort_404(
+                TestService.get_next_question,
+                NextQuestionRequest(**test_parser.parse_args()),
+                TestNotFound,
+                "Теста с заданным id не существует.",
             )
-        except TestNotFound:
-            return abort(HTTPStatus.NOT_FOUND, "Теста с заданным id не существует.")
         except NoNextQuestion:
             return abort(HTTPStatus.NO_CONTENT, "Нет следующего вопроса.")
-        return next_question
 
 
 class SubmitAnswer(Resource):
     @validate
     def post(self) -> SubmitAnswerResponse:
         """Передача ответа от имени указанного юзера на указанный вопрос в тесте."""
-        try:
-            answer = TestService.process_answer(SubmitAnswerRequest(**answer_parser.parse_args()))
-        except (TestNotFound, TestQuestionNotFound):
-            return abort(HTTPStatus.NOT_FOUND, "Указанного вопроса не существует.")
-        return answer
+        return obj_or_abort_404(
+            TestService.process_answer,
+            SubmitAnswerRequest(**answer_parser.parse_args()),
+            (TestNotFound, TestQuestionNotFound),
+            "Указанного вопроса не существует.",
+        )
 
 
 class CheckAnswer(Resource):
     @validate
     def get(self) -> CheckAnswerResponse:
         """Получение ранее внесенного ответа на указанный вопрос."""
-        try:
-            answer = TestService.check_answer(CheckAnswerRequest(**answer_parser.parse_args()))
-        except (TestNotFound, TestQuestionNotFound, AnswerNotFound):
-            return abort(HTTPStatus.NOT_FOUND, "Ответа на указанный вопрос не существует.")
-        return answer
+        return obj_or_abort_404(
+            TestService.check_answer,
+            CheckAnswerRequest(**answer_parser.parse_args()),
+            (TestNotFound, TestQuestionNotFound, AnswerNotFound),
+            "Ответа на указанный вопрос не существует.",
+        )
