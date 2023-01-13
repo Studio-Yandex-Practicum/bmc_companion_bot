@@ -4,6 +4,15 @@ from app.api.v1.questions.routers import (
     QuestionTypeAPIList,
     QuetionAPI,
 )
+from app.api.v1.test_service.routers import (
+    AllTestResults,
+    AllTestStatuses,
+    CheckAnswer,
+    NextQuestion,
+    SubmitAnswer,
+    TestResult,
+    TestStatus,
+)
 from app.api.v1.tests.routers import (
     TestAPI,
     TestAPIList,
@@ -28,3 +37,10 @@ def register_routes(api):
     api.add_resource(TestProgressAPI, "/api/v1/tests/progress/<int:progress_id>/")
     api.add_resource(TestCompletedAPIList, "/api/v1/tests/completed/")
     api.add_resource(TestCompletedAPI, "/api/v1/tests/completed/<int:completed_id>/")
+    api.add_resource(AllTestResults, "api/v1/test_results/all/")
+    api.add_resource(TestResult, "api/v1/test_results/")
+    api.add_resource(AllTestStatuses, "api/v1/test_statuses/all/")
+    api.add_resource(TestStatus, "api/v1/test_statuses/get/")
+    api.add_resource(NextQuestion, "api/v1/next_question/")
+    api.add_resource(SubmitAnswer, "api/v1/submit_answer/")
+    api.add_resource(CheckAnswer, "api/v1/check_answer/")
