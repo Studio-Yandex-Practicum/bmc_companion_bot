@@ -1,5 +1,13 @@
 from app.models import BaseModel
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 
@@ -76,3 +84,39 @@ class Test(BaseModel):
     def from_dict(self, data):
         for key, item in data.items():
             setattr(self, key, item)
+
+
+class TestProgress(BaseModel):
+    """Модель прогресса прохождения теста пользователем."""
+
+    __tablename__ = "tests_progress"
+    __table_args__ = (UniqueConstraint("user_id", "test_question_id", name="unique_progress"),)
+
+    test_question_id = Column(Integer, ForeignKey("test_questions.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    deleted_at = Column(DateTime, comment="Время удаления")
+
+
+class TestQuestion(BaseModel):
+    """Модель вопросов конкретного теста."""
+
+    __tablename__ = "test_questions"
+    __table_args__ = (UniqueConstraint("test_id", "question_id", name="unique_question_in_test"),)
+
+    text = Column(Text)
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
+    order_num = Column(Integer, nullable=False)
+    deleted_at = Column(DateTime, comment="Время удаления")
+
+
+class TestCompleted(BaseModel):
+    """Модель пройденых пользователями тестов."""
+
+    __tablename__ = "completed_tests"
+    __table_args__ = (UniqueConstraint("user_id", "test_id", name="unique_test_completed"),)
+
+    value = Column(Integer, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
+    deleted_at = Column(DateTime, comment="Время удаления")
