@@ -13,7 +13,14 @@ from app.api.v1.test_service.routers import (
     TestResult,
     TestStatus,
 )
-from app.api.v1.tests.routers import TestAPI, TestAPIList
+from app.api.v1.tests.routers import (
+    TestAPI,
+    TestAPIList,
+    TestCompletedAPI,
+    TestCompletedAPIList,
+    TestProgressAPI,
+    TestProgressAPIList,
+)
 from app.api.v1.users.routes import ApiUserWithID, ApiUserWithoutID
 
 
@@ -26,6 +33,10 @@ def register_routes(api):
     api.add_resource(QuestionAPIList, "/api/v1/questions/")
     api.add_resource(TestAPIList, "/api/v1/tests/")
     api.add_resource(TestAPI, "/api/v1/tests/<int:test_id>/")
+    api.add_resource(TestProgressAPIList, "/api/v1/tests/progress/")
+    api.add_resource(TestProgressAPI, "/api/v1/tests/progress/<int:progress_id>/")
+    api.add_resource(TestCompletedAPIList, "/api/v1/tests/completed/")
+    api.add_resource(TestCompletedAPI, "/api/v1/tests/completed/<int:completed_id>/")
     api.add_resource(AllTestResults, "api/v1/test_results/all/")
     api.add_resource(TestResult, "api/v1/test_results/")
     api.add_resource(AllTestStatuses, "api/v1/test_statuses/all/")
