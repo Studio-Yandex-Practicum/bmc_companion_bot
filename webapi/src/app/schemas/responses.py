@@ -1,5 +1,3 @@
-from typing import List
-
 from app.core.constants import TestStatus
 from pydantic import BaseModel
 
@@ -14,7 +12,7 @@ class TestInfo(BaseModel):
 class TestInfoList(BaseModel):
     """Модель списка информации о тестах."""
 
-    __root__: List[TestInfo]
+    __root__: list[TestInfo]
 
 
 class TestResult(TestInfo):
@@ -26,7 +24,7 @@ class TestResult(TestInfo):
 class TestResultList(BaseModel):
     """Модель списка результатов теста."""
 
-    __root__: List[TestResult]
+    __root__: list[TestResult]
 
 
 class TestResultResponse(TestResult):
@@ -68,7 +66,7 @@ class AnswerInfo(BaseModel):
 class AnswerInfoList(BaseModel):
     """Модель cписка информации об ответе на вопрос теста."""
 
-    __root__: List[AnswerInfo]
+    __root__: list[AnswerInfo]
 
 
 class QuestionInfo(BaseModel):
