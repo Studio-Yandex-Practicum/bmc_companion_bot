@@ -60,3 +60,6 @@ for event in ya_calendar.events():
 #         dtend=datetime(2022, 12, 26, 13),
 #         summary="Слот 1",
 #     )
+
+# Больше примеров кода с CalDAV:
+# https://github.com/python-caldav/caldav/tree/master/examples

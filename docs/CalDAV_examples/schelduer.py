@@ -33,6 +33,7 @@ def scheldue_appointment(summary_old, summary_new):
         return "Кто-то уже записался в этот слот"
 
 
+# Добавляет ивент с заданной датой и содержимым.
 def add_event(date_start, summary):
     ya_calendar.save_event(
         dtstart=date_start,
@@ -65,3 +66,6 @@ if __name__ == "__main__":
         start=datetime(2023, 1, 12), end=datetime(2023, 1, 14), event=True, expand=True
     )
     print(events_fetched3[0].data)
+
+# Больше примеров кода с CalDAV:
+# https://github.com/python-caldav/caldav/tree/master/examples
