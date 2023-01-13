@@ -1,6 +1,6 @@
 from typing import List
 
-from core.constants import TestStatus
+from app.core.constants import TestStatus
 from pydantic import BaseModel
 
 

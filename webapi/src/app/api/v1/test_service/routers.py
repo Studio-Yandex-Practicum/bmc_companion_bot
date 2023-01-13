@@ -3,17 +3,18 @@ from http import HTTPStatus
 from app.schemas.requests import (
     AllTestResultsRequest,
     AllTestStatusesRequest,
-    AnswerRequest,
+    CheckAnswerRequest,
     NextQuestionRequest,
+    SubmitAnswerRequest,
     TestResultRequest,
     TestStatusRequest,
 )
 from app.schemas.responses import (
     AllTestResultsResponse,
     AllTestStatusesResponse,
-    AnswerResponse,
     CheckAnswerResponse,
     QuestionResponse,
+    SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
 )
@@ -97,10 +98,10 @@ class NextQuestion(Resource):
 
 class SubmitAnswer(Resource):
     @validate
-    def post(self) -> AnswerResponse:
+    def post(self) -> SubmitAnswerResponse:
         """Передача ответа от имени указанного юзера на указанный вопрос в тесте."""
         try:
-            answer = TestService.process_answer(AnswerRequest(**answer_parser.parse_args()))
+            answer = TestService.process_answer(SubmitAnswerRequest(**answer_parser.parse_args()))
         except (TestNotFound, TestQuestionNotFound):
             return abort(HTTPStatus.NOT_FOUND, "Указанного вопроса не существует.")
         return answer
@@ -111,7 +112,7 @@ class CheckAnswer(Resource):
     def get(self) -> CheckAnswerResponse:
         """Получение ранее внесенного ответа на указанный вопрос."""
         try:
-            answer = TestService.check_answer(AnswerRequest(**answer_parser.parse_args()))
+            answer = TestService.check_answer(CheckAnswerRequest(**answer_parser.parse_args()))
         except (TestNotFound, TestQuestionNotFound, AnswerNotFound):
             return abort(HTTPStatus.NOT_FOUND, "Ответа на указанный вопрос не существует.")
         return answer
