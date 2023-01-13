@@ -65,12 +65,18 @@ class AnswerInfo(BaseModel):
     text: str
 
 
+class AnswerInfoList(BaseModel):
+    """Модель cписка информации об ответе на вопрос теста."""
+
+    __root__: List[AnswerInfo]
+
+
 class QuestionInfo(BaseModel):
     """Модель информации о вопросе."""
 
     test_question_id: int
     text: str
-    answers: List[AnswerInfo]
+    answers: AnswerInfoList
 
 
 class QuestionResponse(QuestionInfo):

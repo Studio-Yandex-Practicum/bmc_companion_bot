@@ -12,7 +12,7 @@ from app.schemas.requests import (
 from app.schemas.responses import (
     AllTestResultsResponse,
     AllTestStatusesResponse,
-    AnswerResponse,
+    AnswerInfoList,
     CheckAnswerResponse,
     QuestionResponse,
     SubmitAnswerResponse,
@@ -32,6 +32,7 @@ from core.constants import TestStatus
 
 class TestService:
     def __validate_ids(self, test_question_id: int, answer_id: int) -> bool:
+        """Проверка корректности комбинации test_question_id/answer_id."""
         if Answer.query(answer_id=answer_id, test_question_id=test_question_id).first() is None:
             raise AnswerNotFound
         return True
@@ -45,15 +46,16 @@ class TestService:
         return sum(answer_values)
 
     def get_test_result(self, request: TestResultRequest) -> TestCompleted:
+        """Возвращает результат конкретного пройденного теста для данного юзера."""
         user_id = request.user_id
         test_id = request.test_id
         test_result = TestCompleted.query.filter_by(user_id=user_id, test_id=test_id).first()
         if test_result is None:
             raise TestNotFound
-        test_result_response = TestResultResponse.from_orm(test_result)
-        return test_result_response
+        return TestResultResponse.from_orm(test_result)
 
     def get_all_test_results(self, request: AllTestResultsRequest) -> AllTestResultsResponse:
+        """Возвращает результаты всех пройденных тестов для данного юзера."""
         user_id = request.user_id
         test_results = TestCompleted.query.filter_by(user_id=user_id).all()
         data = {}
@@ -61,7 +63,21 @@ class TestService:
         data["results"] = TestResultList.from_orm(test_results)
         return AllTestResultsResponse(**data)
 
+    def get_test_status(self, request: TestStatusRequest) -> TestStatusResponse:
+        """Возвращает статус конкретного теста для данного юзера."""
+        user_id = request.user_id
+        test_id = request.test_id
+        test = Test.query.get(test_id)
+        if TestCompleted.query.filter_by(user_id=user_id, test_id=test_id).first() is not None:
+            status = TestStatus.COMPLETED
+        elif TestProgress.query.filter_by(user_id=user_id, test_id=test_id).first() is None:
+            status = TestStatus.AVAILABLE
+        else:
+            status = TestStatus.ACTIVE
+        return TestStatusResponse(user_id=user_id, test_id=test.id, name=test.name, status=status)
+
     def get_all_test_statuses(self, request: AllTestStatusesRequest) -> AllTestStatusesResponse:
+        """Возвращает статус всех активных тестов для данного юзера."""
         user_id = request.user_id
         data = {}
         data["user_id"] = user_id
@@ -75,6 +91,7 @@ class TestService:
         data["completed"] = TestInfoList.from_orm(completed_tests)
         available_tests = (
             db.session.query(Test)
+            .filter_by(deleted_at=None)
             .filter(~Test.id.in_(completed_test_ids))
             .filter(~Test.id.in_(active_test_ids))
             .all()
@@ -82,19 +99,8 @@ class TestService:
         data["available"] = TestInfoList.from_orm(available_tests)
         return AllTestStatusesResponse(**data)
 
-    def get_test_status(self, request: TestStatusRequest) -> TestStatusResponse:
-        user_id = request.user_id
-        test_id = request.test_id
-        test = Test.query.get(test_id)
-        if TestCompleted.query.filter_by(user_id=user_id, test_id=test_id).first() is not None:
-            status = TestStatus.COMPLETED
-        elif TestProgress.query.filter_by(user_id=user_id, test_id=test_id).first() is None:
-            status = TestStatus.AVAILABLE
-        else:
-            status = TestStatus.ACTIVE
-        return TestStatusResponse(user_id=user_id, test_id=test.id, name=test.name, status=status)
-
     def check_answer(self, request: CheckAnswerRequest) -> CheckAnswerResponse:
+        """Возвращает ранее полученный ответ на вопрос теста."""
         user_id = request.user_id
         test_id = request.test_id
         test_question_id = request.test_question_id
@@ -103,10 +109,12 @@ class TestService:
         ).first()
         if answer is None:
             raise AnswerNotFound
-        answer_response = AnswerResponse.from_orm(answer)
+        answer_response = CheckAnswerResponse.from_orm(answer)
         return answer_response
 
     def submit_answer(self, request: SubmitAnswerRequest) -> SubmitAnswerResponse:
+        """Принимает ответ на вопрос теста, обновляет информацию в таблице TestProgress.
+        Создает запись в TestCompleted, если получен ответ на последний вопрос теста."""
         user_id = request.user_id
         test_id = request.test_id
         test_question_id = request.test_question_id
@@ -119,7 +127,7 @@ class TestService:
             raise TestQuestionNotFound
         test_progress.answer_id = answer_id
         current_question = TestQuestion.query.get(test_progress.test_question_id)
-        next_question_order_num = current_question.order_num + 1
+        next_question_order_num = current_question.order_num + 1  # TODO: функция next_order_num?
         next_question = TestQuestion.query.filter(
             test_id=test_id, order_num=next_question_order_num
         ).first()
@@ -136,6 +144,7 @@ class TestService:
         return SubmitAnswerResponse.from_orm(test_progress)
 
     def get_next_question(self, request: NextQuestionRequest) -> QuestionResponse:
+        """Определяет следующий вопрос теста. Исключение NoNextQuestion, если тест пройден."""
         user_id = request.user_id
         test_id = request.test_id
         if TestProgress.query.filter_by(user_id=user_id, test_id=test_id).first() is None:
@@ -154,4 +163,13 @@ class TestService:
         if test_progress is None:
             raise NoNextQuestion
         next_question = TestQuestion.query.get(test_progress.test_question_id)
-        return QuestionResponse.from_orm(next_question)
+        answers = AnswerInfoList.from_orm(
+            Answer.query.filter_by(test_question_id=next_question.id).all()
+        )
+        return QuestionResponse(
+            user_id=user_id,
+            test_id=test_id,
+            test_question_id=next_question.id,
+            text=next_question.text,
+            answers=answers,
+        )
