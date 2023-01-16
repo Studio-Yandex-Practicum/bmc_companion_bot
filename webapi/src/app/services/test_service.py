@@ -1,3 +1,4 @@
+from app.core.constants import TestStatus
 from app.db.pg import db
 from app.models import Answer, Test, TestCompleted, TestProgress, TestQuestion
 from app.schemas.requests import (
@@ -27,7 +28,6 @@ from app.services.exceptions import (
     TestNotFound,
     TestQuestionNotFound,
 )
-from core.constants import TestStatus
 
 
 class TestService:
