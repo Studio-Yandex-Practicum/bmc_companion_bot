@@ -1,19 +1,21 @@
+x-base-service: &base-service
+    env_file: ./.env
+    restart: on-failure
+
 services:
     bot:
+        <<: *base-service
         build:
             context: .
             dockerfile: ./docker/bot/Dockerfile
-        restart: on-failure
-        env_file: ./.env
         depends_on:
             - webapi
 
     webapi:
+        <<: *base-service
         build:
             context: .
             dockerfile: ./docker/webapi/Dockerfile
-        restart: on-failure
-        env_file: ./.env
         environment:
             - FLASK_APP=manage.py
             - APP_HOST=0.0.0.0
@@ -26,9 +28,8 @@ services:
             - redis
 
     nginx:
+        <<: *base-service
         image: nginx:1.21.6-alpine
-        restart: on-failure
-        env_file: ./.env
         environment:
             - APP_HOST=webapi
             - APP_LISTEN_PORT=${APP_NGINX_PORT}
@@ -41,18 +42,16 @@ services:
             - webapi
 
     postgres:
+        <<: *base-service
         image: postgres:14.3-alpine
-        restart: on-failure
-        env_file: ./.env
         ports:
             - ${POSTGRES_PORT}:5432
         volumes:
             - pgdata:/var/lib/postgresql/data
 
     redis:
+        <<: *base-service
         image: redis:7-alpine
-        restart: on-failure
-        env_file: ./.env
         ports:
             - ${REDIS_PORT}:6379
         volumes:
