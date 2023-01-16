@@ -19,6 +19,7 @@ class Question(BaseModel):
     text = Column(Text)
     question_type_id = Column(Integer, ForeignKey("question_types.id"), nullable=False)
     deleted_at = Column(DateTime, comment="Время удаления")
+    answers = relationship("Answer", back_populates="question", cascade="all,delete")
 
     def to_dict(self):
         return dict(
@@ -32,6 +33,14 @@ class Question(BaseModel):
     def from_dict(self, data):
         for key, item in data.items():
             setattr(self, key, item)
+
+
+class Answer(BaseModel):
+    __tablename__ = "answers"
+
+    text = Column(Text)
+    question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"))
+    question = relationship("Question", back_populates="questions")
 
 
 class QuestionType(BaseModel):
