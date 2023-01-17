@@ -1,7 +1,7 @@
 from typing import Dict, Optional, Type, TypeVar, Union
 
 import httpx
-from core.constants import Endpoint, HTTPMethod
+from core.constants import Endpoint, HTTPMethod, UserRoles
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
@@ -9,6 +9,7 @@ from request.exceptions import (
     APIClientResponseError,
     APIClientValidationError,
 )
+from schemas.users import UserBare, UserList
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
@@ -84,14 +85,13 @@ class APIClient:
         """
         if id is not None:
             response = self._safe_request(HTTPMethod.GET, self._obj_url(id))
-            obj = self._process_response(response, self.model)
+            obj = self._process_response(response, self.model0)
             return obj
         params = {}
         if limit:
             params["limit"] = limit
         if offset:
             params["offset"] = offset
-        print(params)
         response = self._safe_request(HTTPMethod.GET, self.base_url, params=params)
         objs = self._process_response(response, self.many_model)
         return objs
@@ -122,3 +122,15 @@ class APIClient:
         response = self._safe_request(HTTPMethod.DELETE, self._obj_url(id))
         obj = self._process_response(response, self.model)
         return obj
+
+    def is_staff(self, telegramm_id: int) -> bool:
+        """Проверка роли пользователя на администратора."""
+        user_role_id = [
+            user.role_id for user in self.get().data if user.telegram_id == telegramm_id
+        ][0]
+        if UserRoles(user_role_id).name != "USER":
+            return True
+        return False
+
+
+user_service = APIClient(endpoint="api/v1/users/", model=UserBare, many_model=UserList)

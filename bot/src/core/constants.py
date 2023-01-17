@@ -4,6 +4,7 @@ from enum import Enum
 class Endpoint(str, Enum):
     MEETINGS = "api/v1/meetings"
     TESTS = "api/v1/tests"
+    USERS = "api/v1/users"
 
 
 class HTTPMethod(str, Enum):
@@ -16,3 +17,9 @@ class HTTPMethod(str, Enum):
     POST = "POST"
     PUT = "PUT"
     TRACE = "TRACE"
+
+
+class UserRoles(int, Enum):
+    ROOT = 1
+    ADMIN = 2
+    USER = 3
