@@ -7,10 +7,10 @@ from httpx import HTTPStatusError, RequestError
 from pydantic import BaseModel
 from src.core.constants import Endpoint, HTTPMethod
 from src.request.clients import (
-    APIClient,
     APIClientRequestError,
     APIClientResponseError,
     APIClientValidationError,
+    ObjAPIClient,
 )
 
 
@@ -41,12 +41,12 @@ test_objects_data = {"test_obj_1_id": test_object_1_data, "test_obj_2_id": test_
 test_objects = [test_object_1, test_object_2]
 
 
-test_client = APIClient(Endpoint.MEETINGS, ModelOne, ManyModelOne)
-test_client_of_wrong_model = APIClient(Endpoint.MEETINGS, ModelTwo, ManyModelTwo)
+test_client = ObjAPIClient(Endpoint.MEETINGS, ModelOne, ManyModelOne)
+test_client_of_wrong_model = ObjAPIClient(Endpoint.MEETINGS, ModelTwo, ManyModelTwo)
 
 
 def mocked_httpx_request(*args, **kwargs):
-    """Имитация ответа httpx.request для тестирования src.request.clients.APIClient."""
+    """Имитация ответа httpx.request для тестирования src.request.clients.ObjAPIClient."""
 
     class FakeRequest:
         """Фиктивный запрос с полем url."""
@@ -93,7 +93,7 @@ def mocked_httpx_request(*args, **kwargs):
 
 
 @mock.patch("src.request.clients.httpx.request", side_effect=mocked_httpx_request)
-class TestAPIClient(TestCase):
+class TestObjAPIClient(TestCase):
     def test_create(self, mock_request):
         obj = test_client.create(test_object_1)
         assert obj == test_object_1
