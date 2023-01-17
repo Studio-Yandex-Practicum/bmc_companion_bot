@@ -1,6 +1,24 @@
 from http import HTTPStatus
+from typing import Callable, TypeVar, Union
 
 from flask import abort, jsonify, make_response
+from pydantic import BaseModel
+
+RequestType = TypeVar("RequestType", bound=BaseModel)
+ResponseType = TypeVar("ResponseType", bound=BaseModel)
+ExceptionType = TypeVar("ExceptionType", bound=Exception)
+
+
+def obj_or_abort_404(
+    service_method: Callable[[RequestType], ResponseType],
+    request: RequestType,
+    not_found_exceptions: Union[ExceptionType, tuple[ExceptionType]],
+    not_found_message: str,
+) -> ResponseType:
+    try:
+        return service_method(request)
+    except not_found_exceptions:
+        return abort(HTTPStatus.NOT_FOUND, not_found_message)
 
 
 def abort_json(msg: str, status_code: int = HTTPStatus.BAD_REQUEST):

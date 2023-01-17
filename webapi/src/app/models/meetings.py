@@ -46,3 +46,15 @@ class MeetingFeedbacksCompleted(BaseModel):
 
     meeting_id = db.Column(db.Integer, db.ForeignKey("meetings.id"), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+
+class PsychologistInfo(BaseModel):
+    """Данные о календаре психолога."""
+
+    __tablename__ = "psychologist_info"
+
+    cal_link = db.Column(db.Text)
+    cal_username = db.Column(db.Text)
+    cal_pass = db.Column(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    deleted_at = db.Column(db.DateTime)

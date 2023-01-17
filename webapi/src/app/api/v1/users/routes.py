@@ -1,11 +1,8 @@
-from datetime import datetime
 from http import HTTPStatus
 
-from app.db.pg import db
-from app.models import User, UserRole
+from app.internal.api_services import user_service
 from app.schemas.core import GetMultiQueryParams, StatusResponse
 from app.schemas.users import UserBare, UserCreate, UserFull, UserList, UserUpdate
-from flask import abort
 from flask_pydantic import validate
 from flask_restful import Resource
 
@@ -14,26 +11,18 @@ class ApiUserWithoutID(Resource):
     @validate()
     def get(self, query: GetMultiQueryParams) -> UserList:
         """Получение данных всех пользователей."""
-        users = User.query.all()
-        users_data = [(dict(UserBare.from_orm(user))) for user in users]
-        paginated_data = UserList.pagination(
-            self, data=users_data, url="/api/v1/users", query=query
+        paginated_data = user_service.get_paginated_objects_list(
+            schema_singl_object=UserBare,
+            schema_list=UserList,
+            url="/api/v1/users/",
+            query=query,
         )
         return UserList(**paginated_data)
 
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: UserCreate) -> UserFull:
         """Создание пользователя."""
-        user = User()
-        user_exists = db.session.query(User).where(User.phone == body.phone).first()
-        if user_exists and body.phone is not None:
-            return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = db.session.query(UserRole).where(UserRole.id == body.role_id).first()
-        if role is None:
-            return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
-        user.from_dict(dict(body))
-        db.session.add(user)
-        db.session.commit()
+        user = user_service.user_create(dict(body))
         return UserFull.from_orm(user)
 
 
@@ -41,35 +30,17 @@ class ApiUserWithID(Resource):
     @validate()
     def get(self, id: int) -> UserBare:
         """Получение данных определенного пользователя по id."""
-        user = User.query.get(id)
-        if user is None:
-            return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
+        user = user_service.get_object_by_id(id)
         return UserFull.from_orm(user)
 
     @validate()
     def patch(self, id: int, body: UserUpdate) -> UserBare:
         """Изменение данных определенного пользователя по id."""
-        user = User.query.get(id)
-        if user is None:
-            return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        phone_in_use = db.session.query(User).where(User.phone == body.phone).first()
-        if phone_in_use and body.phone is not None:
-            return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = db.session.query(UserRole).where(UserRole.id == body.role_id).first()
-        if role is None:
-            return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
-        user.from_dict(dict(body))
-        db.session.commit()
+        user = user_service.user_update(id, body)
         return UserBare.from_orm(user)
 
     @validate()
     def delete(self, id: int) -> StatusResponse:
         """Бан пользователя."""
-        user = User.query.get(id)
-        if user is None:
-            return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        if user.deleted_at is not None:
-            return abort(HTTPStatus.CONFLICT, "Пользоваетель уже забанен!")
-        user.deleted_at = datetime.utcnow()
-        db.session.commit()
+        user_service.remove_object(id)
         return StatusResponse(message="Пользоваетель забанен.")
