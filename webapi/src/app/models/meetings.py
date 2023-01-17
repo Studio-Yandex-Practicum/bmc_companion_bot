@@ -27,6 +27,13 @@ class MeetingType(BaseModel):
 
     name = db.Column(db.String(256), unique=True, nullable=False)
 
+    def to_dict(self):
+        return dict(
+            name=self.name,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
     def from_dict(self, data):
         for key, item in data.items():
             setattr(self, key, item)
