@@ -13,10 +13,10 @@ class MeetingTypeCreate(BaseModel):
         extra = Extra.forbid
 
 
-class MeetingTypeUpdate(BaseModel):
+class MeetingTypeUpdate(MeetingTypeCreate):
     """Схема обновления типа встречи."""
 
-    name: str
+    ...
 
 
 class MeetingTypeResponse(MeetingTypeCreate):
