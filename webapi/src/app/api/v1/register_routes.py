@@ -1,5 +1,4 @@
 from app.api.v1.meetings.routers import MeetingTypeAPI, MeetingTypeAPIList
-from app.api.v1.tests.routers import TestAPI, TestAPIList
 from app.api.v1.questions.routers import (
     QuestionAPIList,
     QuestionTypeAPI,
