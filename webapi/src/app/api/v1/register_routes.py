@@ -1,3 +1,4 @@
+from app.api.v1.meetings.routers import MeetingTypeAPI, MeetingTypeAPIList
 from app.api.v1.questions.routers import (
     QuestionAPIList,
     QuestionTypeAPI,
@@ -31,6 +32,8 @@ def register_routes(api):
     api.add_resource(QuestionTypeAPIList, "/api/v1/question-type/")
     api.add_resource(QuetionAPI, "/api/v1/questions/<int:id>")
     api.add_resource(QuestionAPIList, "/api/v1/questions/")
+    api.add_resource(MeetingTypeAPI, "/api/v1/meeting_types/<int:meeting_type_id>")
+    api.add_resource(MeetingTypeAPIList, "/api/v1/meeting_types/")
     api.add_resource(TestAPIList, "/api/v1/tests/")
     api.add_resource(TestAPI, "/api/v1/tests/<int:test_id>/")
     api.add_resource(TestProgressAPIList, "/api/v1/tests/progress/")
