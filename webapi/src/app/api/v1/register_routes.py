@@ -22,6 +22,7 @@ from app.api.v1.tests.routers import (
     TestProgressAPI,
     TestProgressAPIList,
 )
+from app.api.v1.user_time_slot.routers import UserTimeSlotAPI, UserTimeSlotAPIList
 from app.api.v1.users.routes import ApiUserWithID, ApiUserWithoutID
 
 
@@ -47,3 +48,5 @@ def register_routes(api):
     api.add_resource(NextQuestion, "/api/v1/next_question/")
     api.add_resource(SubmitAnswer, "/api/v1/submit_answer/")
     api.add_resource(CheckAnswer, "/api/v1/check_answer/")
+    api.add_resource(UserTimeSlotAPI, "/api/v1/slot/<int:id>")
+    api.add_resource(UserTimeSlotAPIList, "/api/v1/slots/")
