@@ -1,6 +1,6 @@
 from telegram import KeyboardButton
 
-homme_button = KeyboardButton(text="Домой - возврат в главное меню")
+home_button = KeyboardButton(text="Домой - возврат в главное меню")
 admin_button = KeyboardButton(text="Меню администратора")
 meeting_button = KeyboardButton(text="Записаться к психологу")
 test_button = KeyboardButton(text="Тесты")

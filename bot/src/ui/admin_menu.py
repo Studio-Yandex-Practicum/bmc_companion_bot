@@ -2,7 +2,7 @@ from request.clients import user_service
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import CallbackContext
 from ui.buttons import (
-    homme_button,
+    home_button,
     list_admins_button,
     list_psychologists_button,
     test_button,
@@ -13,7 +13,7 @@ from ui.core import MenuNames
 def admin_menu(update: Update, context: CallbackContext) -> None:
     if user_service.is_staff(telegramm_id=update.message.chat.id):
         buttons = ReplyKeyboardMarkup(
-            [[homme_button], [list_admins_button], [list_psychologists_button], [test_button]],
+            [[home_button], [list_admins_button], [list_psychologists_button], [test_button]],
             resize_keyboard=True,
         )
         context.bot.send_message(

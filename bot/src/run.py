@@ -10,7 +10,7 @@ from telegram.ext import (
     MessageHandler,
     Updater,
 )
-from ui import admin_button, admin_menu, homme_button, main_menu
+from ui import admin_button, admin_menu, home_button, main_menu
 
 updater = Updater(token=settings.BOT_TOKEN, use_context=True)
 dispatcher = updater.dispatcher
@@ -21,7 +21,7 @@ logging.basicConfig(
 
 
 def echo(update: Update, context: CallbackContext):
-    if update.message.text == homme_button.text:
+    if update.message.text == home_button.text:
         main_menu(update, context)
     elif update.message.text == admin_button.text:
         admin_menu(update, context)

@@ -1,7 +1,7 @@
 from ui.admin_menu import admin_menu
 from ui.buttons import (
     admin_button,
-    homme_button,
+    home_button,
     list_admins_button,
     list_psychologists_button,
     meeting_button,
