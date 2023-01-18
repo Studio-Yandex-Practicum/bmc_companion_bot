@@ -34,21 +34,21 @@ class TestResultResponse(TestResult):
 
 
 class AllTestResultsResponse(BaseModel):
-    """Модель ответа с результатом конкретного теста для данного юзера."""
+    """Модель ответа с результатом всех тестов для данного юзера."""
 
     user_id: int
     results: TestResultList
 
 
 class TestStatusResponse(TestInfo):
-    """Модель ответа с инфорамацией о статусе конкретного теста для данного юзера."""
+    """Модель ответа с информацией о статусе конкретного теста для данного юзера."""
 
     user_id: int
     status: TestStatus
 
 
 class AllTestStatusesResponse(BaseModel):
-    """Модель ответа с инфорамацией о статусе всех тестов для данного юзера."""
+    """Модель ответа с информацией о статусе всех тестов для данного юзера."""
 
     user_id: int
     available: TestInfoList
