@@ -1,7 +1,7 @@
 from typing import Dict, Optional, Type, TypeVar, Union
 
 import httpx
-from core.constants import Endpoint, HTTPMethod, UserRoles
+from core.constants import Endpoint, HTTPMethod, UserRole
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
@@ -128,7 +128,7 @@ class APIClient:
         user_role_id = [
             user.role_id for user in self.get().data if user.telegram_id == telegramm_id
         ][0]
-        if UserRoles(user_role_id).name != "USER":
+        if UserRole(user_role_id).name != "USER":
             return True
         return False
 

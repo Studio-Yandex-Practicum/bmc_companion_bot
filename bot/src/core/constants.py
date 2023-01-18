@@ -19,7 +19,7 @@ class HTTPMethod(str, Enum):
     TRACE = "TRACE"
 
 
-class UserRoles(int, Enum):
+class UserRole(int, Enum):
     ROOT = 1
     ADMIN = 2
     USER = 3
