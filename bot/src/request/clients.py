@@ -85,7 +85,7 @@ class APIClient:
         """
         if id is not None:
             response = self._safe_request(HTTPMethod.GET, self._obj_url(id))
-            obj = self._process_response(response, self.model0)
+            obj = self._process_response(response, self.model)
             return obj
         params = {}
         if limit:
