@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     APP_PORT: int
     REDIS_HOST: str
     REDIS_PORT: int
+    UCE_TEST_ID: int
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")

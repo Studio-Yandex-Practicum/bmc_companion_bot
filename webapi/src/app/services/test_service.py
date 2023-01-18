@@ -1,4 +1,5 @@
 from app.core.constants import TestStatus
+from app.core.settings import settings
 from app.db.pg import db
 from app.models import Answer, Test, TestCompleted, TestProgress, TestQuestion
 from app.schemas.requests import (
@@ -44,6 +45,15 @@ class TestService:
         )
         answer_values = db.session.query(Answer.value).filter(Test.id.in_(answer_ids)).all()
         return sum(answer_values)
+
+    def get_uce_score(self, request: TestResultRequest) -> TestCompleted:
+        """Возвращает результат пройденного теста НДО для данного юзера."""
+        user_id = request.user_id
+        uce_test_id = settings.UCE_TEST_ID
+        test_result = TestCompleted.query.filter_by(user_id=user_id, test_id=uce_test_id).first()
+        if test_result is None:
+            raise TestNotFound
+        return TestResultResponse.from_orm(test_result)
 
     def get_test_result(self, request: TestResultRequest) -> TestCompleted:
         """Возвращает результат конкретного пройденного теста для данного юзера."""
