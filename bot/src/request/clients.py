@@ -2,7 +2,7 @@ from typing import Dict, Optional, Type, TypeVar, Union
 from urllib.parse import urljoin
 
 import httpx
-from core.constants import Endpoint, HTTPMethod
+from core.constants import APIVersion, Endpoint, HTTPMethod
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
@@ -83,11 +83,15 @@ class ObjAPIClient(BaseAPIClient):
     """
 
     def __init__(
-        self, endpoint: Endpoint, model: Type[ModelType], many_model: Type[ModelType]
+        self,
+        api_version: APIVersion,
+        endpoint: Endpoint,
+        model: Type[ModelType],
+        many_model: Type[ModelType],
     ) -> None:
         self.model = model
         self.many_model = many_model
-        self.base_url = f"http://{WEB_API_URL}/{endpoint}"
+        self.base_url = f"http://{WEB_API_URL}/api{api_version}{endpoint}"
 
     def _obj_url(self, id: Union[int, str]) -> str:
         """Конструирует URL конкретного ресурса, используя переданный id."""
@@ -150,8 +154,8 @@ class TestAPIClient(BaseAPIClient):
     следующего вопроса в тесте, передачи ответа на вопрос теста и запроса результата пройденного
     теста."""
 
-    def __init__(self) -> None:
-        self._base_url = f"http://{WEB_API_URL}"
+    def __init__(self, api_version: APIVersion) -> None:
+        self._base_url = f"http://{WEB_API_URL}/api{api_version}"
 
     def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
         """Запрос статуса всех тестов для данного пользователя."""

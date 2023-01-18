@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 import pytest
 from httpx import HTTPStatusError, RequestError
 from pydantic import BaseModel
-from src.core.constants import Endpoint
+from src.core.constants import APIVersion, Endpoint
 from src.request.clients import (
     APIClientRequestError,
     APIClientResponseError,
@@ -23,7 +23,7 @@ class WrongModel(BaseModel):
     wrong_field: str
 
 
-test_client = TestAPIClient()
+test_client = TestAPIClient(APIVersion.V1)
 
 breaking_request_u = UserSpecificRequest(user_id=500)
 breaking_request_ut = UserTestSpecificRequest(user_id=500, test_id=1)

@@ -1,16 +1,20 @@
 from enum import Enum
 
 
+class APIVersion(str, Enum):
+    V1 = "/v1"
+
+
 class Endpoint(str, Enum):
-    MEETINGS = "api/v1/meetings"
-    TESTS = "api/v1/tests"
-    NEXT_QUESTION = "api/v1/next_question"
-    SUBMIT_ANSWER = "api/v1/submit_answer"
-    TEST_STATUS = "/api/v1/test_statuses"
-    ALL_TEST_STATUSES = "/api/v1/test_statuses/all"
-    TEST_RESULT = "/api/v1/test_results"
-    ALL_TEST_RESULTS = "/api/v1/test_results/all/"
-    CHECK_ANSWER = "/api/v1/check_answer"
+    MEETINGS = "/meetings"
+    TESTS = "/tests"
+    NEXT_QUESTION = "/next_question"
+    SUBMIT_ANSWER = "/submit_answer"
+    TEST_STATUS = "/test_statuses"
+    ALL_TEST_STATUSES = "/test_statuses/all"
+    TEST_RESULT = "/test_results"
+    ALL_TEST_RESULTS = "/test_results/all"
+    CHECK_ANSWER = "/check_answer"
 
 
 class HTTPMethod(str, Enum):

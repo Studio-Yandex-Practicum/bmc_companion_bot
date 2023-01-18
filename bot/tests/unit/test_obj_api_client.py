@@ -5,7 +5,7 @@ from unittest import TestCase, mock
 import pytest
 from httpx import HTTPStatusError, RequestError
 from pydantic import BaseModel
-from src.core.constants import Endpoint, HTTPMethod
+from src.core.constants import APIVersion, Endpoint, HTTPMethod
 from src.request.clients import (
     APIClientRequestError,
     APIClientResponseError,
@@ -41,8 +41,8 @@ test_objects_data = {"test_obj_1_id": test_object_1_data, "test_obj_2_id": test_
 test_objects = [test_object_1, test_object_2]
 
 
-test_client = ObjAPIClient(Endpoint.MEETINGS, ModelOne, ManyModelOne)
-test_client_of_wrong_model = ObjAPIClient(Endpoint.MEETINGS, ModelTwo, ManyModelTwo)
+test_client = ObjAPIClient(APIVersion.V1, Endpoint.MEETINGS, ModelOne, ManyModelOne)
+test_client_of_wrong_model = ObjAPIClient(APIVersion.V1, Endpoint.MEETINGS, ModelTwo, ManyModelTwo)
 
 
 def mocked_httpx_request(*args, **kwargs):
