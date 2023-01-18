@@ -10,16 +10,20 @@ from request.exceptions import (
     APIClientResponseError,
     APIClientValidationError,
 )
-from schemas.requests import (  # UserTestQuestionSpecificRequest,
+from schemas.requests import (
     UserSpecificRequest,
     UserTestQuestionAnswerSpecificRequest,
+    UserTestQuestionSpecificRequest,
     UserTestSpecificRequest,
 )
 from schemas.responses import (
+    AllTestResultsResponse,
     AllTestStatusesResponse,
+    CheckAnswerResponse,
     QuestionResponse,
     SubmitAnswerResponse,
     TestResultResponse,
+    TestStatusResponse,
 )
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
@@ -150,21 +154,44 @@ class TestAPIClient(BaseAPIClient):
         self._base_url = f"http://{WEB_API_URL}"
 
     def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
+        """Запрос статуса всех тестов для данного пользователя."""
         url = urljoin(self._base_url, Endpoint.ALL_TEST_STATUSES)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, AllTestStatusesResponse)
 
+    def test_status(self, request: UserTestSpecificRequest) -> TestStatusResponse:
+        """Запрос статуса конкретного теста для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.TEST_STATUS)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, TestStatusResponse)
+
     def next_question(self, request: UserTestSpecificRequest) -> QuestionResponse:
+        """Запрос следующего вопроса для данного пользователя в данном тесте."""
         url = urljoin(self._base_url, Endpoint.NEXT_QUESTION)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, QuestionResponse)
 
+    def submit_answer(self, request: UserTestQuestionAnswerSpecificRequest) -> SubmitAnswerResponse:
+        """Передача ответа на вопрос в тесте от имени пользователя."""
+        url = urljoin(self._base_url, Endpoint.SUBMIT_ANSWER)
+        response = self._safe_request(HTTPMethod.POST, url=url, params=request.dict())
+        return self._process_response(response, SubmitAnswerResponse)
+
     def test_result(self, request: UserTestSpecificRequest) -> TestResultResponse:
+        """Запрос результата данного теста для данного пользователя."""
         url = urljoin(self._base_url, Endpoint.TEST_RESULT)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, TestResultResponse)
 
-    def submit_answer(self, request: UserTestQuestionAnswerSpecificRequest) -> SubmitAnswerResponse:
-        url = urljoin(self._base_url, Endpoint.SUBMIT_ANSWER)
-        response = self._safe_request(HTTPMethod.POST, url=url, params=request.dict())
-        return self._process_response(response, SubmitAnswerResponse)
+    def all_test_results(self, request: UserSpecificRequest) -> AllTestResultsResponse:
+        """Запрос результатов всех тестов для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.ALL_TEST_RESULTS)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, AllTestResultsResponse)
+
+    def check_answer(self, request: UserTestQuestionSpecificRequest) -> CheckAnswerResponse:
+        """Запрос ранее полученного ответа на данный вопрос данного теста
+        от имени данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, CheckAnswerResponse)

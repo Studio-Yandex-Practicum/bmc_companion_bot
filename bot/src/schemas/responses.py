@@ -49,6 +49,13 @@ class TestResultResponse(TestResult):
     user_id: int
 
 
+class AllTestResultsResponse(BaseModel):
+    """Модель ответа с результатом всех тестов для данного юзера."""
+
+    user_id: int
+    results: TestResultList
+
+
 class AnswerInfo(BaseModel):
     """Модель информации об ответе на вопрос теста."""
 
