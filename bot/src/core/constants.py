@@ -1,5 +1,7 @@
 from enum import Enum
 
+from telegram.ext import ConversationHandler
+
 
 class APIVersion(str, Enum):
     V1 = "/v1"
@@ -33,3 +35,10 @@ class TestStatus(str, Enum):
     AVAILABLE = "available"
     ACTIVE = "active"
     COMPLETED = "completed"
+
+
+class BotState(str, Enum):
+    MENU_START_SELECTING_LEVEL = "MENU_START_SELECTING_LEVEL"
+    MENU_ADMIN_SELECTING_LEVEL = "MENU_ADMIN_SELECTING_LEVEL"
+    STOPPING = "STOPPING"
+    END = ConversationHandler.END
