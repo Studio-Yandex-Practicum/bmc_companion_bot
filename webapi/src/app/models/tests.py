@@ -40,7 +40,7 @@ class Answer(BaseModel):
 
     text = Column(Text)
     question_id = Column(Integer, ForeignKey("questions.id", ondelete="CASCADE"))
-    question = relationship("Question", back_populates="questions")
+    question = relationship("Question", back_populates="answers")
     deleted_at = Column(DateTime, comment="Время удаления")
 
     def to_dict(self):
