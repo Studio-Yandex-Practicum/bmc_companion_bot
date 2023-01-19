@@ -144,3 +144,27 @@ class TestCompleted(BaseModel):
     test_id = Column(Integer, ForeignKey("tests.id"), nullable=False)
     answer_id = Column(Integer, ForeignKey("answers.id"))
     deleted_at = Column(DateTime, comment="Время удаления")
+
+
+class UserTimeSlot(BaseModel):
+    """Хранение свободных временных слотов психологов."""
+
+    __tablename__ = "user_time_slots"
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    date_start = Column(DateTime, comment="Время начала")
+    date_end = Column(DateTime, comment="Время конца")
+    deleted_at = Column(DateTime, comment="Время удаления")
+
+    def to_dict(self):
+        return dict(
+            date_start=self.date_start,
+            date_end=self.date_end,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+            deleted_at=self.deleted_at,
+        )
+
+    def from_dict(self, data):
+        for key, item in data.items():
+            setattr(self, key, item)

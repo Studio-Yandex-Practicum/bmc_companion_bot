@@ -8,5 +8,6 @@ from app.models.tests import (
     TestCompleted,
     TestProgress,
     TestQuestion,
+    UserTimeSlot,
 )
 from app.models.users import User, UserRole
