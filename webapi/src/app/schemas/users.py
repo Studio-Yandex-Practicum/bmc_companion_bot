@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from app.schemas.core import ObjectList
 from pydantic import BaseModel, Extra, PositiveInt
@@ -27,17 +27,10 @@ class UserUpdate(UserCreate):
     pass
 
 
-class UserBare(BaseModel):
+class UserBare(UserCreate):
     """Схема для получения краткой информации о пользователе."""
 
     id: int
-    first_name: Union[str, None]
-    last_name: Union[str, None]
-    middle_name: Union[str, None]
-    birthday: Union[datetime, None]
-    phone: Union[PositiveInt, None]
-    role_id: int
-    telegram_id: Union[PositiveInt, None]
 
     class Config:
         orm_mode = True
@@ -46,7 +39,7 @@ class UserBare(BaseModel):
 class UserFull(UserBare):
     """Схема для получения полной информации о пользователе."""
 
-    created_at: Optional[datetime]
+    created_at: datetime
     updated_at: Optional[datetime]
     deleted_at: Optional[datetime]
 

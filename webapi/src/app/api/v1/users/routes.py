@@ -22,7 +22,7 @@ class ApiUserWithoutID(Resource):
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: UserCreate) -> UserFull:
         """Создание пользователя."""
-        user = user_service.user_create(dict(body))
+        user = user_service.user_create(body)
         return UserFull.from_orm(user)
 
 
