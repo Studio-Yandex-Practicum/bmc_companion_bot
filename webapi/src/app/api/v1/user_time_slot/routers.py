@@ -1,7 +1,6 @@
-from datetime import datetime
 from http import HTTPStatus
 
-from app.db.pg import db
+from app.internal.api_services import user_time_slot_service
 from app.models import UserTimeSlot
 from app.schemas.core import GetMultiQueryParams, StatusResponse
 from app.schemas.user_time_slot import (
@@ -40,60 +39,36 @@ class UserTimeSlotAPI(Resource):
     @validate()
     def get(self, id: int) -> UserTimeSlotResponse:
         """Получение данных слота по id."""
-        slot = get_object_by_id(id)
+        slot = user_time_slot_service.get_object_by_id(id)
         return UserTimeSlotResponse.from_orm(slot)
 
     @validate()
     def patch(self, id: int, body: UserTimeSlotUpdate) -> UserTimeSlotResponse:
         """Изменение данных определенного слота по id."""
-        slot = get_object_by_id(id)
-        check_delete_object(slot)
-        # check_exists_object(body)
-        slot.from_dict(dict(body))
-        slot.updated_at = datetime.utcnow().strftime(FORMAT)
-        db.session.commit()
+        slot = user_time_slot_service.user_time_slot_update(id, body)
         return UserTimeSlotResponse.from_orm(slot)
 
     @validate()
     def delete(self, id: int) -> StatusResponse:
-        """Soft-delete вопроса."""
-        slot = get_object_by_id(id)
-        check_delete_object(slot)
-        slot.deleted_at = datetime.utcnow().strftime(FORMAT)
-        db.session.commit()
-        message = StatusResponse(
-            warning="Ресурс заблокирован.",
-        )
-        return message
+        """Soft-delete временного слота."""
+        user_time_slot_service.remove_object(id)
+        return StatusResponse(message="Временной слот заблокирован.")
 
 
 class UserTimeSlotAPIList(Resource):
     @validate(on_success_status=HTTPStatus.CREATED)
     def post(self, body: UserTimeSlotCreate) -> UserTimeSlotResponse:
         """Создание слота."""
-        slot = UserTimeSlot()
-        slot_exists = (
-            db.session.query(UserTimeSlot)
-            .where(
-                UserTimeSlot.date_start == body.date_start
-                and UserTimeSlot.date_end == body.date_end
-            )
-            .first()
-        )
-        if slot_exists is not None:
-            return abort(HTTPStatus.CONFLICT, "Такой слот уже есть!")
-        slot.from_dict(dict(body))
-        db.session.add(slot)
-        slot.created_at = datetime.utcnow().strftime(FORMAT)
-        db.session.commit()
+        slot = user_time_slot_service.user_time_slot_create(body)
         return UserTimeSlotResponse.from_orm(slot)
 
     @validate()
     def get(self, query: GetMultiQueryParams) -> UserTimeSlotList:
         """Получение всех слотов."""
-        slot_db = UserTimeSlot.query.filter_by(deleted_at=None).all()
-        slot_data = [(dict(UserTimeSlotResponse.from_orm(slot))) for slot in slot_db]
-        paginated_data = UserTimeSlotList.pagination(
-            self, data=slot_data, url="/api/v1/slots/", query=query
+        paginated_data = user_time_slot_service.get_paginated_objects_list(
+            schema_singl_object=UserTimeSlotResponse,
+            schema_list=UserTimeSlotList,
+            url="/api/v1/slots/",
+            query=query,
         )
         return UserTimeSlotList(**paginated_data)

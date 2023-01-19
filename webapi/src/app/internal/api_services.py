@@ -10,8 +10,9 @@ from app.internal.model_services import (
     TestModelService,
     UserModelService,
     UserRoleModelService,
+    UserTimeSlotModelService,
 )
-from app.models import TestCompleted, TestProgress, User
+from app.models import TestCompleted, TestProgress, User, UserTimeSlot
 from flask import abort
 
 
@@ -140,6 +141,28 @@ class UserService(BaseAPIService):
         return user
 
 
+class UserTimeSlotService(BaseAPIService):
+    def __init__(self, model):
+        super().__init__(model)
+        self.service = UserTimeSlotModelService
+
+    def user_time_slot_create(self, data: SchemaModel):
+        time_slot = UserTimeSlot(**dict(data))
+        self.service.check_timeslot_exists(self, data.date_start, data.date_end, data.user_id)
+        self.service.create(self, time_slot)
+        return time_slot
+
+    def user_time_slot_update(self, id: int, data: SchemaModel):
+        time_slot = self.service.get_object_or_none(self, id)
+        if time_slot is None:
+            return abort(HTTPStatus.NOT_FOUND, "Временногослота с заданным id не существует.")
+        self.service.check_timeslot_exists(self, data.date_start, data.date_end, data.user_id)
+        time_slot.from_dict(dict(data))
+        self.service.update(self)
+        return time_slot
+
+
 user_service = UserService(User)
 test_progress_service = TestProgressService(TestProgress)
 test_completed_service = TestCompletedService(TestCompleted)
+user_time_slot_service = UserTimeSlotService(UserTimeSlot)

@@ -1,7 +1,18 @@
+from datetime import datetime
+from http import HTTPStatus
 from typing import TypeVar
 
 from app.db.pg import db
-from app.models import Question, Test, TestCompleted, TestProgress, User, UserRole
+from app.models import (
+    Question,
+    Test,
+    TestCompleted,
+    TestProgress,
+    User,
+    UserRole,
+    UserTimeSlot,
+)
+from flask import abort
 
 DataBaseModel = TypeVar("DataBaseModel")
 SchemaModel = TypeVar("SchemaModel")
@@ -107,3 +118,23 @@ class TestModelService(BaseModelService):
 
     def __init__(self, model):
         super().__init__(Test)
+
+
+class UserTimeSlotModelService(BaseModelService):
+    """Класс для работы с моделью Test."""
+
+    def __init__(self, model):
+        super().__init__(UserTimeSlot)
+
+    def check_timeslot_exists(self, date_start: datetime, date_end: datetime, user_id: int):
+        time_slot = (
+            db.session.query(self.model)
+            .where(
+                self.model.date_start == date_start,
+                self.model.date_end == date_end,
+                self.model.user_id == user_id,
+            )
+            .first()
+        )
+        if time_slot is not None:
+            return abort(HTTPStatus.CONFLICT, "Такой временной слот уже существует.")
