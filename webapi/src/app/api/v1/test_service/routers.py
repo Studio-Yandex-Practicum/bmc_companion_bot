@@ -62,6 +62,18 @@ class TestResult(Resource):
         )
 
 
+class UCETestResult(Resource):
+    @validate()
+    def get(self) -> TestResultResponse:
+        """Получение результата НДО теста юзера."""
+        return obj_or_abort_404(
+            TestService.get_uce_score,
+            TestResultRequest(**test_parser.parse_args()),
+            TestNotFound,
+            "Результата теста с заданным id не существует.",
+        )
+
+
 class TestStatus(Resource):
     @validate()
     def get(self) -> TestStatusResponse:

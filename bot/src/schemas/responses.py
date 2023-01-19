@@ -1,4 +1,4 @@
-from app.core.constants import TestStatus
+from core.constants import TestStatus
 from pydantic import BaseModel
 
 
@@ -9,35 +9,22 @@ class TestInfo(BaseModel):
     name: str
 
 
-class TestInfoList(BaseModel):
-    """Модель списка информации о тестах."""
-
-    __root__: list[TestInfo]
-
-
 class TestResult(TestInfo):
     """Модель информации о результате теста."""
 
     value: int
 
 
+class TestInfoList(BaseModel):
+    """Модель списка информации о тестах."""
+
+    __root__: list[TestInfo]
+
+
 class TestResultList(BaseModel):
     """Модель списка результатов теста."""
 
     __root__: list[TestResult]
-
-
-class TestResultResponse(TestResult):
-    """Модель ответа с результатом конкретного теста для данного юзера."""
-
-    user_id: int
-
-
-class AllTestResultsResponse(BaseModel):
-    """Модель ответа с результатом всех тестов для данного юзера."""
-
-    user_id: int
-    results: TestResultList
 
 
 class TestStatusResponse(TestInfo):
@@ -56,6 +43,19 @@ class AllTestStatusesResponse(BaseModel):
     completed: TestInfoList
 
 
+class TestResultResponse(TestResult):
+    """Модель ответа с результатом конкретного теста для данного юзера."""
+
+    user_id: int
+
+
+class AllTestResultsResponse(BaseModel):
+    """Модель ответа с результатом всех тестов для данного юзера."""
+
+    user_id: int
+    results: TestResultList
+
+
 class AnswerInfo(BaseModel):
     """Модель информации об ответе на вопрос теста."""
 
@@ -69,19 +69,14 @@ class AnswerInfoList(BaseModel):
     __root__: list[AnswerInfo]
 
 
-class QuestionInfo(BaseModel):
-    """Модель информации о вопросе."""
-
-    test_question_id: int
-    text: str
-    answers: AnswerInfoList
-
-
-class QuestionResponse(QuestionInfo):
+class QuestionResponse(BaseModel):
     """Модель ответа на запрос следующего вопроса указанного теста для указанного юзера."""
 
     user_id: int
     test_id: int
+    test_question_id: int
+    text: str
+    answers: AnswerInfoList
 
 
 class SubmitAnswerResponse(BaseModel):

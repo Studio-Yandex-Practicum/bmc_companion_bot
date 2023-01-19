@@ -1,7 +1,8 @@
 from typing import Dict, Optional, Type, TypeVar, Union
+from urllib.parse import urljoin
 
 import httpx
-from core.constants import Endpoint, HTTPMethod
+from core.constants import APIVersion, Endpoint, HTTPMethod
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
@@ -9,25 +10,30 @@ from request.exceptions import (
     APIClientResponseError,
     APIClientValidationError,
 )
+from schemas.requests import (
+    UserSpecificRequest,
+    UserTestQuestionAnswerSpecificRequest,
+    UserTestQuestionSpecificRequest,
+    UserTestSpecificRequest,
+)
+from schemas.responses import (
+    AllTestResultsResponse,
+    AllTestStatusesResponse,
+    CheckAnswerResponse,
+    QuestionResponse,
+    SubmitAnswerResponse,
+    TestResultResponse,
+    TestStatusResponse,
+)
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
 
-class APIClient:
-    """
-    Класс обвязки HTTP-запросов к Web-API. Конструктор принимает адрес эндпойнта, тип
-    pydantic-модели отдельного объекта и тип pydantic-модели их набора. Поддерживаются методы
-    get(), create(), patch() и delete().
-    """
-
-    def __init__(
-        self, endpoint: Endpoint, model: Type[ModelType], many_model: Type[ModelType]
-    ) -> None:
-        self.model = model
-        self.many_model = many_model
-        self.base_url = f"http://{WEB_API_URL}/{endpoint}"
+class BaseAPIClient:
+    """Базовый класс API-клиентов, включающий методы перехвата ошибок 4xx/5xx и преобразования
+    ответа в модель pydantic."""
 
     def _assert_response_ok(self, response: httpx.Response) -> httpx.Response:
         """Выбрасывает APIClientResponseError, если код состояния HTTP-ответа не OK."""
@@ -67,6 +73,25 @@ class APIClient:
         except httpx.RequestError as e:
             raise APIClientRequestError(f"Error while requesting {e.request.url}")
         return response
+
+
+class ObjAPIClient(BaseAPIClient):
+    """
+    Класс обвязки HTTP-запросов к Web-API. Конструктор принимает адрес эндпойнта, тип
+    pydantic-модели отдельного объекта и тип pydantic-модели их набора. Поддерживаются методы
+    get(), create(), patch() и delete().
+    """
+
+    def __init__(
+        self,
+        api_version: APIVersion,
+        endpoint: Endpoint,
+        model: Type[ModelType],
+        many_model: Type[ModelType],
+    ) -> None:
+        self.model = model
+        self.many_model = many_model
+        self.base_url = f"http://{WEB_API_URL}/api{api_version}{endpoint}"
 
     def _obj_url(self, id: Union[int, str]) -> str:
         """Конструирует URL конкретного ресурса, используя переданный id."""
@@ -122,3 +147,55 @@ class APIClient:
         response = self._safe_request(HTTPMethod.DELETE, self._obj_url(id))
         obj = self._process_response(response, self.model)
         return obj
+
+
+class TestAPIClient(BaseAPIClient):
+    """Класс роутов для прохождения теста. Включает методы запроса статуса тестов, получения
+    следующего вопроса в тесте, передачи ответа на вопрос теста и запроса результата пройденного
+    теста."""
+
+    def __init__(self, api_version: APIVersion) -> None:
+        self._base_url = f"http://{WEB_API_URL}/api{api_version}"
+
+    def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
+        """Запрос статуса всех тестов для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.ALL_TEST_STATUSES)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, AllTestStatusesResponse)
+
+    def test_status(self, request: UserTestSpecificRequest) -> TestStatusResponse:
+        """Запрос статуса конкретного теста для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.TEST_STATUS)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, TestStatusResponse)
+
+    def next_question(self, request: UserTestSpecificRequest) -> QuestionResponse:
+        """Запрос следующего вопроса для данного пользователя в данном тесте."""
+        url = urljoin(self._base_url, Endpoint.NEXT_QUESTION)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, QuestionResponse)
+
+    def submit_answer(self, request: UserTestQuestionAnswerSpecificRequest) -> SubmitAnswerResponse:
+        """Передача ответа на вопрос в тесте от имени пользователя."""
+        url = urljoin(self._base_url, Endpoint.SUBMIT_ANSWER)
+        response = self._safe_request(HTTPMethod.POST, url=url, params=request.dict())
+        return self._process_response(response, SubmitAnswerResponse)
+
+    def test_result(self, request: UserTestSpecificRequest) -> TestResultResponse:
+        """Запрос результата данного теста для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.TEST_RESULT)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, TestResultResponse)
+
+    def all_test_results(self, request: UserSpecificRequest) -> AllTestResultsResponse:
+        """Запрос результатов всех тестов для данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.ALL_TEST_RESULTS)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, AllTestResultsResponse)
+
+    def check_answer(self, request: UserTestQuestionSpecificRequest) -> CheckAnswerResponse:
+        """Запрос ранее полученного ответа на данный вопрос данного теста
+        от имени данного пользователя."""
+        url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, CheckAnswerResponse)
