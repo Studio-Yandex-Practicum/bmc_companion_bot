@@ -1,5 +1,7 @@
 from enum import Enum
 
+from telegram.ext import ConversationHandler
+
 
 class Endpoint(str, Enum):
     MEETINGS = "api/v1/meetings"
@@ -16,3 +18,10 @@ class HTTPMethod(str, Enum):
     POST = "POST"
     PUT = "PUT"
     TRACE = "TRACE"
+
+
+class BotState(str, Enum):
+    MENU_START_SELECTING_LEVEL = "MENU_START_SELECTING_LEVEL"
+    MENU_ADMIN_SELECTING_LEVEL = "MENU_ADMIN_SELECTING_LEVEL"
+    STOPPING = "STOPPING"
+    END = ConversationHandler.END
