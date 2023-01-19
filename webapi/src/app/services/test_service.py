@@ -39,7 +39,7 @@ class TestService:
 
     def __complete_test(self, user_id: int, test_id: int) -> int:
         """Метод вычисления результата пройденного теста."""
-        answer_ids = db.session.query(TestProgress.test_id).filter_by(
+        answer_ids = db.session.query(TestProgress.answer_id).filter_by(
             user_id=user_id, test_id=test_id
         )
         answer_values = db.session.query(Answer.value).filter(Test.id.in_(answer_ids)).all()
