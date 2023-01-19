@@ -151,6 +151,7 @@ class UserTimeSlot(BaseModel):
 
     __tablename__ = "user_time_slots"
 
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     date_start = Column(DateTime, comment="Время начала")
     date_end = Column(DateTime, comment="Время конца")
     deleted_at = Column(DateTime, comment="Время удаления")

@@ -8,6 +8,7 @@ from pydantic import BaseModel, Extra
 class UserTimeSlotCreate(BaseModel):
     """Схема создания временных слотов."""
 
+    user_id: int
     date_start: datetime
     date_end: datetime
 
@@ -18,6 +19,7 @@ class UserTimeSlotCreate(BaseModel):
 class UserTimeSlotUpdate(BaseModel):
     """Схема обновления временных слотов."""
 
+    user_id: Optional[int]
     date_start: Optional[datetime]
     date_end: Optional[datetime]
 
