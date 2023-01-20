@@ -2,7 +2,7 @@ from typing import Dict, Optional, Type, TypeVar, Union
 from urllib.parse import urljoin
 
 import httpx
-from core.constants import APIVersion, Endpoint, HTTPMethod
+from core.constants import APIVersion, Endpoint, HTTPMethod, UserRole
 from core.settings import settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
@@ -24,6 +24,8 @@ from schemas.responses import (
     SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
+    UserListResponse,
+    UserResponse,
 )
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
@@ -116,7 +118,6 @@ class ObjAPIClient(BaseAPIClient):
             params["limit"] = limit
         if offset:
             params["offset"] = offset
-        print(params)
         response = self._safe_request(HTTPMethod.GET, self.base_url, params=params)
         objs = self._process_response(response, self.many_model)
         return objs
@@ -147,6 +148,15 @@ class ObjAPIClient(BaseAPIClient):
         response = self._safe_request(HTTPMethod.DELETE, self._obj_url(id))
         obj = self._process_response(response, self.model)
         return obj
+
+    def is_staff(self, telegramm_id: int) -> bool:
+        """Проверка роли пользователя на администратора."""
+        user_role_id = [
+            user.role_id for user in self.get().data if user.telegram_id == telegramm_id
+        ][0]
+        if UserRole(user_role_id).name != "USER":
+            return True
+        return False
 
 
 class TestAPIClient(BaseAPIClient):
@@ -199,3 +209,8 @@ class TestAPIClient(BaseAPIClient):
         url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, CheckAnswerResponse)
+
+
+user_service = ObjAPIClient(
+    api_version="/v1", endpoint="/users/", model=UserResponse, many_model=UserListResponse
+)
