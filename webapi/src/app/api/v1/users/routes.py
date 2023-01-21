@@ -43,4 +43,4 @@ class ApiUserWithID(Resource):
     def delete(self, id: int) -> StatusResponse:
         """Бан пользователя."""
         user_service.remove_object(id)
-        return StatusResponse(message="Пользоваетель забанен.")
+        return StatusResponse(warning="Пользоваетель забанен.")
