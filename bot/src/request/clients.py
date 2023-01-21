@@ -151,11 +151,12 @@ class ObjAPIClient(BaseAPIClient):
 
     def is_staff(self, telegramm_id: int) -> bool:
         """Проверка роли пользователя на администратора."""
-        user_role_id = [
-            user.role_id for user in self.get().data if user.telegram_id == telegramm_id
-        ][0]
-        if UserRole(user_role_id).name != "USER":
-            return True
+        for user in self.get().data:
+            if telegramm_id == dict(user).get("telegram_id"):
+                user_role = UserRole(dict(user).get("role_id")).name.lower()
+                if user_role == settings.ADMIN.lower() or user_role == settings.ROOT.lower():
+                    return True
+                return False
         return False
 
 
