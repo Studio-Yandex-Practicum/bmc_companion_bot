@@ -2,7 +2,6 @@ from typing import TypeVar
 
 from app.internal.model_services import BaseModelService
 from app.models import Question
-from flask import abort
 
 DataBaseModel = TypeVar("DataBaseModel")
 

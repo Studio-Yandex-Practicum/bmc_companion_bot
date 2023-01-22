@@ -3,7 +3,6 @@ from typing import TypeVar
 from app.db.pg import db
 from app.internal.model_services import BaseModelService
 from app.models import Test, TestCompleted, TestProgress
-from flask import abort
 
 DataBaseModel = TypeVar("DataBaseModel")
 SchemaModel = TypeVar("SchemaModel")
