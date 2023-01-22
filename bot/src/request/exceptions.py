@@ -20,3 +20,9 @@ class APIClientValidationError(APIClientException):
     """Исключение ошибок валидации pydantic-моделей."""
 
     pass
+
+
+class NoNextQuestion(Exception):
+    """Исключение отсутствия следующего вопроса (тест пройден до конца)."""
+
+    pass

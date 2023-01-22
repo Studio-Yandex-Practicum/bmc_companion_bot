@@ -1,6 +1,12 @@
 from pydantic import BaseModel
 
 
+class UserIdRequestFromTelegram(BaseModel):
+    """Модель запроса user_id по chat_id Телеграма."""
+
+    chat_id: int
+
+
 class AllTestResultsRequest(BaseModel):
     """Модель запроса для получения результатов всех тестов данного юзера."""
 

@@ -1,7 +1,7 @@
 from app.core.constants import TestStatus
 from app.core.settings import settings
 from app.db.pg import db
-from app.models import Answer, Test, TestCompleted, TestProgress, TestQuestion
+from app.models import Answer, Test, TestCompleted, TestProgress, TestQuestion, User
 from app.schemas.requests import (
     AllTestResultsRequest,
     AllTestStatusesRequest,
@@ -10,6 +10,7 @@ from app.schemas.requests import (
     SubmitAnswerRequest,
     TestResultRequest,
     TestStatusRequest,
+    UserIdRequestFromTelegram,
 )
 from app.schemas.responses import (
     AllTestResultsResponse,
@@ -22,12 +23,14 @@ from app.schemas.responses import (
     TestResultList,
     TestResultResponse,
     TestStatusResponse,
+    UserIdResponse,
 )
 from app.services.exceptions import (
     AnswerNotFound,
     NoNextQuestion,
     TestNotFound,
     TestQuestionNotFound,
+    UserNotFound,
 )
 
 
@@ -45,6 +48,14 @@ class TestService:
         )
         answer_values = db.session.query(Answer.value).filter(Test.id.in_(answer_ids)).all()
         return sum(answer_values)
+
+    def user_id_from_chat_id(self, request: UserIdRequestFromTelegram) -> UserIdResponse:
+        """Метод получения user_id по chat_id Телеграма."""
+        chat_id = request.chat_id
+        user_id = User.query.filter_by(chat_id=chat_id).first()
+        if user_id is None:
+            raise UserNotFound
+        return UserIdResponse(user_id=user_id)
 
     def get_uce_score(self, request: TestResultRequest) -> TestCompleted:
         """Возвращает результат пройденного теста НДО для данного юзера."""

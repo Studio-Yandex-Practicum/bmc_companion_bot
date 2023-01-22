@@ -2,6 +2,12 @@ from core.constants import TestStatus
 from pydantic import BaseModel
 
 
+class UserIdResponse(BaseModel):
+    """Модель информации о id юзера."""
+
+    user_id: int
+
+
 class TestInfo(BaseModel):
     """Модель информации о тесте."""
 

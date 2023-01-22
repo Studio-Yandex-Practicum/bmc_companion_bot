@@ -17,6 +17,7 @@ class Endpoint(str, Enum):
     TEST_RESULT = "/test_results"
     ALL_TEST_RESULTS = "/test_results/all"
     CHECK_ANSWER = "/check_answer"
+    USER_ID_FROM_CHAT_ID = "/user_id_from_chat_id"
 
 
 class HTTPMethod(str, Enum):
@@ -40,5 +41,7 @@ class TestStatus(str, Enum):
 class BotState(str, Enum):
     MENU_START_SELECTING_LEVEL = "MENU_START_SELECTING_LEVEL"
     MENU_ADMIN_SELECTING_LEVEL = "MENU_ADMIN_SELECTING_LEVEL"
+    MENU_TEST_SELECTING_LEVEL = "MENU_TEST_SELECTING_LEVEL"
+    QUESTIONING = "QUESTIONING"
     STOPPING = "STOPPING"
     END = ConversationHandler.END

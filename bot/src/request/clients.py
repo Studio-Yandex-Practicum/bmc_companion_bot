@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Dict, Optional, Type, TypeVar, Union
 from urllib.parse import urljoin
 
@@ -9,8 +10,10 @@ from request.exceptions import (
     APIClientRequestError,
     APIClientResponseError,
     APIClientValidationError,
+    NoNextQuestion,
 )
 from schemas.requests import (
+    UserIdRequestFromTelegram,
     UserSpecificRequest,
     UserTestQuestionAnswerSpecificRequest,
     UserTestQuestionSpecificRequest,
@@ -24,6 +27,7 @@ from schemas.responses import (
     SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
+    UserIdResponse,
 )
 
 WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
@@ -157,6 +161,12 @@ class TestAPIClient(BaseAPIClient):
     def __init__(self, api_version: APIVersion) -> None:
         self._base_url = f"http://{WEB_API_URL}/api{api_version}"
 
+    def user_id_from_chat_id(self, request: UserIdRequestFromTelegram) -> UserIdResponse:
+        """Получение user_id по chat_id."""
+        url = urljoin(self._base_url, Endpoint.USER_ID_FROM_CHAT_ID)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, UserIdResponse)
+
     def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
         """Запрос статуса всех тестов для данного пользователя."""
         url = urljoin(self._base_url, Endpoint.ALL_TEST_STATUSES)
@@ -173,6 +183,8 @@ class TestAPIClient(BaseAPIClient):
         """Запрос следующего вопроса для данного пользователя в данном тесте."""
         url = urljoin(self._base_url, Endpoint.NEXT_QUESTION)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        if response.status_code == HTTPStatus.NO_CONTENT:
+            raise NoNextQuestion
         return self._process_response(response, QuestionResponse)
 
     def submit_answer(self, request: UserTestQuestionAnswerSpecificRequest) -> SubmitAnswerResponse:

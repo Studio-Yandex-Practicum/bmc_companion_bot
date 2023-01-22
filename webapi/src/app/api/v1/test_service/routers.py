@@ -8,6 +8,7 @@ from app.schemas.requests import (
     SubmitAnswerRequest,
     TestResultRequest,
     TestStatusRequest,
+    UserIdRequestFromTelegram,
 )
 from app.schemas.responses import (
     AllTestResultsResponse,
@@ -17,6 +18,7 @@ from app.schemas.responses import (
     SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
+    UserIdResponse,
 )
 from app.services.exceptions import (
     AnswerNotFound,
@@ -30,6 +32,8 @@ from flask import abort
 from flask_pydantic import validate
 from flask_restful import Resource, reqparse
 
+chat_parser = reqparse.RequestParser()
+chat_parser.add_argument("chat_id", type=int, required=True)
 user_parser = reqparse.RequestParser()
 user_parser.add_argument("user_id", type=int, required=True)
 test_parser = user_parser.copy()
@@ -38,6 +42,16 @@ question_parser = test_parser.copy()
 question_parser.add_argument("question_id", type=int, required=True)
 answer_parser = question_parser.copy()
 answer_parser.add_argument("answer_id", type=int, required=True)
+
+
+class UserIdFromTelegram(Resource):
+    @validate()
+    def get(self) -> UserIdResponse:
+        """Получение user_id по chat_id Телеграма."""
+        user_id = TestService.user_id_from_chat_id(
+            UserIdRequestFromTelegram(**chat_parser.parse_args())
+        )
+        return user_id
 
 
 class AllTestResults(Resource):
