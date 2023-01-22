@@ -12,7 +12,15 @@ from app.internal.model_services import (
     UserRoleModelService,
     UserTimeSlotModelService,
 )
-from app.models import TestCompleted, TestProgress, User, UserTimeSlot
+from app.models import (
+    Question,
+    Test,
+    TestCompleted,
+    TestProgress,
+    User,
+    UserRole,
+    UserTimeSlot,
+)
 from flask import abort
 
 
@@ -47,15 +55,15 @@ class TestProgressService(BaseAPIService):
     def __init__(self, model):
         super().__init__(model)
         self.service = ProgressModelService
-        self.question_service = QuestionModelService
-        self.user_service = UserModelService
+        self.question_service = QuestionModelService(Question)
+        self.user_service = UserModelService(User)
 
     def progress_create(self, data: SchemaModel):
         progress = TestProgress(**dict(data))
-        user = self.user_service.get_object_or_none(self, data.user_id)
+        user = self.user_service.get_object_or_none(data.user_id)
         if user is None:
             return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        question = self.question_service.get_object_or_none(self, data.test_question_id)
+        question = self.question_service.get_object_or_none(data.test_question_id)
         if question is None:
             return abort(HTTPStatus.NOT_FOUND, "Вопроса с заданным id не существует.")
         progress_exists = self.service.check_progress_exists(self, data)
@@ -68,7 +76,7 @@ class TestProgressService(BaseAPIService):
         progress = self.service.get_object_or_none(self, id)
         if progress is None:
             return abort(HTTPStatus.NOT_FOUND, "Прогресса с заданным id не существует.")
-        question = self.question_service.get_object_or_none(self, data.test_question_id)
+        question = self.question_service.get_object_or_none(data.test_question_id)
         if question is None:
             return abort(HTTPStatus.NOT_FOUND, "Вопроса с заданным id не существует.")
         progress_exists = self.service.check_progress_exists_for_update(self, progress, data)
@@ -83,15 +91,15 @@ class TestCompletedService(BaseAPIService):
     def __init__(self, model):
         super().__init__(model)
         self.service = CompletedModelService
-        self.user_service = UserModelService
-        self.test_service = TestModelService
+        self.user_service = UserModelService(User)
+        self.test_service = TestModelService(Test)
 
     def completed_create(self, data: SchemaModel):
         test_completed = TestCompleted(**dict(data))
-        user = self.user_service.get_object_or_none(self, data.user_id)
+        user = self.user_service.get_object_or_none(data.user_id)
         if user is None:
             return abort(HTTPStatus.NOT_FOUND, "Пользователя с заданным id не существует.")
-        test = self.test_service.get_object_or_none(self, data.test_id)
+        test = self.test_service.get_object_or_none(data.test_id)
         if test is None:
             return abort(HTTPStatus.NOT_FOUND, "Теста с заданным id не существует.")
         test_completed_exists = self.service.check_test_completed_exists(self, data)
@@ -113,14 +121,14 @@ class UserService(BaseAPIService):
     def __init__(self, model):
         super().__init__(model)
         self.service = UserModelService
-        self.role_service = UserRoleModelService
+        self.role_service = UserRoleModelService(UserRole)
 
     def user_create(self, data: SchemaModel):
         user = User(**dict(data))
         user_exists = self.service.check_user_exists(self, data.phone)
         if user_exists and data.phone is not None:
             return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = self.role_service.get_object_or_none(self, data.role_id)
+        role = self.role_service.get_object_or_none(data.role_id)
         if role is None:
             return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
         self.service.create(self, user)
@@ -133,7 +141,7 @@ class UserService(BaseAPIService):
         phone_in_use = self.service.check_user_exists(self, data.phone)
         if phone_in_use and data.phone is not None:
             return abort(HTTPStatus.CONFLICT, "Пользователь с таким номером телефона уже есть!")
-        role = self.role_service.get_object_or_none(self, data.role_id)
+        role = self.role_service.get_object_or_none(data.role_id)
         if role is None:
             return abort(HTTPStatus.NOT_FOUND, "Такой роли нет!")
         user.from_dict(dict(data))
