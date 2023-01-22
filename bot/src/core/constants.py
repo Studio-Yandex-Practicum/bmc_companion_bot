@@ -17,6 +17,7 @@ class Endpoint(str, Enum):
     TEST_RESULT = "/test_results"
     ALL_TEST_RESULTS = "/test_results/all"
     CHECK_ANSWER = "/check_answer"
+    USERS = "/users"
 
 
 class HTTPMethod(str, Enum):
