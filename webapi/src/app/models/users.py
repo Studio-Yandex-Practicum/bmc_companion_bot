@@ -14,6 +14,7 @@ class User(BaseModel):
     phone = db.Column(db.SmallInteger)
     role_id = db.Column(db.Integer, db.ForeignKey("user_roles.id"), nullable=False)
     telegram_id = db.Column(db.Integer)
+    chat_id = db.Column(db.Integer)
     deleted_at = db.Column(db.DateTime)
 
 
