@@ -23,3 +23,13 @@ class UserTestQuestionAnswerSpecificRequest(UserTestQuestionSpecificRequest):
     """Схема запроса к API, требующего указания id пользователя, теста, вопроса и ответа."""
 
     answer_id: int
+
+
+class UserCreateRequest(BaseModel):
+    """Схема запроса к API, требующего указания id пользователя."""
+
+    role_id: int
+    telegram_id: int
+    first_name: str
+    last_name: str
+    middle_name: str
