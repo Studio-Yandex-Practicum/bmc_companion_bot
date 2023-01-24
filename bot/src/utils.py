@@ -52,6 +52,9 @@ class ContextManager:
         return context.user_data.get(ContextKeys.QUESTION_ID)
 
 
+context_manager = ContextManager()
+
+
 def make_text_handler(callback: Callable):
     return MessageHandler(filters.TEXT, callback)
 
