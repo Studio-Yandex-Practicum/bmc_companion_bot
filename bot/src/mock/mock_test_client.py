@@ -20,6 +20,7 @@ from schemas.responses import (
     QuestionResponse,
     SubmitAnswerResponse,
     TestResultResponse,
+    TestStatusResponse,
     UserIdResponse,
 )
 
@@ -63,11 +64,8 @@ class MockTestAPIClient:
             user_id=123, available=available, active=active, completed=completed
         )
 
-    # def test_status(self, request: UserTestSpecificRequest) -> TestStatusResponse:
-    #     """Запрос статуса конкретного теста для данного пользователя."""
-    #     url = urljoin(self._base_url, Endpoint.TEST_STATUS)
-    #     response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-    #     return self._process_response(response, TestStatusResponse)
+    def test_status(self, request: UserTestSpecificRequest) -> TestStatusResponse:
+        pass
 
     def next_question(self, request: UserTestSpecificRequest) -> QuestionResponse:
         if request.test_id in self.avalaible:
@@ -107,20 +105,13 @@ class MockTestAPIClient:
         test_id = request.test_id
         name = TESTS[test_id]["name"]
         value = test_results[test_id]
-
         return TestResultResponse(test_id=1, name=name, value=value, user_id=123)
 
     def all_test_results(self, request: UserSpecificRequest) -> AllTestResultsResponse:
         """Запрос результатов всех тестов для данного пользователя."""
-        # url = urljoin(self._base_url, Endpoint.ALL_TEST_RESULTS)
-        # response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        # return self._process_response(response, AllTestResultsResponse)
         pass
 
     def check_answer(self, request: UserTestQuestionSpecificRequest) -> CheckAnswerResponse:
         """Запрос ранее полученного ответа на данный вопрос данного теста
         от имени данного пользователя."""
-        # url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
-        # response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        # return self._process_response(response, CheckAnswerResponse)
         pass

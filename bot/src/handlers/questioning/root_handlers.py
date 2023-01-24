@@ -17,17 +17,17 @@ async def questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE
     ).user_id
     test_statuses = api_client.all_test_statuses(UserSpecificRequest(user_id=user_id))
     context_manager.set_user_id(context, user_id)
-    buttons = []
-    context_manager.set_tests(context, {})
     if test_statuses.active.items:
-        text = "Вы уже начинали проходить тест. Рекомендуем закончить его прохождение:"
-        test_list = test_statuses.active.items
-    elif test_statuses.available.items:
+        active_test_names = "\n".join([f" — {test.name}" for test in test_statuses.active.items])
+        text = f"Рекомендуем закончить прохождение уже начатых тестов:\n {active_test_names}"
+        await update.message.reply_text(text)
+    test_list = [*test_statuses.active.items, *test_statuses.available.items]
+    if test_list:
         text = "Вы можете пройти один из следующих тестов: "
-        test_list = test_statuses.available.items
     else:
         text = "Вы уже прошли все доступные тесты."
-        test_list = []
+    buttons = []
+    context_manager.set_tests(context, {})
     for test in test_list:
         buttons.append([KeyboardButton(text=test.name)])
         context_manager.get_tests(context)[test.name] = test.test_id

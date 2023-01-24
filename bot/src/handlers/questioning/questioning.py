@@ -1,4 +1,6 @@
 from core.constants import BotState
+from handlers.questioning.root_handlers import api_client, questioning_section
+from handlers.root_handlers import error_restart
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
     UserTestQuestionAnswerSpecificRequest,
@@ -8,8 +10,6 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, MessageHandler, filters
 from ui.buttons import BTN_START_MENU
 from utils import context_manager
-
-from .root_handlers import api_client, questioning_section
 
 
 async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
@@ -40,7 +40,6 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     context_manager.set_answers(context, {})
     answers = next_question.answers.items
     for answer in answers:
-        print(answer)
         buttons.append(KeyboardButton(text=answer.text))
         context_manager.get_answers(context)[answer.text] = answer.answer_id
     buttons = [buttons, [BTN_START_MENU]]
@@ -52,6 +51,9 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
 
 async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
+    answers = context_manager.get_answers(context)
+    if not answers:
+        error_restart(update, context)
     if answer_text not in context_manager.get_answers(context):
         await update.message.reply_text(
             "Выберите ответ из предложенных вариантов",
