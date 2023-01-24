@@ -1,6 +1,6 @@
 from core.constants import APIVersion, BotState
 from handlers.root_handlers import start
-from mock.mock_test_client import MockTestAPIClient as TestAPIClient
+from request.clients import TestAPIClient
 from schemas.requests import UserIdRequestFromTelegram, UserSpecificRequest
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
