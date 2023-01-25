@@ -1,9 +1,30 @@
 from http import HTTPStatus
 
 from app.internal.api_services import BaseAPIService
-from app.internal.model_services import MeetingTypeModelService, SchemaModel
-from app.models import MeetingType
+from app.internal.model_services import (
+    MeetingModelService,
+    MeetingTypeModelService,
+    SchemaModel,
+)
+from app.models import Meeting, MeetingType
 from flask import abort
+
+
+class MeetingService(BaseAPIService):
+    def __init__(self, model):
+        super().__init__(model)
+        self.service = MeetingModelService
+
+    def create(self, data: SchemaModel):
+        meeting = Meeting(**dict(data))
+        self.service.create(self, meeting)
+        return meeting
+
+    def update(self, meeting_id: int, data: SchemaModel):
+        meeting = self.service.get_object_or_none(self, meeting_id)
+        meeting.from_dict(dict(data))
+        self.service.update(self)
+        return meeting
 
 
 class MeetingTypeService(BaseAPIService):
@@ -35,4 +56,5 @@ class MeetingTypeService(BaseAPIService):
         return meeting_type
 
 
+meeting_service = MeetingService(Meeting)
 meeting_type_service = MeetingTypeService(MeetingType)

@@ -4,3 +4,4 @@ from .meeting_types import (
     MeetingTypeResponse,
     MeetingTypeUpdate,
 )
+from .meetings import MeetingCreate, MeetingList, MeetingResponse, MeetingUpdate
