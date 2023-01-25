@@ -21,12 +21,7 @@ class MeetingCreate(BaseModel):
 class MeetingUpdate(MeetingCreate):
     """Схема обновления встречи."""
 
-    client_id: None | int
-    user_id: None | int
-    type_id: None | int
-    comment: None | str
-    target_test_score: None | int
-    time_slot: None | datetime
+    ...
 
 
 class MeetingResponse(MeetingCreate):
