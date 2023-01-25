@@ -18,6 +18,7 @@ class Endpoint(str, Enum):
     ALL_TEST_RESULTS = "/test_results/all"
     CHECK_ANSWER = "/check_answer"
     USER_ID_FROM_CHAT_ID = "/user_id_from_chat_id"
+    USER = "/users"
 
 
 class HTTPMethod(str, Enum):
@@ -45,3 +46,9 @@ class BotState(str, Enum):
     QUESTIONING = "QUESTIONING"
     STOPPING = "STOPPING"
     END = ConversationHandler.END
+
+
+class UserRole(int, Enum):
+    ROOT = 1
+    ADMIN = 2
+    USER = 3

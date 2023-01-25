@@ -11,6 +11,9 @@ class Settings(BaseSettings):
     BOT_TOKEN: str
     APP_HOST: str
     APP_PORT: str
+    ADMIN: str
+    ROOT: str
+    USER: str
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")

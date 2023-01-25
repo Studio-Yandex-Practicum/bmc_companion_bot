@@ -1,5 +1,7 @@
+from typing import Union
+
 from core.constants import TestStatus
-from pydantic import BaseModel
+from pydantic import BaseModel, PositiveInt
 
 
 class UserIdResponse(BaseModel):
@@ -111,3 +113,16 @@ class CheckAnswerResponse(SubmitAnswerResponse):
 
     text: str
     value: int
+
+
+class UserResponse(BaseModel):
+    """Модель для получения краткой информации о пользователе."""
+
+    role_id: int
+    telegram_id: Union[PositiveInt, None]
+
+
+class UserListResponse(BaseModel):
+    """Модель для получения списка пользователей."""
+
+    data: list[UserResponse]
