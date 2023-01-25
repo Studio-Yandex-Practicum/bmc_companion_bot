@@ -1,3 +1,9 @@
+class UserNotFound(Exception):
+    """Не существует юзера(-ов) с указанными данными."""
+
+    pass
+
+
 class TestNotFound(Exception):
     """Не существует теста(-ов) с указанными параметрами."""
 

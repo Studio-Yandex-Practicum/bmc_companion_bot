@@ -4,6 +4,12 @@ from core.constants import TestStatus
 from pydantic import BaseModel, PositiveInt
 
 
+class UserIdResponse(BaseModel):
+    """Модель информации о id юзера."""
+
+    user_id: int
+
+
 class TestInfo(BaseModel):
     """Модель информации о тесте."""
 
@@ -22,11 +28,19 @@ class TestInfoList(BaseModel):
 
     __root__: list[TestInfo]
 
+    @property
+    def items(self):
+        return self.__root__
+
 
 class TestResultList(BaseModel):
     """Модель списка результатов теста."""
 
     __root__: list[TestResult]
+
+    @property
+    def items(self):
+        return self.__root__
 
 
 class TestStatusResponse(TestInfo):
@@ -69,6 +83,10 @@ class AnswerInfoList(BaseModel):
     """Модель cписка информации об ответе на вопрос теста."""
 
     __root__: list[AnswerInfo]
+
+    @property
+    def items(self):
+        return self.__root__
 
 
 class QuestionResponse(BaseModel):

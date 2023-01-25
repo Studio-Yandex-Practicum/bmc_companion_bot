@@ -14,6 +14,7 @@ from app.api.v1.test_service.routers import (
     TestResult,
     TestStatus,
     UCETestResult,
+    UserIdFromTelegram,
 )
 from app.api.v1.tests.routers import (
     TestAPI,
@@ -50,5 +51,6 @@ def register_routes(api):
     api.add_resource(NextQuestion, "/api/v1/next_question/")
     api.add_resource(SubmitAnswer, "/api/v1/submit_answer/")
     api.add_resource(CheckAnswer, "/api/v1/check_answer/")
+    api.add_resource(UserIdFromTelegram, "/api/v1/user_id_from_chat_id/")
     api.add_resource(UserTimeSlotAPI, "/api/v1/slot/<int:id>")
     api.add_resource(UserTimeSlotAPIList, "/api/v1/slots/")

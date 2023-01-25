@@ -13,7 +13,7 @@ from ui.buttons import (
 
 async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if user_service.is_staff(telegramm_id=update.message.chat.id):
-        text = "Это админка!\nВыберите, нужный раздел"
+        text = "Это админка!\nВыберите нужный раздел"
         buttons = [
             [BTN_ADMINS_LIST, BTN_PSYCHOLOGISTS_LIST, BTN_TESTS_MENU],
             [BTN_START_MENU],

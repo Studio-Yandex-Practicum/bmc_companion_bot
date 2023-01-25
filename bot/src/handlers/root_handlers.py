@@ -22,3 +22,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text)
 
     return BotState.MENU_START_SELECTING_LEVEL
+
+
+async def error_restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = "Непредвиденная ошибка! Пожалуйста, сообщите о ней разработчику."
+    await update.message.reply_text(text)
+    await start(update, context)
+
+    return BotState.MENU_START_SELECTING_LEVEL

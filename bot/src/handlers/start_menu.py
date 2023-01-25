@@ -1,6 +1,7 @@
 from core.constants import BotState
 from handlers.admin.entrypoint import admin_section
 from handlers.base import BaseCommand
+from handlers.questioning.entrypoint import questioning_section
 from handlers.root_handlers import help_command, start
 from telegram.ext import CommandHandler, ConversationHandler
 
@@ -8,7 +9,7 @@ from telegram.ext import CommandHandler, ConversationHandler
 class StartCommand(BaseCommand):
     @classmethod
     def get_handler(cls):
-        selection_handlers = [admin_section]
+        selection_handlers = [admin_section, questioning_section]
 
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
