@@ -3,7 +3,7 @@ from telegram import KeyboardButton
 BTN_START_MENU = KeyboardButton(text="Главное меню")
 
 BTN_SELECT_TEST = KeyboardButton(text="Пройти тест")
-BTN_MAKE_APPOINTMENT = KeyboardButton(text="Записаться к психологу")
+BTN_MAKE_MEETING = KeyboardButton(text="Записаться к психологу")
 BTN_ADMIN_MENU = KeyboardButton(text="Админка")
 
 BTN_ADMINS_LIST = KeyboardButton(text="Список админов")
@@ -22,3 +22,7 @@ BTN_DELETE_USER = KeyboardButton(text="Удалить психолога")
 BTN_SHOW_ADMINS = KeyboardButton(text="Показать админов")
 BTN_ADD_ADMIN = KeyboardButton(text="Добавить админа")
 BTN_DELETE_ADMIN = KeyboardButton(text="Удалить админа")
+
+BTN_MEETING_FIRST = KeyboardButton(text="Первичная запись")
+BTN_MEETING_REPEAT = KeyboardButton(text="Повторная запись")
+BTN_MEETING_CANCEL = KeyboardButton(text="Отмена записи")

@@ -12,6 +12,8 @@ class ContextKeys(str, Enum):
     USER_ID = "current_user_id"
     TEST_ID = "current_test_id"
     QUESTION_ID = "current_question_id"
+    PHONE = "phone"
+    USER = "user"
 
 
 class ContextManager:
@@ -35,6 +37,15 @@ class ContextManager:
 
     def set_user_id(self, context: ContextTypes.DEFAULT_TYPE, user_id: int):
         context.user_data[ContextKeys.USER_ID] = user_id
+
+    def set_user_phone(self, context: ContextTypes.DEFAULT_TYPE, phone: str):
+        context.user_data[ContextKeys.PHONE] = phone
+
+    def set_user(self, context: ContextTypes.DEFAULT_TYPE, user):
+        context.user_data[ContextKeys.USER] = user
+
+    def get_user(self, context: ContextTypes.DEFAULT_TYPE):
+        return context.user_data.get(ContextKeys.USER)
 
     def get_user_id(self, context: ContextTypes.DEFAULT_TYPE) -> int:
         return context.user_data.get(ContextKeys.USER_ID)
