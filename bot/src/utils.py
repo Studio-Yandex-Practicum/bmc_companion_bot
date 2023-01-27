@@ -17,6 +17,12 @@ class ContextKeys(str, Enum):
 
 
 class ContextManager:
+    def set(self, context: ContextTypes.DEFAULT_TYPE, key, value):
+        context.user_data[key] = value
+
+    def get(self, context: ContextTypes.DEFAULT_TYPE, key):
+        return context.user_data.get(key)
+
     def set_keys(self, context: ContextTypes.DEFAULT_TYPE, keys: ReplyKeyboardMarkup):
         context.chat_data[ContextKeys.KEYBOARD] = keys
 

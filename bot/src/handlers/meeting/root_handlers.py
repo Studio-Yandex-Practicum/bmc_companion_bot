@@ -24,8 +24,3 @@ async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await start(update, context)
     return BotState.END
-
-
-# async def back_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     await admin(update, context)
-#     return BotState.STOPPING

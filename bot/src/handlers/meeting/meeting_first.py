@@ -1,315 +1,223 @@
-from telegram import Update
+from core.constants import BotState
+from handlers.meeting.root_handlers import back_to_start_menu
+from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_MEETING_FIRST
 from utils import context_manager, make_message_handler, make_text_handler
 
-#
+BTN_I_DONT_KNOW = KeyboardButton(text="Не знаю")
+BTN_MEETING_FORMAT_ONLINE = KeyboardButton(text="Online")
+BTN_MEETING_FORMAT_OFFLINE = KeyboardButton(text="Очно")
+BTN_CONFIRM_MEETING = KeyboardButton(text="Записаться")
+BTN_NOT_CONFIRM_MEETING = KeyboardButton(text="Не записываться")
+
+DO_NOTHING_SIGN = "-"
+
 TYPING_PHONE = "TYPING_PHONE"
 TYPING_FIRST_NAME = "TYPING_FIRST_NAME"
 TYPING_LAST_NAME = "TYPING_LAST_NAME"
 TYPING_AGE = "TYPING_AGE"
 TYPING_TEST_SCORE = "TYPING_TEST_SCORE"
+TYPING_MEETING_FORMAT = "TYPING_MEETING_FORMAT"
+TYPING_TIME_SLOT = "TYPING_TIME_SLOT"
+TYPING_MEETING_CONFIRM = "TYPING_MEETING_CONFIRM"
+
+CONTEXT_KEY_FORMAT = "CONTEXT_KEY_FORMAT"
+CONTEXT_KEY_TIMESLOT = "CONTEXT_KEY_TIMESLOT"
+CONTEXT_EXISTING_TIMESLOT = "CONTEXT_EXISTING_TIMESLOT"
 
 
-# MENU_TESTS_LIST_SELECTING_LEVEL = "MENU_TESTS_LIST_SELECTING_LEVEL"
-# TYPING_TEST_NAME_FOR_CHANGE_TEST = "TYPING_TEST_NAME_FOR_CHANGE_TEST"
-# TYPING_TEST_ID_FOR_CHANGE_TEST = "TYPING_TEST_ID_FOR_CHANGE_TEST"
-# TYPING_TEST_ID_FOR_DELETE_TEST = "TYPING_TEST_ID_FOR_DELETE_TEST"
-# TYPING_CONFIRM_FOR_DELETE_TEST = "TYPING_CONFIRM_FOR_DELETE_TEST"
-#
-# CREATING_NEW_TEST = "CREATING_NEW_TEST"
-#
-# SCRIPT_CREATING_NEW_TEST, SCRIPT_CHANGE_TEST, SCRIPT_DELETE_TEST = range(3)
-#
-#
-# async def menu_tests(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     text = "Раздел редактирования тестов"
-#     buttons = [
-#         [BTN_SHOW_TESTS, BTN_ADD_TEST],
-#         [BTN_ADMIN_MENU],
-#     ]
-#     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
-#
-#     await update.message.reply_text(text, reply_markup=keyboard)
-#
-#     return MENU_TESTS_SELECTING_LEVEL
-#
-#
-# async def menu_tests_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     text = "Список всех тестов:"
-#
-#     # TODO: получить и вывести все тесты в формате
-#     #  НомерПоПорядку. Название теста (id)
-#     #  Например:
-#     #   1. Тест о наличии НДО (99)
-#     #   2. Токсичные ли у вас родители (100)
-#
-#     buttons = [
-#         [BTN_ADD_TEST, BTN_CHANGE_TEST, BTN_DELETE_TEST],
-#         [BTN_TESTS_MENU],
-#     ]
-#     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
-#
-#     await update.message.reply_text(text, reply_markup=keyboard)
-#
-#     return MENU_TESTS_LIST_SELECTING_LEVEL
-#
-#
-# def ask_for_input_test_id(script: int = SCRIPT_CHANGE_TEST):
-#     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#         text = "Введите ID теста:"
-#
-#         await update.message.reply_text(text=text)
-#
-#         if script == SCRIPT_DELETE_TEST:
-#             return TYPING_TEST_ID_FOR_DELETE_TEST
-#
-#         return TYPING_TEST_ID_FOR_CHANGE_TEST
-#
-#     return inner
-async def ask_phone(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    text = "Введите номер телефона:"
+def ask_for_input(state: str):
+    async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+        text = ""
+        keyboard = None
 
-    await update.message.reply_text(text=text)
+        # TODO: пытаемся получить юзера из контекста или найти юзера по telegram логину
+        user = context_manager.get_user(context)
+        if user is None:
+            # TODO: если юзера нет в контексте, то пытаемся найти юзера по telegram логину
+            user = {
+                "phone": "99",
+                "first_name": "Denis",
+                "last_name": "",
+            }
 
-    return TYPING_PHONE
+        user = user or {}
+        phone = user.get("phone")
+        first_name = user.get("first_name")
+        last_name = user.get("last_name")
+        age = user.get("age")
 
+        if state == TYPING_PHONE:
+            text = "Введите номер телефона"
+            text += (
+                ":" if not phone else f" (или введите {DO_NOTHING_SIGN}, чтобы оставить {phone}):"
+            )
+        elif state == TYPING_FIRST_NAME:
+            phone = update.message.text
+            if phone != DO_NOTHING_SIGN:
+                # TODO: обновить телефон юзера в БД
+                pass
 
-async def ask_first_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    user_answer = update.message.text
-    context_manager.set_user_phone(context, user_answer)
+            text = "Как Вас зовут? Введите только имя"
+            text += (
+                ":"
+                if not first_name
+                else f" (или введите {DO_NOTHING_SIGN}, чтобы оставить {first_name}):"
+            )
+        elif state == TYPING_LAST_NAME:
+            first_name = update.message.text
+            if first_name != DO_NOTHING_SIGN:
+                # TODO: обновить first_name юзера в БД
+                pass
 
-    state = TYPING_FIRST_NAME
-    text = "Как вас зовут? (Введите только имя)"
+            text = "Введите фамилию"
+            text += (
+                ":"
+                if not last_name
+                else f" (или введите {DO_NOTHING_SIGN}, чтобы оставить {last_name}):"
+            )
+        elif state == TYPING_AGE:
+            last_name = update.message.text
+            if last_name != DO_NOTHING_SIGN:
+                # TODO: обновить last_name юзера в БД
+                pass
 
-    # TODO: найти юзера по нику TG, если не нашли, то создать
-    user = "vot_your_not_none_user"
-    if user is not None:
-        first_name = ""
-        if not first_name:
-            text = "Как вас зовут? (Введите только имя)"
-            state = TYPING_FIRST_NAME
-    else:
-        # TODO: создаем юзера
-        user = "new_user"
-    context_manager.set_user(context, user)
+            text = "Введите возраст"
+            text += ":" if not age else f" (или введите {DO_NOTHING_SIGN}, чтобы оставить {age}):"
+        elif state == TYPING_TEST_SCORE:
+            age = update.message.text
+            if age != DO_NOTHING_SIGN:
+                # TODO: обновить last_name юзера в БД
+                pass
 
-    await update.message.reply_text(text=text)
+            # TODO: получить балл за тест НДО с помощью функции get_uce_score (см. задачу)
+            test_score = 0
+            if test_score == 0:
+                text = "Какой у Вас балл за тест НДО:"
+                buttons = [
+                    [BTN_I_DONT_KNOW],
+                ]
+                keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
+            else:
+                text = "Выберите формат записи:"
+        elif state == TYPING_MEETING_FORMAT:
+            text = "Выберите формат участия:"
+            buttons = [
+                [BTN_MEETING_FORMAT_ONLINE, BTN_MEETING_FORMAT_OFFLINE],
+            ]
+            keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
+        elif state == TYPING_TIME_SLOT:
+            meeting_format = update.message.text
+            context_manager.set(context, CONTEXT_KEY_FORMAT, meeting_format)
 
-    return state
+            text = "Выберите дату и время записи:\n"
+            # TODO: получить таймслоты
+            timeslots = [
+                {
+                    "fio": "Иванов Иван",
+                    "date": "01.01.2023 01:00",
+                },
+                {
+                    "fio": "Иванов Иван",
+                    "date": "01.01.2023 18:00",
+                },
+                {
+                    "fio": "Петров Андрей",
+                    "date": "02.01.2023 14:00",
+                },
+            ]
+            context_manager.set(context, CONTEXT_EXISTING_TIMESLOT, timeslots)
 
+            for index, value in enumerate(timeslots):
+                text += f"\n{index + 1}. {value.get('fio')} {value.get('date')}"
+        elif state == TYPING_MEETING_CONFIRM:
+            number_of_timeslot = int(update.message.text)
+            # TODO: добавить запись в таблицу митингов
 
-async def ask_last_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    # first_name = update.message.text
-    # user = context_manager.get_user(context)
-    # TODO: обновить first_name юзера user
+            meeting_format = context_manager.get(context, CONTEXT_KEY_FORMAT)
+            timeslots = context_manager.get(context, CONTEXT_EXISTING_TIMESLOT) or []
+            timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
 
-    state = TYPING_LAST_NAME
-    text = "Введите фамилию"
+            text = "Давайте все проверим:\n"
+            text += f"\nФормат записи: {meeting_format}"
+            text += f"\nПсихолог: {timeslot.get('fio')}"
+            text += f"\nДата: {timeslot.get('date')}"
 
-    last_name = "user.last_name"
-    if not last_name:
-        text = "Введите фамилию"
-        state = TYPING_AGE
+            buttons = [
+                [BTN_CONFIRM_MEETING, BTN_NOT_CONFIRM_MEETING],
+            ]
+            keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
 
-    await update.message.reply_text(text=text)
+        context_manager.set_user(context, user)
 
-    return state
+        await update.message.reply_text(text=text, reply_markup=keyboard)
 
+        return state
 
-async def ask_age(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    # last_name = update.message.text
-    # user = context_manager.get_user(context)
-    # TODO: обновить last_name юзера user
-
-    state = TYPING_TEST_SCORE
-    text = "Введите возраст"
-
-    age = "user.age"
-    if not age:
-        text = "Введите возраст"
-        state = TYPING_TEST_SCORE
-
-    await update.message.reply_text(text=text)
-
-    return state
-
-
-async def ask_test_score(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    # last_name = update.message.text
-    # user = context_manager.get_user(context)
-
-    #
-    state = "next"
-    text = f"Введите ваш бал НДО (user = {context_manager.get_user(context)})"
-    # TODO: воспользоваться функцией get_uce_score
-    score = "get_uce_score"
-    if score:
-        text = "Выберите формат участи"
-
-    await update.message.reply_text(text=text)
-
-    return state
+    return inner
 
 
-#
-#
-# def ask_for_input_test_name(script: int = SCRIPT_CREATING_NEW_TEST):
-#     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#         text = "Введите новое название теста (или -, чтобы ничего не делать):"
-#
-#         if script == SCRIPT_CHANGE_TEST:
-#             user_data = context.user_data
-#             test_id = update.message.text
-#
-#             # TODO: найти тест по test_id
-#             test = "not_none"
-#             if test is not None:
-#                 user_data["test"] = test
-#                 await update.message.reply_text(text=text)
-#                 return TYPING_TEST_NAME_FOR_CHANGE_TEST
-#
-#             text = f"Тест с ID {test_id} не найден"
-#             await update.message.reply_text(text=text)
-#
-#             await menu_tests(update, context)
-#
-#             return MENU_TESTS_SELECTING_LEVEL
-#
-#         await update.message.reply_text(text=text)
-#         return CREATING_NEW_TEST
-#
-#     return inner
-#
-#
-# async def create_new_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     test_name = update.message.text
-#
-#     # TODO: создать тест с названием test_name, если такого еще нет
-#     test_exists = False
-#     if test_exists:
-#         text = f"Тест '{test_name}' уже существует"
-#     elif test_name == "-":
-#         text = "Ок, я ничего не сделал"
-#     else:
-#         text = f"Тест '{test_name}' успешно создан"
-#     await update.message.reply_text(text=text)
-#
-#     await menu_tests(update, context)
-#
-#     return MENU_TESTS_SELECTING_LEVEL
-#
-#
-# async def change_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     # user_data = context.user_data
-#     test_name = update.message.text
-#
-#     if test_name and test_name.strip() != "-":
-#         # test = user_data["test"]
-#
-#         # TODO: изменить название теста на test_name
-#         text = "Название теста успешно изменено!"
-#     else:
-#         text = "Название теста не изменилось!"
-#
-#     await update.message.reply_text(text=text)
-#
-#     await menu_tests(update, context)
-#
-#     return MENU_TESTS_SELECTING_LEVEL
-#
-#
-# async def ask_confirmation_for_test_deletion(
-#     update: Update, context: ContextTypes.DEFAULT_TYPE
-# ) -> str:
-#     user_data = context.user_data
-#     test_id = update.message.text
-#
-#     # TODO: найти тест по test_id
-#     test = "not_none"
-#     if test is not None:
-#         user_data["test"] = test
-#         text = "Вы точно хотите удалить тест? (y/n)"
-#         await update.message.reply_text(text=text)
-#         return TYPING_CONFIRM_FOR_DELETE_TEST
-#
-#     text = f"Тест с ID {test_id} не найден"
-#     await update.message.reply_text(text=text)
-#
-#     await menu_tests(update, context)
-#
-#     return MENU_TESTS_SELECTING_LEVEL
-#
-#
-# async def delete_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-#     user_data = context.user_data
-#     test = user_data["test"]
-#     confirm_deletion = update.message.text
-#
-#     if confirm_deletion.lower() == "y":
-#         # TODO: удалить тест
-#         text = f"Тест {test} удален!"
-#     else:
-#         text = f"Тест {test} остался без изменений. Он не удален!"
-#
-#     await update.message.reply_text(text=text)
-#
-#     await menu_tests(update, context)
-#
-#     return MENU_TESTS_SELECTING_LEVEL
-#
-#
+async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    text = "выполняется переход на прохождение теста НДО:"
+    await update.message.reply_text(text)
+    return "---"
+
+
+def process_meeting_confirm(confirm: bool):
+    async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+        if confirm:
+            text = "Вы успешно записаны к психологу!"
+        else:
+            text = "Запись не оформлена!"
+
+        await update.message.reply_text(text=text)
+
+        await back_to_start_menu(update, context)
+
+        return BotState.STOPPING
+
+    return inner
+
+
 meeting_first_section = ConversationHandler(
     entry_points=[
-        make_message_handler(BTN_MEETING_FIRST, ask_phone),
+        make_message_handler(BTN_MEETING_FIRST, ask_for_input(TYPING_PHONE)),
     ],
     states={
         TYPING_PHONE: [
-            make_text_handler(
-                ask_first_name,
-            ),
+            make_text_handler(ask_for_input(TYPING_FIRST_NAME)),
         ],
         TYPING_FIRST_NAME: [
-            make_text_handler(
-                ask_last_name,
-            ),
+            make_text_handler(ask_for_input(TYPING_LAST_NAME)),
         ],
         TYPING_LAST_NAME: [
-            make_text_handler(
-                ask_age,
-            ),
+            make_text_handler(ask_for_input(TYPING_AGE)),
+        ],
+        TYPING_AGE: [
+            make_text_handler(ask_for_input(TYPING_TEST_SCORE)),
         ],
         TYPING_TEST_SCORE: [
-            make_text_handler(
-                ask_test_score,
-            ),
+            make_message_handler(BTN_I_DONT_KNOW, go_to_test),
+            make_text_handler(ask_for_input(TYPING_MEETING_FORMAT)),
         ],
-        # MENU_TESTS_LIST_SELECTING_LEVEL: [
-        #     make_message_handler(BTN_ADD_TEST, ask_for_input_test_name(SCRIPT_CREATING_NEW_TEST)),
-        #     make_message_handler(BTN_CHANGE_TEST, ask_for_input_test_id(SCRIPT_CHANGE_TEST)),
-        #     make_message_handler(BTN_DELETE_TEST, ask_for_input_test_id(SCRIPT_DELETE_TEST)),
-        # ],
-        # CREATING_NEW_TEST: [
-        #     make_text_handler(create_new_test),
-        # ],
-        # TYPING_TEST_ID_FOR_CHANGE_TEST: [
-        #     make_text_handler(ask_for_input_test_name(SCRIPT_CHANGE_TEST))
-        # ],
-        # TYPING_TEST_NAME_FOR_CHANGE_TEST: [
-        #     make_text_handler(change_test),
-        # ],
-        # TYPING_TEST_ID_FOR_DELETE_TEST: [
-        #     make_text_handler(ask_confirmation_for_test_deletion),
-        # ],
-        # TYPING_CONFIRM_FOR_DELETE_TEST: [
-        #     make_text_handler(delete_test),
-        # ],
+        TYPING_MEETING_FORMAT: [
+            make_message_handler(BTN_MEETING_FORMAT_ONLINE, ask_for_input(TYPING_TIME_SLOT)),
+            make_message_handler(BTN_MEETING_FORMAT_OFFLINE, ask_for_input(TYPING_TIME_SLOT)),
+        ],
+        TYPING_TIME_SLOT: [
+            make_text_handler(ask_for_input(TYPING_MEETING_CONFIRM)),
+        ],
+        TYPING_MEETING_CONFIRM: [
+            make_message_handler(BTN_CONFIRM_MEETING, process_meeting_confirm(True)),
+            make_message_handler(BTN_NOT_CONFIRM_MEETING, process_meeting_confirm(False)),
+        ],
     },
     fallbacks=[
         # make_message_handler(BTN_ADMIN_MENU, back_to_admin),
         # make_message_handler(BTN_TESTS_MENU, menu_tests),
     ],
     map_to_parent={
-        # BotState.STOPPING: BotState.MENU_ADMIN_SELECTING_LEVEL,
+        BotState.STOPPING: BotState.END,
     },
 )
