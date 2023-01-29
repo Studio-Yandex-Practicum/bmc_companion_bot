@@ -22,3 +22,13 @@ BTN_DELETE_USER = KeyboardButton(text="Удалить психолога")
 BTN_SHOW_ADMINS = KeyboardButton(text="Показать админов")
 BTN_ADD_ADMIN = KeyboardButton(text="Добавить админа")
 BTN_DELETE_ADMIN = KeyboardButton(text="Удалить админа")
+
+BTN_ADD_QUESTION = KeyboardButton(text="Добавить вопрос")
+BTN_CHANGE_QUESTION = KeyboardButton(text="Изменить вопрос")
+BTN_DELETE_QUESTION = KeyboardButton(text="Удалить вопрос")
+BTN_QUESTION_ANSWERS = KeyboardButton(text="Варианты ответов")
+
+BTN_ADD_ANSWER = KeyboardButton(text="Добавить вариант ответа")
+BTN_CHANGE_ANSWER = KeyboardButton(text="Изменить вариант ответа")
+BTN_DELETE_ANSWER = KeyboardButton(text="Удалить вариант ответа")
+BTN_QUESTIONS_MENU = KeyboardButton(text="Вопросы теста")
