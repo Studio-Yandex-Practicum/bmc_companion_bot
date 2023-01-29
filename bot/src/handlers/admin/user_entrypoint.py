@@ -27,6 +27,8 @@ USER_DELETE_CLIENT = ObjAPIClient(
     many_model=[BaseModel],
 )
 
+USER_GET_CLIENT = USER_DELETE_CLIENT
+
 
 async def main_users_list(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     text = "Раздел редактирования психологов"

@@ -22,3 +22,5 @@ BTN_DELETE_USER = KeyboardButton(text="Удалить психолога")
 BTN_SHOW_ADMINS = KeyboardButton(text="Показать админов")
 BTN_ADD_ADMIN = KeyboardButton(text="Добавить админа")
 BTN_DELETE_ADMIN = KeyboardButton(text="Удалить админа")
+
+BTN_SCHEDULE = KeyboardButton(text="Расписание")

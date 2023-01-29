@@ -7,6 +7,7 @@ from handlers.admin.user_create import (
 )
 from handlers.admin.user_delete import ask_confirmation_for_user_deletion, delete_user
 from handlers.admin.user_entrypoint import main_users_list
+from handlers.admin.user_get_list import get_user_list
 from request.clients import ObjAPIClient
 from schemas.requests import BaseModel, UserCreateRequest
 from telegram.ext import ConversationHandler
@@ -27,7 +28,7 @@ TYPING_CONFIRM_FOR_DELETE_USER = "TYPING_CONFIRM_FOR_DELETE_USER"
 
 CREATING_NEW_USER = "CREATING_NEW_USER"
 
-SCRIPT_CREATING_NEW_USER, SCRIPT_DELETE_USER = range(2)
+SCRIPT_CREATING_NEW_USER, SCRIPT_DELETE_USER, SCRIPT_GET_USER_LIST = range(3)
 
 USER_CREATE_CLIENT = ObjAPIClient(
     api_version=APIVersion.V1,
@@ -42,6 +43,7 @@ users_list_section = ConversationHandler(
     ],
     states={
         MENU_USERS_SELECTING_LEVEL: [
+            make_message_handler(BTN_SHOW_USERS, get_user_list(SCRIPT_GET_USER_LIST)),
             make_message_handler(BTN_ADD_USER, ask_for_input_user_login(SCRIPT_CREATING_NEW_USER)),
             make_message_handler(BTN_DELETE_USER, ask_for_input_user_login(SCRIPT_DELETE_USER)),
         ],
