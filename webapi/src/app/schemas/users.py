@@ -15,6 +15,7 @@ class UserCreate(BaseModel):
     phone: Optional[PositiveInt]
     role_id: int
     telegram_id: Optional[PositiveInt]
+    telegram_login: str | None
 
     class Config:
         min_anystr_length = 1

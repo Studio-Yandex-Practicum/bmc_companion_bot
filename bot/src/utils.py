@@ -1,8 +1,66 @@
+import secrets
+from dataclasses import dataclass
 from enum import Enum
 from typing import Callable
 
+import requests
+from core.constants import (
+    DO_NOTHING_SIGN,
+    KEY_RESULTS_FOR_PAGINATED_RESPONSE,
+    RANDOM_STRING_CHARS,
+)
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, MessageHandler, filters
+
+
+def get_random_string(length, allowed_chars=RANDOM_STRING_CHARS):
+    return "".join(secrets.choice(allowed_chars) for i in range(length))
+
+
+def make_random_password(
+    length=10, allowed_chars="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+):
+    return get_random_string(length, allowed_chars)
+
+
+@dataclass
+class DemoApiClient:
+    def post(self, cb: str, data=None):
+        d = data or {}
+        d["cb"] = cb
+        r = requests.post("http://127.0.0.1:5001/api/v1/healthcheck/", json=d)
+        return r
+
+    def get_admins(self):
+        r = self.post("get_admins")
+        return r.json()
+
+    def get_users(self):
+        r = self.post("get_users")
+        return r.json()
+
+    def get_user_by_tg_login(self, tg_login):
+        r = self.post("get_user_by_tg_login", {"tg_login": tg_login})
+        return r.json()
+
+    def create_user(self, user_params):
+        r = self.post("create_user", {"user_params": user_params})
+        return r.json()
+
+    def delete_user_by_id(self, user_id):
+        r = self.post("delete_user_by_id", {"user_id": user_id})
+        return r.json()
+
+    def get_timeslots(self, tg_login):
+        r = self.post("get_timeslots", {"tg_login": tg_login})
+        return r.json()
+
+    def create_timeslot(self, tg_login, timeslot):
+        r = self.post("create_timeslot", {"tg_login": tg_login, "timeslot": timeslot})
+        return r.json()
+
+
+demo_api_client = DemoApiClient()
 
 
 class ContextKeys(str, Enum):
@@ -78,3 +136,14 @@ def make_text_handler(callback: Callable):
 
 def make_message_handler(btn: KeyboardButton, callback: Callable):
     return MessageHandler(filters.Regex(f"^{btn.text}$"), callback)
+
+
+def make_ask_for_input_information(main_text: str, value) -> str:
+    text = main_text
+    if value:
+        text += f" (или введите {DO_NOTHING_SIGN}, чтобы оставить {value})"
+    return f"{text}:"
+
+
+def is_paginated_object(data: dict) -> bool:
+    return KEY_RESULTS_FOR_PAGINATED_RESPONSE in data.keys()

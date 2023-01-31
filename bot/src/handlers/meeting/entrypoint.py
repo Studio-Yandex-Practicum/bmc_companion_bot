@@ -7,8 +7,6 @@ from utils import make_message_handler
 
 selection_handlers = [
     meeting_first_section,
-    # users_list_section,
-    # admins_list_section,
 ]
 
 

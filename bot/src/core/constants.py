@@ -47,9 +47,15 @@ class BotState(str, Enum):
     QUESTIONING = "QUESTIONING"
     STOPPING = "STOPPING"
     END = ConversationHandler.END
+    ERROR = "ERROR"
 
 
 class UserRole(int, Enum):
     ROOT = 1
     ADMIN = 2
     USER = 3
+
+
+RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+DO_NOTHING_SIGN = "-"
+KEY_RESULTS_FOR_PAGINATED_RESPONSE = "results"

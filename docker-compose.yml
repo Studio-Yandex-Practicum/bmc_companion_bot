@@ -19,6 +19,7 @@ services:
         environment:
             - FLASK_APP=manage.py
             - APP_HOST=0.0.0.0
+            - APP_PORT=5000
             - POSTGRES_HOST=postgres
             - POSTGRES_PORT=5432
             - REDIS_HOST=redis
@@ -26,6 +27,10 @@ services:
         depends_on:
             - postgres
             - redis
+        volumes:
+            - ./webapi/src:/src
+        ports:
+            - "5001:5000"
 
     nginx:
         <<: *base-service

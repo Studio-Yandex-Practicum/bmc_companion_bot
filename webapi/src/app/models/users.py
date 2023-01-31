@@ -14,8 +14,24 @@ class User(BaseModel):
     phone = db.Column(db.SmallInteger)
     role_id = db.Column(db.Integer, db.ForeignKey("user_roles.id"), nullable=False)
     telegram_id = db.Column(db.Integer)
+    telegram_login = db.Column(db.String)
     chat_id = db.Column(db.Integer)
     deleted_at = db.Column(db.DateTime)
+
+    def to_dict(self):
+        return dict(
+            id=self.id,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            middle_name=self.middle_name,
+            birthday=self.birthday,
+            phone=self.phone,
+            role_id=self.role_id,
+            telegram_id=self.telegram_id,
+            telegram_login=self.telegram_login,
+            chat_id=self.chat_id,
+            deleted_at=self.deleted_at,
+        )
 
 
 class UserRole(BaseModel):
