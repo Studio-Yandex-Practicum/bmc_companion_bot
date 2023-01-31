@@ -1,7 +1,5 @@
-from typing import Union
-
 from core.constants import TestStatus
-from pydantic import BaseModel, PositiveInt
+from pydantic import BaseModel
 
 
 class UserIdResponse(BaseModel):
@@ -118,8 +116,36 @@ class CheckAnswerResponse(SubmitAnswerResponse):
 class UserResponse(BaseModel):
     """Модель для получения краткой информации о пользователе."""
 
-    role_id: int
-    telegram_id: Union[PositiveInt, None]
+    id: int | None
+    username: str | None = ""
+    first_name: str | None = ""
+    last_name: str | None = ""
+    middle_name: str | None = ""
+    email: str | None = ""
+    phone: str | None = ""
+    age: int | None = 0
+    uce_score: int | None = 0
+    chat_id: str | None = ""
+    telegram_login: str | None = ""
+    telegram_id: str | None = ""
+
+
+class TimeslotResponse(BaseModel):
+    """Модель для получения краткой информации о таймслоте."""
+
+    id: int | None
+    date_start: str | None = ""
+    profile: UserResponse | None = None
+
+
+class MeetingResponse(BaseModel):
+    """Модель для получения краткой информации о митинга (встречи)."""
+
+    id: int | None
+    psychologist: int | None = None
+    user: int | None = None
+    format: int | None = None
+    date_start: str | None = ""
 
 
 class UserListResponse(BaseModel):

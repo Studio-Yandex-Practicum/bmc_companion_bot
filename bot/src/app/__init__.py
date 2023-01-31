@@ -1,6 +1,12 @@
-from core.settings import settings
-from handlers import register_handlers
+from core.settings import BASE_API_URL_V1, settings
+from request.base import ApiClient
+from services.schedule_service import ScheduleApiService
+from services.user_service import UserService
 from telegram.ext import ApplicationBuilder
+
+api_client_v1 = ApiClient(base_url=BASE_API_URL_V1)
+user_service_v1 = UserService(api_client=api_client_v1)
+schedule_service_v1 = ScheduleApiService(api_client=api_client_v1)
 
 
 def create_app():
@@ -9,3 +15,6 @@ def create_app():
     register_handlers(app)
 
     return app
+
+
+from handlers import register_handlers

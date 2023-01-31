@@ -24,6 +24,6 @@ RUN poetry config virtualenvs.create false \
     && poetry remove psycopg2-binary \
     && poetry add psycopg2
 
-COPY ./webapi/src .
+#COPY ./webapi/src .
 
 ENTRYPOINT ["/scripts/entrypoint.sh"]

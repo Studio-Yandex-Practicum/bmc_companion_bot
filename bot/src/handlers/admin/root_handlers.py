@@ -26,11 +26,22 @@ async def admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         await back_to_start_menu(update, context)
 
 
+async def admin2(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    text = "Это админка!\nВыберите нужный раздел"
+    buttons = [
+        [BTN_ADMINS_LIST, BTN_PSYCHOLOGISTS_LIST, BTN_TESTS_MENU],
+        [BTN_START_MENU],
+    ]
+    keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
+    await update.message.reply_text(text, reply_markup=keyboard)
+    return BotState.MENU_ADMIN_SELECTING_LEVEL
+
+
 async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     await start(update, context)
     return BotState.END
 
 
 async def back_to_admin(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    await admin(update, context)
+    await admin2(update, context)
     return BotState.STOPPING
