@@ -144,6 +144,7 @@ class MeetingResponse(BaseModel):
     id: int | None
     psychologist: int | None = None
     user: int | None = None
+    comment: str | None = ""
     format: int | None = None
     date_start: str | None = ""
 
