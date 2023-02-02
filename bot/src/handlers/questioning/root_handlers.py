@@ -1,7 +1,8 @@
+from app import user_service_v1
 from core.constants import APIVersion, BotState
 from handlers.root_handlers import start
 from request.clients import TestAPIClient
-from schemas.requests import UserIdRequestFromTelegram, UserSpecificRequest
+from schemas.requests import UserSpecificRequest
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
@@ -12,9 +13,14 @@ api_client = TestAPIClient(APIVersion.V1)
 
 async def questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     await update.message.reply_text("Это раздел тестирования.")
-    user_id = api_client.user_id_from_chat_id(
-        UserIdRequestFromTelegram(chat_id=update.message.chat.id)
-    ).user_id
+    chat_data = update.message.chat
+    telegram_login = chat_data.username
+    user = user_service_v1.get_user(username=telegram_login)
+    if user is None:
+        user = user_service_v1.create_user(
+            telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
+        )
+    user_id = user.id
     test_statuses = api_client.all_test_statuses(UserSpecificRequest(user_id=user_id))
     context_manager.set_user_id(context, user_id)
     if test_statuses.active.items:

@@ -5,13 +5,13 @@ from . import models
 
 class InlineQuestionAdmin(admin.TabularInline):
     model = models.Question
-    fields = ("text", "score")
+    fields = ("text",)
     extra = 0
 
 
 class InlineAnswerAdmin(admin.TabularInline):
     model = models.Answer
-    fields = ("text", "is_correct")
+    fields = ("text", "value")
     extra = 0
 
 
@@ -34,7 +34,7 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(models.Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ("id", "question", "text", "is_correct")
+    list_display = ("id", "question", "text", "value")
     list_select_related = ("question__test", "question")
     search_fields = ("question__test__name", "question__text", "text")
-    list_filter = ("question__test", "question", "is_correct")
+    list_filter = ("question__test", "question", "value")
