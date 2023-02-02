@@ -1,5 +1,6 @@
 from core.constants import BotState
 from handlers.meeting.meeting_first import meeting_first_section
+from handlers.meeting.meeting_repeat import meeting_repeat_section
 from handlers.meeting.root_handlers import back_to_start_menu, meetings_main_menu
 from telegram.ext import ConversationHandler
 from ui.buttons import BTN_MAKE_MEETING, BTN_START_MENU
@@ -7,6 +8,7 @@ from utils import make_message_handler
 
 selection_handlers = [
     meeting_first_section,
+    meeting_repeat_section,
 ]
 
 
