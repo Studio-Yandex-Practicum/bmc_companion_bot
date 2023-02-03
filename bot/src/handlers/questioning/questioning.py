@@ -31,7 +31,7 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         next_question = api_client.next_question(
             UserTestSpecificRequest(user_id=user_id, test_id=test_id)
         )
-        context_manager.set_question_id(context, next_question.test_question_id)
+        context_manager.set_question_id(context, next_question.id)
     except NoNextQuestion:
         context_manager.set_question_id(context, None)
         bot_state = await show_result(update, context)
@@ -41,7 +41,7 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     answers = next_question.answers.items
     for answer in answers:
         buttons.append(KeyboardButton(text=answer.text))
-        context_manager.get_answers(context)[answer.text] = answer.answer_id
+        context_manager.get_answers(context)[answer.text] = answer.id
     buttons = [buttons, [BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
     context_manager.set_keys(context, keyboard)
@@ -65,7 +65,7 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         UserTestQuestionAnswerSpecificRequest(
             user_id=context_manager.get_user_id(context),
             test_id=context_manager.get_test_id(context),
-            test_question_id=context_manager.get_question_id(context),
+            question_id=context_manager.get_question_id(context),
             answer_id=answer_id,
         )
     )

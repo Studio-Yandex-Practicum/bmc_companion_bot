@@ -36,7 +36,7 @@ async def questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE
     context_manager.set_tests(context, {})
     for test in test_list:
         buttons.append([KeyboardButton(text=test.name)])
-        context_manager.get_tests(context)[test.name] = test.test_id
+        context_manager.get_tests(context)[test.name] = test.id
     buttons.append([BTN_START_MENU])
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
     context_manager.set_keys(context, keyboard)

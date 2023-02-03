@@ -1,4 +1,4 @@
-from content.models import Answer, Question, Test, TestCompleted, TestProgress
+from content.models import Answer, Question, Test
 from rest_framework import serializers
 
 
@@ -22,15 +22,3 @@ class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
         fields = ["id", "name", "type", "questions"]
-
-
-class TestCompletedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestCompleted
-        fields = ["id", "profile", "test", "value"]
-
-
-class TestProgressSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TestProgress
-        fields = ["id", "profile", "question", "answer"]

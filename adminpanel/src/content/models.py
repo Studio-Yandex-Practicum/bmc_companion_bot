@@ -1,7 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
-from profiles.models import Profile
 
 
 class Test(models.Model):
@@ -62,26 +61,6 @@ class Question(models.Model):
         super().save(*args, **kwargs)
 
 
-class TestCompleted(models.Model):
-    profile = models.ForeignKey(
-        Profile, blank=False, null=True, on_delete=models.CASCADE, related_name="test_results"
-    )
-    test = models.ForeignKey(
-        Test, blank=False, null=True, on_delete=models.CASCADE, related_name="results"
-    )
-    value = models.SmallIntegerField(
-        null=True,
-        blank=True,
-        default=0,
-        verbose_name="Результат теста (баллы)",
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Результат теста"
-        verbose_name_plural = "Результаты тестов"
-
-
 class Answer(models.Model):
     question = models.ForeignKey(
         Question, blank=True, null=True, on_delete=models.CASCADE, related_name="answers"
@@ -100,20 +79,3 @@ class Answer(models.Model):
 
     def __str__(self):
         return f"{self.text[:30]}"
-
-
-class TestProgress(models.Model):
-    profile = models.ForeignKey(
-        Profile, blank=False, null=True, on_delete=models.CASCADE, related_name="answered"
-    )
-    question = models.ForeignKey(
-        Question, blank=False, null=True, on_delete=models.CASCADE, related_name="answered"
-    )
-    answer = models.ForeignKey(
-        Profile, blank=True, null=True, on_delete=models.CASCADE, related_name="used_in"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        verbose_name = "Результат теста"
-        verbose_name_plural = "Результаты тестов"
