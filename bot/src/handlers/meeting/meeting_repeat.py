@@ -33,17 +33,38 @@ def ask_for_repeat_meeting(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text = "Выберите дату и время записи:\n"
+            text = f"{'Выберите дату и время записи:'}\n"
+            text_was = f"{'Вы уже были у этих психологов:'}\n"
+            text_wasnt = f"\n\n{'У этих психологов Вы еще не были:'}"
+
             timeslots = schedule_service_v1.get_actual_timeslots()
+            meetings = schedule_service_v1.get_meetings_by_user(user=user.id)
+            list_ps = []
+            for meeting in meetings:
+                user_id = meeting.psychologist
+                ps_name = user_service_v1.get_user(id=user_id)
+                list_ps.append(ps_name.id)
 
             for index, timeslot in enumerate(timeslots):
+                add_ps = (
+                    f"\n{index + 1}. {timeslot.profile.first_name} "
+                    f"{timeslot.profile.last_name}: "
+                    f"{timeslot.date_start}"
+                )
                 if timeslot.date_start and timeslot.profile:
-                    text += (
-                        f"\n{index + 1}. {timeslot.profile.first_name} "
-                        f"{timeslot.profile.last_name} "
-                        f"{timeslot.date_start}"
-                    )
-
+                    ts_ps = timeslot.profile.id
+                    if ts_ps in list_ps:
+                        if text_was not in text:
+                            text += text_was
+                            text += add_ps
+                        else:
+                            text += add_ps
+                    elif ts_ps not in list_ps:
+                        if text_wasnt not in text:
+                            text += text_wasnt
+                            text += add_ps
+                        else:
+                            text += add_ps
             context_manager.set_timeslots(context, timeslots)
 
         elif state == States.TYPING_MEETING_CONFIRM:

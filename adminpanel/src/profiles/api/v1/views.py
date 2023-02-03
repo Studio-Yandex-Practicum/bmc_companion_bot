@@ -9,6 +9,7 @@ class ProfileViewSet(ModelViewSet):
     serializer_class = serializer.ProfileSerializer
     permission_classes = [permissions.AllowAny]
     filterset_fields = [
+        "id",
         "username",
         "first_name",
         "last_name",

@@ -20,3 +20,10 @@ class MeetingViewSet(ModelViewSet):
     queryset = Meeting.objects.all()
     serializer_class = serializer.MeetingSerializer
     permission_classes = [permissions.AllowAny]
+    filterset_fields = [
+        "id",
+        "date_start",
+        "format",
+        "psychologist",
+        "user",
+    ]
