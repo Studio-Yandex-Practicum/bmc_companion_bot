@@ -1,10 +1,10 @@
 import datetime
 
-from celery_app.create_task import create_notification_task
 from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 from schedule.api.v1 import serializer
 from schedule.models import Meeting, TimeSlot
+from schedule.tasks import create_notification_task
 
 
 class TimeSlotViewSet(ModelViewSet):
@@ -23,5 +23,8 @@ class MeetingViewSet(ModelViewSet):
     permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
-        create_notification_task(chat_id=serializer.validated_data.get("user").chat_id)
+        create_notification_task(
+            chat_id=serializer.validated_data.get("user").chat_id,
+            date_time=serializer.validated_data.get("date_start"),
+        )
         return super().perform_create(serializer)
