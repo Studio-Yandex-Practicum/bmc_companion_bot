@@ -5,8 +5,10 @@ from . import models
 
 class InlineQuestionAdmin(admin.TabularInline):
     model = models.Question
-    fields = ("text",)
+    fields = ("order_num", "text")
+    ordering = ("order_num",)
     extra = 0
+    show_change_link = True
 
 
 class InlineAnswerAdmin(admin.TabularInline):
@@ -25,10 +27,14 @@ class TestAdmin(admin.ModelAdmin):
 
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("id", "test", "text")
+    list_display = ("id", "test", "order_num", "text")
     list_select_related = ("test",)
     search_fields = ("test__name", "text")
     list_filter = ("test",)
+    ordering = (
+        "test__name",
+        "order_num",
+    )
     inlines = (InlineAnswerAdmin,)
 
 

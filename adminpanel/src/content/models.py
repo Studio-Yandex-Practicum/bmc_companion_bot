@@ -42,7 +42,9 @@ class Question(models.Model):
     test = models.ForeignKey(
         Test, blank=False, null=True, on_delete=models.CASCADE, related_name="questions"
     )
-    order_num = models.PositiveSmallIntegerField(blank=False, null=True)
+    order_num = models.PositiveSmallIntegerField(
+        blank=False, null=True, verbose_name="Порядковый номер"
+    )
     text = models.TextField(blank=True, null=True, verbose_name="Текст вопроса")
 
     class Meta:
@@ -53,7 +55,9 @@ class Question(models.Model):
         return f"{self.text[:30]}"
 
     def clean(self):
-        if Question.objects.filter(Q(test=self.test) & Q(order_num=self.order_num)).exists():
+        if Question.objects.filter(
+            Q(test=self.test) & Q(order_num=self.order_num) & ~Q(id=self.id)
+        ).exists():
             raise ValidationError("Порядковый номер уже используется")
 
     def save(self, *args, **kwargs):
