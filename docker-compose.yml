@@ -61,6 +61,26 @@ services:
             - ${REDIS_PORT}:6379
         volumes:
             - redis_data:/data
+    
+    celery:
+        build: ./adminpanel/src
+        command: celery -A config.celery worker -l info
+        volumes:
+            - ./adminpanel/src/:/usr/src/app/
+        env_file:
+            - .env
+        depends_on:
+            - redis
+
+    celery-beat:
+        build: ./
+        command: celery -A config.celery beat -l info
+        volumes:
+            - ./adminpanel/src/:/usr/src/app/
+        env_file:
+            - .env
+        depends_on:
+            - redis
 
 volumes:
     pgdata:
