@@ -66,6 +66,11 @@ faker = "^15.3.4"
 [tool.black]
 line-length = 100
 
+exclude = '''
+ /(
+   | migrations
+ )/
+ '''
 
 [tool.isort]
 line_length = 88
