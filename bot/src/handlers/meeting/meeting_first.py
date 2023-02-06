@@ -56,13 +56,24 @@ def ask_for_input(state: str):
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
-        elif state == States.TYPING_MEETING_FORMAT:
+
+        elif state == States.TYPING_COMMENT:
             uce_score = update.message.text
             if uce_score != DO_NOTHING_SIGN:
                 user = user_service_v1.update_user(user.id, uce_score=uce_score)
+            text = "О чем бы вы хотели поговорить с психологом?"
+
+            btns = [[buttons.BTN_I_DONT_KNOW]]
+            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+
+        elif state == States.TYPING_MEETING_FORMAT:
+            comment = update.message.text
+            context_manager.set_meeting_comment(context, comment)
+
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+
         elif state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
@@ -117,10 +128,12 @@ def process_meeting_confirm(confirm: bool):
             user = context_manager.get_user(context)
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
+            comment = context_manager.get_comment(context)
             schedule_service_v1.create_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
+                comment=comment,
                 meeting_format=10
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else 20,
@@ -169,6 +182,9 @@ meeting_first_section = ConversationHandler(
         ],
         States.TYPING_TEST_SCORE: [
             make_message_handler(buttons.BTN_I_DONT_KNOW, go_to_test),
+            make_text_handler(ask_for_input(States.TYPING_COMMENT)),
+        ],
+        States.TYPING_COMMENT: [
             make_text_handler(ask_for_input(States.TYPING_MEETING_FORMAT)),
         ],
         States.TYPING_MEETING_FORMAT: [

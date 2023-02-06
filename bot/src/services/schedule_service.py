@@ -16,11 +16,12 @@ class ScheduleApiService(PydanticApiService):
         return self.get(MeetingResponse, self.url_meetings, params=kwargs)
 
     def create_meeting(
-        self, psychologist_id: int, user_id: int, date_start, meeting_format
+        self, psychologist_id: int, user_id: int, comment: str, date_start, meeting_format
     ) -> MeetingResponse:
         data = {
             "psychologist": psychologist_id,
             "user": user_id,
+            "comment": comment,
             "date_start": date_start,
             "format": meeting_format,
         }
