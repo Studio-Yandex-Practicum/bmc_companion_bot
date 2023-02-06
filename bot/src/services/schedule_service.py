@@ -12,6 +12,9 @@ class ScheduleApiService(PydanticApiService):
     def get_actual_timeslots(self, **kwargs) -> list[TimeslotResponse]:
         return self.get(TimeslotResponse, self.url_timeslots, params=kwargs)
 
+    def get_meetings_by_user(self, **kwargs) -> MeetingResponse | list[MeetingResponse]:
+        return self.get(MeetingResponse, self.url_meetings, params=kwargs)
+
     def create_meeting(
         self, psychologist_id: int, user_id: int, date_start, meeting_format
     ) -> MeetingResponse:
