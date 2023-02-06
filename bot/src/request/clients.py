@@ -170,7 +170,7 @@ class TestAPIClient(BaseAPIClient):
     теста."""
 
     def __init__(self, api_version: APIVersion) -> None:
-        self._base_url = f"http://{WEB_API_URL}/api{api_version}"
+        self._base_url = f"http://{WEB_API_URL}/api{api_version}/"
 
     def user_id_from_chat_id(self, request: UserIdRequestFromTelegram) -> UserIdResponse:
         """Получение user_id по chat_id."""

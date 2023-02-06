@@ -22,6 +22,7 @@ urlpatterns = [
     path("api/", include("content.api.urls")),
     path("api/", include("profiles.api.urls")),
     path("api/", include("schedule.api.urls")),
+    path("api/", include("questioning.api.urls")),
 ]
 
 urlpatterns += [

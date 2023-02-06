@@ -22,7 +22,7 @@ class UserTestSpecificRequest(UserSpecificRequest):
 class UserTestQuestionSpecificRequest(UserTestSpecificRequest):
     """Схема запроса к API, требующего указания id пользователя, теста и вопроса."""
 
-    test_question_id: int
+    question_id: int
 
 
 class UserTestQuestionAnswerSpecificRequest(UserTestQuestionSpecificRequest):
