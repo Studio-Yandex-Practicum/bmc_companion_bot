@@ -48,6 +48,7 @@ class BotState(str, Enum):
     STOPPING = "STOPPING"
     END = ConversationHandler.END
     ERROR = "ERROR"
+    RESTART = "RESTART"
 
 
 class UserRole(int, Enum):
@@ -59,3 +60,6 @@ class UserRole(int, Enum):
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 DO_NOTHING_SIGN = "-"
 KEY_RESULTS_FOR_PAGINATED_RESPONSE = "results"
+ERROR_TEXT_MESSAGE = (
+    "Непредвиденная ошибка! Попробуйте повторить позже или сообщите администратору."
+)
