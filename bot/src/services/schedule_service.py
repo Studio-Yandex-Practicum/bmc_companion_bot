@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from request.services import PydanticApiService
-from schemas.responses import MeetingResponse, TimeslotResponse
+from schemas.responses import MeetingResponse, TimeslotResponse, MeetingResponse
 
 
 @dataclass
@@ -22,3 +22,11 @@ class ScheduleApiService(PydanticApiService):
             "format": meeting_format,
         }
         return self.post(MeetingResponse, self.url_meetings, data=data)
+
+    async def delete_meeting(
+        self, data
+    ) -> MeetingResponse:
+        return self.delete(MeetingResponse, self.url_meetings, data=data)
+
+    def get_actual_meetings_by_user(self, **kwargs) -> MeetingResponse | list[MeetingResponse]:
+        return self.get(MeetingResponse, self.url_path + '/?only_actual=1', params=kwargs)

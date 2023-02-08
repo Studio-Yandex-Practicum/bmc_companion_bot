@@ -20,3 +20,9 @@ class MeetingViewSet(ModelViewSet):
     queryset = Meeting.objects.all()
     serializer_class = serializer.MeetingSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        # get query parram if only_actual == 1: qs = qs.filter(date_start__gt=datetime.datetime.now())
+        only_actual = qs
+        return qs
