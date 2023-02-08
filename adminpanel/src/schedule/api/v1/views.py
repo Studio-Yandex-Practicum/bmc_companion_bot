@@ -4,7 +4,7 @@ from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 from schedule.api.v1 import serializer
 from schedule.models import Meeting, TimeSlot
-from schedule.tasks import create_notification_task
+from schedule.tasks import create_notification_tasks
 
 
 class TimeSlotViewSet(ModelViewSet):
@@ -23,8 +23,10 @@ class MeetingViewSet(ModelViewSet):
     permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
-        create_notification_task(
-            chat_id=serializer.validated_data.get("user").chat_id,
-            date_time=serializer.validated_data.get("date_start"),
+        task_data = serializer.validated_data
+        create_notification_tasks(
+            psychologist_chat_id=task_data.get("psychologist").chat_id,
+            patient_chat_id=task_data.get("user").chat_id,
+            date_time=task_data.get("date_start"),
         )
         return super().perform_create(serializer)
