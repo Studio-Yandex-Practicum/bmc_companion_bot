@@ -8,7 +8,7 @@ from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
 from utils import context_manager
 
-api_client = TestAPIClient(APIVersion.V1)
+api_client = TestAPIClient(APIVersion.V1.value)
 
 
 async def questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
