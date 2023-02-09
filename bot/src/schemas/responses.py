@@ -11,7 +11,8 @@ class UserIdResponse(BaseModel):
 class TestInfo(BaseModel):
     """Модель информации о тесте."""
 
-    test_id: int
+    id: int
+    type: int
     name: str
 
 
@@ -73,7 +74,7 @@ class AllTestResultsResponse(BaseModel):
 class AnswerInfo(BaseModel):
     """Модель информации об ответе на вопрос теста."""
 
-    answer_id: int
+    id: int
     text: str
 
 
@@ -92,7 +93,7 @@ class QuestionResponse(BaseModel):
 
     user_id: int
     test_id: int
-    test_question_id: int
+    id: int
     text: str
     answers: AnswerInfoList
 
@@ -144,6 +145,7 @@ class MeetingResponse(BaseModel):
     id: int | None
     psychologist: int | None = None
     user: int | None = None
+    comment: str | None = ""
     format: int | None = None
     date_start: str | None = ""
 

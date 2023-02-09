@@ -38,6 +38,9 @@ class Meeting(models.Model):
         related_name="user_meetings",
         verbose_name="Пациент",
     )
+    comment = models.TextField(
+        max_length=500, null=True, blank=True, verbose_name="Запрос к психологу"
+    )
     date_start = models.DateTimeField(null=True, blank=True, verbose_name="Дата старта")
     format = models.SmallIntegerField(
         null=True,

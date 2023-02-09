@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     "content.apps.ContentConfig",
     "profiles.apps.ProfilesConfig",
     "schedule.apps.ScheduleConfig",
+    "questioning.apps.QuestioningConfig",
     # third parties apps
     "rest_framework",
     "django_filters",

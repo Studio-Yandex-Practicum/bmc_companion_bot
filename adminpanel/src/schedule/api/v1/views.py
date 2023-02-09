@@ -21,6 +21,13 @@ class MeetingViewSet(ModelViewSet):
     queryset = Meeting.objects.all()
     serializer_class = serializer.MeetingSerializer
     permission_classes = [permissions.AllowAny]
+    filterset_fields = [
+        "id",
+        "date_start",
+        "format",
+        "psychologist",
+        "user",
+    ]
 
     def perform_create(self, serializer):
         task_data = serializer.validated_data
