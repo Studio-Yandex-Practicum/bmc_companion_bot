@@ -29,4 +29,4 @@ class ScheduleApiService(PydanticApiService):
         return self.delete(MeetingResponse, self.url_meetings, data=data)
 
     def get_actual_meetings_by_user(self, **kwargs) -> MeetingResponse | list[MeetingResponse]:
-        return self.get(MeetingResponse, self.url_path + '/?only_actual=1', params=kwargs)
+        return self.get(MeetingResponse, self.url_meetings + '/?only_actual=1', params=kwargs)

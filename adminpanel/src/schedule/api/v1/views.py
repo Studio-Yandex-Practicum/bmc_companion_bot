@@ -23,6 +23,7 @@ class MeetingViewSet(ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        # get query parram if only_actual == 1: qs = qs.filter(date_start__gt=datetime.datetime.now())
-        only_actual = qs
+        only_actual = self.request.query_params
+        if only_actual == 1:
+            qs = qs.filter(date_start__gt=datetime.datetime.now())
         return qs

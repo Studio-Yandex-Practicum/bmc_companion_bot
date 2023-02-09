@@ -10,7 +10,7 @@ class ContextKeys(str, Enum):
     MEETING_FORMAT = "MEETING_FORMAT"
     TIMESLOTS = "TIMESLOTS"
     TIMESLOT = "TIMESLOT"
-    MEETING = 'MEETING'
+    MEETING = "MEETING"
 
 
 class MeetingContextManager(BaseContextManager):
@@ -45,14 +45,14 @@ class MeetingContextManager(BaseContextManager):
     def get_timeslot(self, context: ContextTypes.DEFAULT_TYPE):
         return self.get(context, ContextKeys.TIMESLOT)
 
-    def delete_timeslot(self, context: ContextTypes.DEFAULT_TYPE):
-        return self.delete(context, ContextTypes.TIMESLOT)
+    def delete_meeting(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.delete(context, ContextKeys.MEETING)
 
     def set_actual_meeting(self, context: ContextTypes.DEFAULT_TYPE, meeting: dict):
         return self.set(context, ContextKeys.MEETING, meeting)
 
     def get_actual_meeting(self, context: ContextTypes.DEFAULT_TYPE):
-        return self.get(context, ContextTypes.MEETING)
+        return self.get(context, ContextKeys.MEETING)
 
 
 context_manager = MeetingContextManager()
