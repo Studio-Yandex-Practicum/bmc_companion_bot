@@ -1,4 +1,5 @@
 from core.constants import BotState
+from handlers.meeting.meeting_cancel import meeting_cancel_section
 from handlers.meeting.meeting_first import meeting_first_section
 from handlers.meeting.meeting_repeat import meeting_repeat_section
 from handlers.meeting.root_handlers import back_to_start_menu, meetings_main_menu
@@ -9,6 +10,7 @@ from utils import make_message_handler
 selection_handlers = [
     meeting_first_section,
     meeting_repeat_section,
+    meeting_cancel_section,
 ]
 
 

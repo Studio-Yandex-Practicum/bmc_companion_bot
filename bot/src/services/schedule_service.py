@@ -26,3 +26,6 @@ class ScheduleApiService(PydanticApiService):
             "format": meeting_format,
         }
         return self.post(MeetingResponse, self.url_meetings, data=data)
+
+    def delete_meeting(self, meeting_id) -> MeetingResponse:
+        return self.delete(MeetingResponse, self.url_meetings + str(meeting_id))
