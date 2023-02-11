@@ -2,6 +2,8 @@ from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import DO_NOTHING_SIGN, BotState
+from decorators import at
+from handlers.root_handlers import error, restart
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from utils import (
@@ -15,12 +17,9 @@ from .enums import States
 from .helpers import context_manager
 from .root_handlers import back_to_start_menu
 
-# from decorators import at, t
-# from handlers.root_handlers import start
-
 
 def ask_for_input(state: str):
-    # @at
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         keyboard = None
@@ -34,7 +33,6 @@ def ask_for_input(state: str):
             )
 
         if state == States.TYPING_PHONE:
-            # a = 1 / 0
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
         elif state == States.TYPING_FIRST_NAME:
             phone = update.message.text
@@ -155,19 +153,6 @@ def process_meeting_confirm(confirm: bool):
     return inner
 
 
-# async def error(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     text = ERROR_TEXT_MESSAGE  #Добавить импорт из core.constants
-#     btns = [[buttons.BTN_MAIN_MENU]]
-#     keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
-#     await update.message.reply_text(text=text, reply_markup=keyboard)
-#     return BotState.RESTART
-
-
-# async def error_restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
-#     await start(update, context)
-#     return BotState.STOPPING
-
-
 meeting_first_section = ConversationHandler(
     entry_points=[
         make_message_handler(buttons.BTN_MEETING_FIRST, ask_for_input(States.TYPING_PHONE)),
@@ -204,8 +189,8 @@ meeting_first_section = ConversationHandler(
             make_message_handler(buttons.BTN_CONFIRM_MEETING, process_meeting_confirm(True)),
             make_message_handler(buttons.BTN_NOT_CONFIRM_MEETING, process_meeting_confirm(False)),
         ],
-        # BotState.ERROR: [make_text_handler(error)],
-        # BotState.RESTART: [make_text_handler(error_restart)],
+        BotState.ERROR: [make_text_handler(error)],
+        BotState.RESTART: [make_text_handler(restart)],
     },
     fallbacks=[
         # make_message_handler(BTN_ADMIN_MENU, back_to_admin),

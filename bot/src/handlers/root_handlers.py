@@ -1,8 +1,9 @@
 from app import user_service_v1
-from core.constants import BotState
+from core.constants import ERROR_TEXT_MESSAGE, BotState
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
-from ui.buttons import BTN_MAKE_MEETING, BTN_SELECT_TEST
+from ui.buttons import BTN_MAKE_MEETING, BTN_SELECT_TEST, BTN_START_MENU
+from utils import context_manager
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -40,3 +41,16 @@ async def error_restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await start(update, context)
 
     return BotState.MENU_START_SELECTING_LEVEL
+
+
+async def error(update: Update, context: ContextTypes.DEFAULT_TYPE, text=ERROR_TEXT_MESSAGE):
+    btns = [[BTN_START_MENU]]
+    keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+    context_manager.set_keys(context, keyboard)
+    await update.message.reply_text(text=text, reply_markup=keyboard)
+    return BotState.RESTART
+
+
+async def restart(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await start(update, context)
+    return BotState.STOPPING
