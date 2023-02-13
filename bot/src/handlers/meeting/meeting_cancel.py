@@ -12,19 +12,18 @@ from .enums import States
 
 async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Получить список записей встречь клиента."""
-    text = ""
     chat_data = update.message.chat
     user = user_service_v1.get_user(chat_id=chat_data.id)
     meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
 
-    if not meetings:
-        text = "У вас нет записи"
-
+    text = "Выберите запись для отмены:\n"
     for index, meeting in enumerate(meetings):
-        text = "Выберите запись для отмены:\n"
         psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
         text += f"\n{index+1}. {psychologist_profile.first_name} {psychologist_profile.last_name} "
         text += f"{meeting.date_start}"
+
+    if not meetings:
+        text = "У вас нет записи"
 
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
