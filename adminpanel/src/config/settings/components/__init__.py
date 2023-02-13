@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
     POSTGRES_PORT: int
+    BOT_TOKEN: str
+    DJANGO_SETTINGS_MODULE: str
+    CELERY_BEAT_SCHEDULER: str
+    CELERY_BROKER_URL: str
+    CELERY_RESULT_BACKEND: str
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")

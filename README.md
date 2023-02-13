@@ -262,6 +262,22 @@ python -m flask db upgrade
 ```
 </details>
 
+<details>
+<summary>Запуск и отладка сервиса celery</summary>
+<br>
+Для запуска сервиса оповещений нужно находиться в папке /adminpanel/src/
+
+Запустить сервис celery worker:
+```
+celery -A config.celery worker -l info
+```
+
+Запустить сервис celery beat:
+```
+celery -A config.celery beat -l info
+```
+</details>
+
 [Оглавление](#Оглавление)
 
 # Особенности разработки
