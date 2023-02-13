@@ -11,7 +11,7 @@ from .enums import States
 
 
 async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """Получить список записей встречь клиента."""
+    """Получить список записей встреч клиента."""
     chat_data = update.message.chat
     user = user_service_v1.get_user(chat_id=chat_data.id)
     meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
