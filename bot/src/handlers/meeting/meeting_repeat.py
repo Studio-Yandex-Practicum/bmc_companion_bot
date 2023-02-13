@@ -29,7 +29,8 @@ def ask_for_repeat_meeting(state: str):
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
-        elif state == States.TYPING_TIME_SLOT:
+
+        if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
@@ -59,15 +60,17 @@ def ask_for_repeat_meeting(state: str):
                             text += add_ps
                         else:
                             text += add_ps
-                    elif ts_ps not in list_ps:
+
+                    if ts_ps not in list_ps:
                         if text_wasnt not in text:
                             text += text_wasnt
                             text += add_ps
                         else:
                             text += add_ps
+
             context_manager.set_timeslots(context, timeslots)
 
-        elif state == States.TYPING_MEETING_CONFIRM:
+        if state == States.TYPING_MEETING_CONFIRM:
             number_of_timeslot = int(update.message.text)
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
@@ -108,6 +111,7 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
+                comment="О разном",
                 meeting_format=10
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else 20,
