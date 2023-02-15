@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     ADMIN: str
     ROOT: str
     USER: str
+    UCE_TEST_ID: str
 
     class Config:
         env_file = os.path.join(ROOT_DIR, ".env")
