@@ -34,7 +34,7 @@ def profile_from_telegram(request: Request):
     ]
 )
 def uce_test_from_telegram(request: Request):
-    test = Test.objects.filter(type=10).first()
+    test = Test.objects.filter(type=Test.TEST_TYPE_UCE).first()
     serializer = TestSerializer(test)
     return Response(data=serializer.data)
 
