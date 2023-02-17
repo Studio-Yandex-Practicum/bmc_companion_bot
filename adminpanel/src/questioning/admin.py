@@ -12,3 +12,16 @@ class TestCompletedAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+"""без этой модели из админки не сбросить прохождение теста
+@admin.register(models.TestProgress)
+class TestProgressAdmin(admin.ModelAdmin):
+    list_display = ("id", "profile", "test",)
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+"""
