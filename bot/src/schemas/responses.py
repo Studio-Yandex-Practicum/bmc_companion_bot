@@ -154,3 +154,9 @@ class UserListResponse(BaseModel):
     """Модель для получения списка пользователей."""
 
     data: list[UserResponse]
+
+
+class MeetingListResponse(BaseModel):
+    """Модель для получения списка митингов (встреч)."""
+
+    data: list[MeetingResponse]
