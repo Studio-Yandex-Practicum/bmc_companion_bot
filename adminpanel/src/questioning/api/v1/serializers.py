@@ -18,6 +18,4 @@ class TestProgressSerializer(serializers.ModelSerializer):
 class TestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Test
-        fields = [
-            "id",
-        ]
+        fields = ["id"]

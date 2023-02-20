@@ -14,14 +14,12 @@ class TestCompletedAdmin(admin.ModelAdmin):
         return False
 
 
-"""без этой модели из админки не сбросить прохождение теста
 @admin.register(models.TestProgress)
 class TestProgressAdmin(admin.ModelAdmin):
-    list_display = ("id", "profile", "test",)
+    list_display = ("id", "profile", "test", "question", "answer")
 
     def has_add_permission(self, request, obj=None):
         return False
 
     def has_change_permission(self, request, obj=None):
         return False
-"""
