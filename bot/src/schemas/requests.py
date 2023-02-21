@@ -29,3 +29,9 @@ class UserTestQuestionAnswerSpecificRequest(UserTestQuestionSpecificRequest):
     """Схема запроса к API, требующего указания id пользователя, теста, вопроса и ответа."""
 
     answer_id: int
+
+
+class MeetingIdRequest(BaseModel):
+    """Схема запроса к API, требующего указания id митинга (встречи)."""
+
+    meeting_id: int
