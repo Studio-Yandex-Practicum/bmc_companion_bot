@@ -1,7 +1,9 @@
 from http import HTTPStatus
 
+from content.models import Test
 from profiles.api.v1.serializer import ProfileSerializer
 from profiles.models import Profile
+from questioning.api.v1.serializers import TestSerializer
 from questioning.exceptions import AnswerNotFound, NoNextQuestion, QuestionNotActive
 from questioning.services import (
     all_test_statuses,
@@ -22,6 +24,18 @@ def profile_from_telegram(request: Request):
         return Response(status=HTTPStatus.BAD_REQUEST)
     profile = Profile.objects.filter(telegram_id=telegram_id).first()
     serializer = ProfileSerializer(profile)
+    return Response(data=serializer.data)
+
+
+@api_view(["GET"])
+@permission_classes(
+    [
+        AllowAny,
+    ]
+)
+def uce_test_from_telegram(request: Request):
+    test = Test.objects.filter(type=Test.TEST_TYPE_UCE).first()
+    serializer = TestSerializer(test)
     return Response(data=serializer.data)
 
 

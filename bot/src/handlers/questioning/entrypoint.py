@@ -1,6 +1,9 @@
 from core.constants import BotState
 from handlers.questioning.questioning import question_handler
-from handlers.questioning.root_handlers import back_to_start_menu, questioning_section
+from handlers.questioning.root_handlers import (
+    back_to_start_menu,
+    test_questioning_section,
+)
 from handlers.questioning.test_selection import test_selection
 from telegram.ext import ConversationHandler
 from ui.buttons import BTN_SELECT_TEST, BTN_START_MENU
@@ -8,7 +11,7 @@ from utils import make_message_handler
 
 questioning_section = ConversationHandler(
     entry_points=[
-        make_message_handler(BTN_SELECT_TEST, questioning_section),
+        make_message_handler(BTN_SELECT_TEST, test_questioning_section),
     ],
     states={
         BotState.MENU_TEST_SELECTING_LEVEL: [test_selection],

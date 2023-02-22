@@ -11,7 +11,7 @@ from utils import context_manager
 api_client = TestAPIClient(APIVersion.V1.value)
 
 
-async def questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     await update.message.reply_text("Это раздел тестирования.")
     chat_data = update.message.chat
     telegram_login = chat_data.username
