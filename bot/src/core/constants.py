@@ -10,6 +10,7 @@ class APIVersion(str, Enum):
 class Endpoint(str, Enum):
     MEETINGS = "/meetings"
     TESTS = "/tests"
+    UCE_TEST = "uce_test"
     NEXT_QUESTION = "next_question"
     SUBMIT_ANSWER = "submit_answer"
     TEST_STATUS = "test_statuses"

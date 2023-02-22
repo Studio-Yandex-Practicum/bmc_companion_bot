@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import DO_NOTHING_SIGN, BotState
+from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from utils import (
@@ -116,12 +117,6 @@ def ask_for_input(state: str):
     return inner
 
 
-async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = "выполняется переход на прохождение теста НДО:"
-    await update.message.reply_text(text)
-    return "---"
-
-
 def process_meeting_confirm(confirm: bool):
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
@@ -181,7 +176,7 @@ meeting_first_section = ConversationHandler(
             make_text_handler(ask_for_input(States.TYPING_TEST_SCORE)),
         ],
         States.TYPING_TEST_SCORE: [
-            make_message_handler(buttons.BTN_I_DONT_KNOW, go_to_test),
+            uce_test_section,
             make_text_handler(ask_for_input(States.TYPING_COMMENT)),
         ],
         States.TYPING_COMMENT: [
@@ -208,6 +203,7 @@ meeting_first_section = ConversationHandler(
         # make_message_handler(BTN_TESTS_MENU, menu_tests),
     ],
     map_to_parent={
-        BotState.STOPPING: BotState.END,
+        BotState.STOPPING: States.TYPING_COMMENT,
+        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
     },
 )
