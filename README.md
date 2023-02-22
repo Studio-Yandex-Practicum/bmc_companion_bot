@@ -1,30 +1,46 @@
 # О проекте
+[![Code style: black](https://badgen.net/badge/codestyle/black/black)](https://github.com/psf/black)
+[![PyPI pyversions](https://badgen.net/badge/python/3.10/green)](https://www.python.org)
 
-
-Телеграм-бот "Ты в порядке" для записи людей на консультации с психологом
+Телеграм-бот **Ты в порядке** для записи людей на консультации с психологом
 
 Задачи бота:
 * записывать людей на индивидуальные консультации;
 * прохождение тестов;
 * обратная связь для людей, получивших консультацию.
 
+# Оглавление
+
+[Requirements](#Requirements) <br>
+[Запуск проекта](#Запуск-проекта) <br>
+[Создание среды разработки](#Создание-сред-разработки) <br>
+[Режим разработки](#Режим-разработки) <br>
+[Особенности разработки](#Особенности-разработки) <br>
+[Работа с GIT](#Работа-с-GIT) <br>
+
 
 # Requirements
-
 
 * Python 3.10
 * Docker 20.10+ [(инструкция по установке)](https://docs.docker.com/get-docker/).
 
+[Оглавление](#Оглавление)
+
+# Клонирование репозитория
+**_Важно!!!_** Склонируйте репозиторий с ключем: укажите для команды git clone параметр "--config core.autocrlf=input".
+В противном случае проект не будет запускаться в докере, если у вас Windows.
 
 # Запуск проекта
-
 
 Все команды, приведенные в данном руководстве, выполняются из корневой директории проекта, если
 иное не указано в описании.
 
-## Проверка docker
+<details>
+<summary>Проверка docker</summary>
+<br>
 По умолчанию проект запускается в докере. Перед запуском проекта нужно убедиться, что докер
 установлен. Открой любой терминал и выполни следующую команду:
+
 ```
 docker --version
 ```
@@ -33,20 +49,35 @@ docker --version
 Docker version 20.10.21, build baeda1f
 ```
 Если докер не установлен, то установи его, следуя [инструкции](https://docs.docker.com/get-docker/).
+</details>
 
-## Настройка переменных окружения
-Переменные окружения проекта хранятся в файле `.env`, для которого есть шаблон `.env.template`.
+<details>
+<summary>Настройка переменных окружения</summary>
+<br>
+
+Переменные окружения проекта хранятся в файле `.env` , для которого есть шаблон `.env.template`.
 Создай в корне проекта файл `.env` простым копированием файла `.env.template`.
 
-## Запуск сервисов
+</details>
+
+<details>
+<summary>Запуск сервисов</summary>
+<br>
+<hr>
+
+**_ВАЖНО!!!_** данный раздел устарел и требует обновления. Перейди к разделу "Создание среды разработки"
+<hr>
+
 Для запуска проекта выполни следующую команду:
 ```
 docker-compose up -d --build
 ```
+
 Убедимся, что все контейнеры запущены:
 ```
 docker-compose ps
 ```
+
 Результат должен быть примерно такой (список сервисов может отличаться, но статус всех сервисов
 должен быть `running`):
 ```
@@ -57,6 +88,7 @@ bmc_companion_bot-postgres-1   "docker-entrypoint.s…"   postgres            ru
 bmc_companion_bot-redis-1      "docker-entrypoint.s…"   redis               running             0.0.0.0:6379->6379/tcp
 bmc_companion_bot-webapi-1     "/scripts/entrypoint…"   webapi              running
 ```
+
 Перейди по адресу [http://127.0.0.1/api/v1/healthcheck/ping/](http://127.0.0.1/api/v1/healthcheck/ping/).
 Если все ок, то должно быть сообщение `pong`.
 
@@ -68,11 +100,16 @@ bmc_companion_bot-webapi-1     "/scripts/entrypoint…"   webapi              ru
 docker-compose down
 ```
 
+</details>
+
+[Оглавление](#Оглавление)
 
 # Создание среды разработки
 
+<details>
+<summary>Установка Poetry</summary>
+<br>
 
-## Установка Poetry
 Poetry - это пакетный менеджер для python, аналог `pip`. Подробнее про установку Poetry [здесь](https://python-poetry.org/docs/#installation).
 
 Команды для установки Poetry:
@@ -105,8 +142,12 @@ poetry --version
 ```
 Poetry (version 1.3.1)
 ```
+</details>
 
-## Установка зависимостей
+<details>
+<summary>Установка зависимостей</summary>
+<br>
+
 Сначала нужно активировать виртуальную среду:
 ```
 poetry shell
@@ -115,8 +156,12 @@ poetry shell
 ```
 poetry install
 ```
+</details>
 
-## Установка pre-commit хуков
+<details>
+<summary>Установка pre-commit хуков</summary>
+<br>
+
 Пакет [pre-commit](https://pre-commit.com/) включен в список зависимостей и устанавливается
 командой `poetry install`. Для проверки корректности установки `pre-commit`
 нужно выполнить команду:
@@ -138,35 +183,52 @@ pre-commit install --hook-type commit-msg
 pre-commit installed at .git/hooks/pre-commit
 ```
 Теперь все готово к разработке.
+</details>
 
+[Оглавление](#Оглавление)
 
 # Режим разработки
 
+<details>
+<summary>Запуск и отладка сервиса adminpanel</summary>
+<br>
 
-## Запуск и отладка сервиса webapi
-Для запуска и отладки сервиса webapi нужно, чтобы была запущена база данных и redis.
+Для запуска и отладки сервиса adminpanel нужно, чтобы была запущена база данных.
 
 Сначала остановим все запущенные контейнеры:
 ```
 docker-compose down
+# make down
 ```
 Запустим базу данных и redis:
 ```
-docker-compose up -d --build postgres redis
+docker-compose up -d --build postgres
+# make run s="postgres"
 ```
-Теперь можно запустить сам сервис:
+Теперь нужно выполнять миграции. Для этого перейдем в каталог adminpanel/src
 ```
-python webapi/src/manage.py
+cd adminpanel/src
 ```
-Перейди по адресу [http://127.0.0.1:5000/api/v1/healthcheck/ping/](http://127.0.0.1:5000/api/v1/healthcheck/ping/).
-Если выдается `pong`, значит все ок.
+Выполним миграции:
+```
+python manage.py migrate
+```
+При необходимости создадим суперюзера:
+```
+python manage.py createsuperuser
+```
+Запускаем сервер:
+```
+python manage.py runserver
+```
+Для дебага в PyCharm нужно прописать в конфигурации в Script Path путь к файлу
+manage.py, а в Parameters прописать runserver и можно юзать отладчик.
+Либо просто запустить файл manage.py в режиме отладки.
+</details>
 
-Ты можешь настраивать хост и порт с помощью переменных окружения `APP_HOST` и `APP_PORT`.
-
-Отлаживать сервис можно с помощью стандартного дебаггера в PyCharm. Для этого запусти debug файла
-`webapi/src/manage.py`.
-
-## Запуск и отладка сервиса bot
+<details>
+<summary>Запуск и отладка сервиса bot</summary>
+<br>
 Для того чтобы бот заработал, нужно установить валидный токен бота для переменной окружения
 `BOT_TOKEN`.
 
@@ -177,8 +239,12 @@ webapi, только используется другой файл.
 ```
 python bot/src/run.py
 ```
+</details>
 
-## Управление миграциями базы данных
+<details>
+<summary>Управление миграциями базы данных</summary>
+<br>
+
 Базой данных управляет сервис webapi.
 
 После изменения моделей в файле `models.py` нужно сформировать миграции. Перед этим убедись,
@@ -199,16 +265,36 @@ python -m flask db migrate -m "Your comment"
 ```
 python -m flask db upgrade
 ```
+</details>
 
+<details>
+<summary>Запуск и отладка сервиса celery</summary>
+<br>
+Для запуска сервиса оповещений нужно находиться в папке /adminpanel/src/
+
+Запустить сервис celery worker:
+```
+celery -A config.celery worker -l info
+```
+
+Запустить сервис celery beat:
+```
+celery -A config.celery beat -l info
+```
+</details>
+
+[Оглавление](#Оглавление)
 
 # Особенности разработки
-
 
 При разработке необходимо придерживаться установленных правил оформления кода.
 В этом разделе ты найдешь описание настроек редактора кода, линтеры и форматеры,
 используемые в проекте, а также другие особенности, которые необходимо учитывать при разработке.
 
-## Управление зависимостями
+<details>
+<summary>Управление зависимостями</summary>
+<br>
+
 В качестве пакетного менеджера используется [Poetry](https://python-poetry.org/). Для управления зависимостями используются группы (см. файл `pyproject.toml`).
 
 Все основные зависимости располагаются в группе `tool.poetry.dependencies`:
@@ -233,8 +319,12 @@ pep8-naming = "^0.13.2"
 ```bash
 poetry add pytest --group test
 ```
+</details>
 
-## Руководства по стилю
+<details>
+<summary>Руководства по стилю</summary>
+<br>
+
 ### Импорты
 Выполняй импорты из каталогов, вложенных в `src`. Следи, чтобы твои импорты не начинались
 с папки `src`.
@@ -278,8 +368,12 @@ COPY ./src .
 ```
 ModuleNotFoundError: No module named 'src'
 ```
+</details>
 
-## Conventional Commits
+<details>
+<summary>Conventional Commits</summary>
+<br>
+
 Твои комментарии к коммитам должны соответствовать [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 Pre-commit хук `conventional-pre-commit` выполнит проверку комментария перед коммитом.
 
@@ -292,12 +386,20 @@ commitizen check.........................................................Failed
 Для более удобного написания комментариев к коммитам, ты можешь воспользоваться плагином
 Conventional Commit для PyCharm:
 ![conventional-commit-plugin.png](docs/assets/img/conventional-commit-plugin.png)
+</details>
 
-## Настройки IDE
+<details>
+<summary>Настройки IDE</summary>
+<br>
+
 Проект содержит файл `.editorconfig` - ознакомься с ним, чтобы узнать какие настройки
 должны быть в твоем редакторе.
+</details>
 
-## Форматер и линтер
+<details>
+<summary>Форматер и линтер</summary>
+<br>
+
 В качестве форматера мы используем [black](https://github.com/psf/black).
 Конфиг black см. в файле `pyproject.toml` в секции `[tool.black]`.
 
@@ -309,12 +411,16 @@ Conventional Commit для PyCharm:
 
 Также можно назначить hot key для этого действия:
 ![add-hot-key.png](docs/assets/img/add-hot-key.png)
+</details>
 
+[Оглавление](#Оглавление)
 
 # Работа с GIT
 
+<details>
+<summary>Основное</summary>
+<br>
 
-## Основное
 Все коммиты должны быть на русском языке.
 
 *Важно!!! Для быстрого прохождения код-ревью, для снижения merge conflict придерживайся
@@ -325,7 +431,12 @@ Conventional Commit для PyCharm:
 3. Не добавляй папки полностью, добавляй файлы по отдельности.
 4. Не изменяй форматирование других файлов и не добавляй их в коммит.
 
-## Правила работы с репозиторием
+</details>
+
+<details>
+<summary>Правила работы с репозиторием</summary>
+<br>
+
 ### Правила именования веток
 Название ветки должно быть сформировано по правилу `{type}/{name}`, где:
 * `type`: тип (feat, fix и т.п.) согласно [conventional-commits](https://www.conventionalcommits.org/en/v1.0.0/);
@@ -407,4 +518,8 @@ git commit -m 'feat: commit description'
 git push origin feat/model_user
 ```
 
-6. Создай pull request из своей ветки в ветку `develop`
+7. Создай pull request из своей ветки в ветку `develop`
+
+</details>
+
+[Оглавление](#Оглавление)
