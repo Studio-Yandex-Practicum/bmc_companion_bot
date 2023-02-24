@@ -14,6 +14,9 @@ class TimeSlotViewSet(ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset().filter(date_start__gte=datetime.datetime.now())
+        is_free = self.request.query_params.get("is_free", None)
+        if is_free:
+            qs = qs.filter(timeslot_meetings__isnull=True)
         return qs
 
 

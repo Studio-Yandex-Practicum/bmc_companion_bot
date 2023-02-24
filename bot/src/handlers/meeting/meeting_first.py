@@ -25,6 +25,27 @@ def ask_for_input(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
+        meeting = schedule_service_v1.get_meetings_by_user(user=user.id)
+
+        if meeting:
+            meeting = meeting[0]
+            meeting_time = meeting.date_start
+            meeting_format = (
+                buttons.BTN_MEETING_FORMAT_ONLINE.text
+                if meeting.format == 10
+                else buttons.BTN_MEETING_FORMAT_OFFLINE.text
+            )
+            ps = user_service_v1.get_user(id=meeting.psychologist)
+            text = (
+                f"У вас уже имеется активная запись:\n"
+                f"Психолог: {ps.first_name} {ps.last_name}\n"
+                f"Когда: {meeting_time}\n"
+                f"Формат: {meeting_format}"
+            )
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.MENU_START_SELECTING_LEVEL
+
         if user is None:
             user = user_service_v1.create_user(
                 telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
@@ -132,6 +153,7 @@ def process_meeting_confirm(confirm: bool):
                 meeting_format=10
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else 20,
+                timeslot=timeslot.id,
             )
 
             psychologist_chat_id = timeslot.profile.chat_id

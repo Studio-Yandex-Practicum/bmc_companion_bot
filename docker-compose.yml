@@ -11,26 +11,26 @@ services:
         depends_on:
             - webapi
 
-#    webapi:
-#        <<: *base-service
-#        build:
-#            context: .
-#            dockerfile: ./docker/webapi/Dockerfile
-#        environment:
-#            - FLASK_APP=manage.py
-#            - APP_HOST=0.0.0.0
-#            - APP_PORT=5000
-#            - POSTGRES_HOST=postgres
-#            - POSTGRES_PORT=5432
-#            - REDIS_HOST=redis
-#            - REDIS_PORT=6379
-#        depends_on:
-#            - postgres
-#            - redis
-#        volumes:
-#            - ./webapi/src:/src
-#        ports:
-#            - "5001:5000"
+    webapi:
+        <<: *base-service
+        build:
+            context: .
+            dockerfile: ./docker/webapi/Dockerfile
+        environment:
+            - FLASK_APP=manage.py
+            - APP_HOST=0.0.0.0
+            - APP_PORT=5000
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - ./webapi/src:/src
+        ports:
+            - "5001:5000"
 
     nginx:
         <<: *base-service
