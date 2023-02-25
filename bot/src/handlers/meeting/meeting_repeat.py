@@ -20,8 +20,7 @@ def ask_for_repeat_meeting(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
-        meeting = schedule_service_v1.get_meetings_by_user(user=user.id)
-
+        meeting = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
         if meeting:
             meeting = meeting[0]
             meeting_time = meeting.date_start
@@ -58,7 +57,7 @@ def ask_for_repeat_meeting(state: str):
             text_was = f"{'Вы уже были у этих психологов:'}\n"
             text_wasnt = f"\n\n{'У этих психологов Вы еще не были:'}"
 
-            timeslots = schedule_service_v1.get_actual_timeslots()
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id)
             list_ps = []
             for meeting in meetings:

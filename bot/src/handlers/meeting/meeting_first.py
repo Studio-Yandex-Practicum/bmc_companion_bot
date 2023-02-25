@@ -25,8 +25,7 @@ def ask_for_input(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
-        meeting = schedule_service_v1.get_meetings_by_user(user=user.id)
-
+        meeting = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
         if meeting:
             meeting = meeting[0]
             meeting_time = meeting.date_start
@@ -101,7 +100,7 @@ def ask_for_input(state: str):
             context_manager.set_meeting_format(context, meeting_format)
 
             text = "Выберите дату и время записи:\n"
-            timeslots = schedule_service_v1.get_actual_timeslots()
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
 
             for index, timeslot in enumerate(timeslots):
                 if timeslot.date_start and timeslot.profile:
