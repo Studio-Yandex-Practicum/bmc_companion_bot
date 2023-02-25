@@ -49,7 +49,7 @@ class Meeting(models.Model):
         default=MEETING_FORMAT_ONLINE,
         verbose_name="Формат встречи",
     )
-    timeslot = models.ForeignKey(
+    timeslot = models.OneToOneField(
         TimeSlot,
         blank=True,
         null=True,

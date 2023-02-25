@@ -25,16 +25,18 @@ def ask_for_input(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
-        meeting = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
-        if meeting:
-            meeting = meeting[0]
-            meeting_time = meeting.date_start
+        user_active_meeting = schedule_service_v1.get_meetings_by_user(
+            user=user.id, is_active="True"
+        )
+        if user_active_meeting:
+            meeting_obj = user_active_meeting[0]
+            meeting_time = meeting_obj.date_start
             meeting_format = (
                 buttons.BTN_MEETING_FORMAT_ONLINE.text
-                if meeting.format == 10
+                if meeting_obj.format == 10
                 else buttons.BTN_MEETING_FORMAT_OFFLINE.text
             )
-            ps = user_service_v1.get_user(id=meeting.psychologist)
+            ps = user_service_v1.get_user(id=meeting_obj.psychologist)
             text = (
                 f"У вас уже имеется активная запись:\n"
                 f"Психолог: {ps.first_name} {ps.last_name}\n"
