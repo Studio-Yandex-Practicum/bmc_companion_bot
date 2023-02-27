@@ -27,5 +27,17 @@ class ScheduleApiService(PydanticApiService):
         }
         return self.post(MeetingResponse, self.url_meetings, data=data)
 
+    def update_meeting(
+        self, psychologist_id: int, user_id: int, date_start, meeting_format, meeting_id
+    ) -> MeetingResponse:
+        data = {
+            "psychologist": psychologist_id,
+            "user": user_id,
+            "date_start": date_start,
+            "format": meeting_format,
+            "meeting_id": meeting_id,
+        }
+        return self.patch(MeetingResponse, self.url_meetings + str(meeting_id), data=data)
+
     def delete_meeting(self, meeting_id) -> MeetingResponse:
         return self.delete(MeetingResponse, self.url_meetings + str(meeting_id))
