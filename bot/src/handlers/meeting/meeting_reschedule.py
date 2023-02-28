@@ -11,7 +11,6 @@ from utils import make_message_handler, make_text_handler
 from . import buttons
 from .enums import States
 from .helpers import context_manager
-from .meeting_first import ask_for_input
 
 
 def ask_for_reschedule(state: str):
