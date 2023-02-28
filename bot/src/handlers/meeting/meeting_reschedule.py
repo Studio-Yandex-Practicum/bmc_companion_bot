@@ -3,10 +3,10 @@ from datetime import datetime
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from handlers.meeting.root_handlers import back_to_start_menu
-from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ConversationHandler, ContextTypes
-from utils import make_message_handler, make_text_handler
+from telegram import ReplyKeyboardMarkup, Update
+from telegram.ext import ContextTypes, ConversationHandler
 from utils import context_manager as cm
+from utils import make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States
@@ -74,6 +74,7 @@ def ask_for_reschedule(state: str):
 
 def meeting_update(confirm: bool):
     """Обновление записи пользователя"""
+
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
             user = context_manager.get_user(context)
@@ -107,7 +108,6 @@ def meeting_update(confirm: bool):
         else:
             text = "Запись не оформлена!"
 
-
         await update.message.reply_text(text=text)
 
         await back_to_start_menu(update, context)
@@ -120,7 +120,8 @@ def meeting_update(confirm: bool):
 meeting_reschedule_section = ConversationHandler(
     entry_points=[
         make_message_handler(
-            buttons.BTN_MEETING_RESCHEDULE, ask_for_reschedule(States.TYPING_MEETING_FORMAT)),
+            buttons.BTN_MEETING_RESCHEDULE, ask_for_reschedule(States.TYPING_MEETING_FORMAT)
+        ),
     ],
     states={
         States.TYPING_MEETING_FORMAT: [
@@ -140,7 +141,7 @@ meeting_reschedule_section = ConversationHandler(
         ],
     },
     fallbacks=[
-        #make_message_handler(BTN_START_MENU, back_to_start_menu),
+        # make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
