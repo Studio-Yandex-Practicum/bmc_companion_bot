@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import phonenumbers
 from app import schedule_service_v1, user_service_v1
 from core.constants import DO_NOTHING_SIGN, BotState
 from handlers.questioning.uce_test_selection import uce_test_section
@@ -23,6 +24,7 @@ def ask_for_input(state: str):
         keyboard = None
         chat_data = update.message.chat
         telegram_login = chat_data.username
+        new_state = state
 
         user = user_service_v1.get_user(username=telegram_login)
         if user is None:
@@ -33,27 +35,61 @@ def ask_for_input(state: str):
         if state == States.TYPING_PHONE:
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
         elif state == States.TYPING_FIRST_NAME:
-            phone = update.message.text
-            if phone != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, phone=phone)
             text = make_ask_for_input_information(
                 "Как Вас зовут? Введите только имя", user.first_name
             )
+            phone = update.message.text
+            if phone != DO_NOTHING_SIGN:
+                is_phone_valid = False
+                try:
+                    parsed_phone = phonenumbers.parse(phone, None)
+                    is_phone_valid = phonenumbers.is_valid_number(parsed_phone)
+                except phonenumbers.NumberParseException:
+                    text = make_ask_for_input_information(
+                        "Ваш номер телефона неверный, введите еще раз", user.phone
+                    )
+                    new_state = States.TYPING_PHONE
+                if is_phone_valid:
+                    user = user_service_v1.update_user(user.id, phone=phone)
+
         elif state == States.TYPING_LAST_NAME:
+            text = make_ask_for_input_information("Введите фамилию", user.last_name)
             first_name = update.message.text
             if first_name != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, first_name=first_name)
-            text = make_ask_for_input_information("Введите фамилию", user.last_name)
+                if not first_name.isalpha():
+                    text = make_ask_for_input_information(
+                        "Имя не может содержать символы и цифры, введите еще раз", user.first_name
+                    )
+                    new_state = States.TYPING_FIRST_NAME
+                else:
+                    user = user_service_v1.update_user(user.id, first_name=first_name)
+
         elif state == States.TYPING_AGE:
+            text = make_ask_for_input_information("Введите возраст", user.age)
             last_name = update.message.text
             if last_name != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, last_name=last_name)
-            text = make_ask_for_input_information("Введите возраст", user.age)
+                if not last_name.isalpha():
+                    text = make_ask_for_input_information(
+                        "Фамилия не может содержать символы и цифры, введите еще раз",
+                        user.last_name,
+                    )
+                    new_state = States.TYPING_LAST_NAME
+
+                else:
+                    user = user_service_v1.update_user(user.id, last_name=last_name)
+
         elif state == States.TYPING_TEST_SCORE:
+            text = make_ask_for_input_information("Введите свой балл за тест НДО", user.uce_score)
             age = update.message.text
             if age != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, age=age)
-            text = make_ask_for_input_information("Введите свой балл за тест НДО", user.uce_score)
+                if not age.isdigit():
+                    text = make_ask_for_input_information(
+                        "Возраст может быть только положительным и должен содержать только цифры",
+                        user.age,
+                    )
+                    new_state = States.TYPING_AGE
+                else:
+                    user = user_service_v1.update_user(user.id, age=age)
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
@@ -112,7 +148,7 @@ def ask_for_input(state: str):
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
-        return state
+        return new_state
 
     return inner
 
