@@ -25,7 +25,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(text, reply_markup=keyboard)
 
     else:
-        await update.message.reply_text(reply_markup=keyboard)
+        await update.message.reply_text("Вы в главном меню", reply_markup=keyboard)
 
     return BotState.MENU_START_SELECTING_LEVEL
 
