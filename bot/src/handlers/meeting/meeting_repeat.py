@@ -20,6 +20,11 @@ def ask_for_repeat_meeting(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
+        if user is None:
+            text = "Ваших данных нет в базе"
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+            return BotState.STOPPING
+
         user_active_meeting = schedule_service_v1.get_meetings_by_user(
             user=user.id, is_active="True"
         )
@@ -40,12 +45,7 @@ def ask_for_repeat_meeting(state: str):
             )
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.MENU_START_SELECTING_LEVEL
-
-        if user is None:
-            text = "Ваших данных нет в базе"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
-            return BotState.MENU_START_SELECTING_LEVEL
+            return BotState.STOPPING
 
         if state == States.TYPING_MEETING_FORMAT:
             text = "Выберите формат участия:"
@@ -55,38 +55,37 @@ def ask_for_repeat_meeting(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text = f"{'Выберите дату и время записи:'}\n\n"
-            text_was = f"\n\n{'Вы уже были у этих психологов:'}"
-            text_wasnt = f"{'У этих психологов Вы еще не были:'}"
+            text_list = ["Выберите дату и время записи:\n"]
+            list_was = [
+                "\nВы уже были у этих психологов:",
+            ]
+            list_was_not = [
+                "\n\nУ этих психологов Вы еще не были:",
+            ]
 
-            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
             list_ps = []
             for meeting in meetings:
                 user_id = meeting.psychologist
-                ps_name = user_service_v1.get_user(id=user_id)
-                list_ps.append(ps_name.id)
+                psycho_name = user_service_v1.get_user(id=user_id)
+                list_ps.append(psycho_name.id)
 
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in list_ps, x.date_start))
             for index, timeslot in enumerate(timeslots):
-                add_ps = (
+                timeslot_data = (
                     f"\n{index + 1}. {timeslot.profile.first_name} "
                     f"{timeslot.profile.last_name}: "
                     f"{timeslot.date_start}"
                 )
                 if timeslot.date_start and timeslot.profile:
-                    ts_ps = timeslot.profile.id
-                    if ts_ps in list_ps:
-                        if text_was not in text:
-                            text += text_was
-                            text += add_ps
-                        else:
-                            text += add_ps
-                    elif ts_ps not in list_ps:
-                        if text_wasnt not in text:
-                            text += text_wasnt
-                            text += add_ps
-                        else:
-                            text += add_ps
+                    ts_psycho = timeslot.profile.id
+                    if ts_psycho in list_ps:
+                        list_was.append(timeslot_data)
+                    elif ts_psycho not in list_ps:
+                        list_was_not.append(timeslot_data)
+
+            text = "".join(text_list + list_was + list_was_not)
             context_manager.set_timeslots(context, timeslots)
 
         elif state == States.TYPING_MEETING_CONFIRM:

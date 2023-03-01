@@ -25,6 +25,11 @@ def ask_for_input(state: str):
         telegram_login = chat_data.username
 
         user = user_service_v1.get_user(username=telegram_login)
+        if user is None:
+            user = user_service_v1.create_user(
+                telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
+            )
+
         user_active_meeting = schedule_service_v1.get_meetings_by_user(
             user=user.id, is_active="True"
         )
@@ -45,12 +50,7 @@ def ask_for_input(state: str):
             )
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.MENU_START_SELECTING_LEVEL
-
-        if user is None:
-            user = user_service_v1.create_user(
-                telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
-            )
+            return BotState.END
 
         if state == States.TYPING_PHONE:
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
@@ -176,7 +176,7 @@ def process_meeting_confirm(confirm: bool):
 
         await back_to_start_menu(update, context)
 
-        return BotState.STOPPING
+        return BotState.END
 
     return inner
 
@@ -227,6 +227,6 @@ meeting_first_section = ConversationHandler(
     ],
     map_to_parent={
         BotState.STOPPING: States.TYPING_COMMENT,
-        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
+        BotState.END: BotState.END,
     },
 )
