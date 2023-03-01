@@ -49,11 +49,12 @@ class PsychologistInfo(BaseModel):
     deleted_at = db.Column(db.DateTime)
 
 
-class Review(BaseModel):
+class MeetingReview(BaseModel):
     """Оценка встречи с психологом."""
 
     __tablename__ = "assessment_of_the_meeting"
 
     meeting_id = db.Column(db.Integer, db.ForeignKey("meetings.id"), nullable=False)
-    text = db.Columb(db.Text)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    text = db.Column(db.Text)
     score = db.Column(db.Integer)
