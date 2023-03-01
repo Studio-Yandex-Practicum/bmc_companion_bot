@@ -24,7 +24,7 @@ def ask_for_input(state: str):
         keyboard = None
         chat_data = update.message.chat
         telegram_login = chat_data.username
-        new_state = state
+        next_state = state
 
         user = user_service_v1.get_user(username=telegram_login)
         if user is None:
@@ -48,7 +48,7 @@ def ask_for_input(state: str):
                     text = make_ask_for_input_information(
                         "Ваш номер телефона неверный, введите еще раз", user.phone
                     )
-                    new_state = States.TYPING_PHONE
+                    next_state = States.TYPING_PHONE
                 if is_phone_valid:
                     user = user_service_v1.update_user(user.id, phone=phone)
 
@@ -60,9 +60,9 @@ def ask_for_input(state: str):
                     text = make_ask_for_input_information(
                         "Имя не может содержать символы и цифры, введите еще раз", user.first_name
                     )
-                    new_state = States.TYPING_FIRST_NAME
+                    next_state = States.TYPING_FIRST_NAME
                 else:
-                    user = user_service_v1.update_user(user.id, first_name=first_name)
+                    user = user_service_v1.update_user(user.id, first_name=first_name.title())
 
         elif state == States.TYPING_AGE:
             text = make_ask_for_input_information("Введите возраст", user.age)
@@ -73,10 +73,10 @@ def ask_for_input(state: str):
                         "Фамилия не может содержать символы и цифры, введите еще раз",
                         user.last_name,
                     )
-                    new_state = States.TYPING_LAST_NAME
+                    next_state = States.TYPING_LAST_NAME
 
                 else:
-                    user = user_service_v1.update_user(user.id, last_name=last_name)
+                    user = user_service_v1.update_user(user.id, last_name=last_name.title())
 
         elif state == States.TYPING_TEST_SCORE:
             text = make_ask_for_input_information("Введите свой балл за тест НДО", user.uce_score)
@@ -87,7 +87,7 @@ def ask_for_input(state: str):
                         "Возраст может быть только положительным и должен содержать только цифры",
                         user.age,
                     )
-                    new_state = States.TYPING_AGE
+                    next_state = States.TYPING_AGE
                 else:
                     user = user_service_v1.update_user(user.id, age=age)
 
@@ -148,7 +148,7 @@ def ask_for_input(state: str):
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
-        return new_state
+        return next_state
 
     return inner
 
