@@ -52,11 +52,11 @@ def ask_for_repeat_meeting(state: str):
             ]
 
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
-            psycho_list = {meeting.psychologist for meeting in meetings}
+            psycho_set = {meeting.psychologist for meeting in meetings}
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             timeslots = sorted(
-                timeslots, key=lambda x: (x.profile.id not in psycho_list, x.date_start)
+                timeslots, key=lambda x: (x.profile.id not in psycho_set, x.date_start)
             )
 
             for index, timeslot in enumerate(timeslots, start=1):
@@ -67,9 +67,9 @@ def ask_for_repeat_meeting(state: str):
                 )
                 if timeslot.date_start and timeslot.profile:
                     ts_psycho = timeslot.profile.id
-                    if ts_psycho in psycho_list:
+                    if ts_psycho in psycho_set:
                         list_was.append(timeslot_data)
-                    elif ts_psycho not in psycho_list:
+                    elif ts_psycho not in psycho_set:
                         list_was_not.append(timeslot_data)
 
             text = "".join(text_list + list_was + list_was_not)

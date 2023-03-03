@@ -6,7 +6,7 @@ from handlers.meeting import buttons
 load_dotenv()
 
 
-def make_message_for_active_meeting(user_active_meeting) -> str | None:
+def make_message_for_active_meeting(user_active_meeting) -> str:
     meeting_obj = user_active_meeting[0]
     meeting_time = meeting_obj.date_start
     meeting_format = (
