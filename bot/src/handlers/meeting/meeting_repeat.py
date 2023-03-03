@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import BotState
+from core.constants import MEETING_FORMAT_OFFLINE, MEETING_FORMAT_ONLINE, BotState
+from handlers.handlers_utils import make_message_for_active_meeting
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from utils import make_message_handler, make_text_handler
@@ -29,20 +30,7 @@ def ask_for_repeat_meeting(state: str):
             user=user.id, is_active="True"
         )
         if user_active_meeting:
-            meeting_obj = user_active_meeting[0]
-            meeting_time = meeting_obj.date_start
-            meeting_format = (
-                buttons.BTN_MEETING_FORMAT_ONLINE.text
-                if meeting_obj.format == 10
-                else buttons.BTN_MEETING_FORMAT_OFFLINE.text
-            )
-            ps = user_service_v1.get_user(id=meeting_obj.psychologist)
-            text = (
-                f"У вас уже имеется активная запись:\n"
-                f"Психолог: {ps.first_name} {ps.last_name}\n"
-                f"Когда: {meeting_time}\n"
-                f"Формат: {meeting_format}"
-            )
+            text = make_message_for_active_meeting(user_active_meeting)
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
             return BotState.STOPPING
@@ -64,25 +52,24 @@ def ask_for_repeat_meeting(state: str):
             ]
 
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
-            list_ps = []
-            for meeting in meetings:
-                user_id = meeting.psychologist
-                psycho_name = user_service_v1.get_user(id=user_id)
-                list_ps.append(psycho_name.id)
+            psycho_list = {meeting.psychologist for meeting in meetings}
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
-            timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in list_ps, x.date_start))
-            for index, timeslot in enumerate(timeslots):
+            timeslots = sorted(
+                timeslots, key=lambda x: (x.profile.id not in psycho_list, x.date_start)
+            )
+
+            for index, timeslot in enumerate(timeslots, start=1):
                 timeslot_data = (
-                    f"\n{index + 1}. {timeslot.profile.first_name} "
+                    f"\n{index}. {timeslot.profile.first_name} "
                     f"{timeslot.profile.last_name}: "
                     f"{timeslot.date_start}"
                 )
                 if timeslot.date_start and timeslot.profile:
                     ts_psycho = timeslot.profile.id
-                    if ts_psycho in list_ps:
+                    if ts_psycho in psycho_list:
                         list_was.append(timeslot_data)
-                    elif ts_psycho not in list_ps:
+                    elif ts_psycho not in psycho_list:
                         list_was_not.append(timeslot_data)
 
             text = "".join(text_list + list_was + list_was_not)
@@ -129,9 +116,9 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                meeting_format=10
+                meeting_format=MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MEETING_FORMAT_OFFLINE,
                 timeslot=timeslot.id,
             )
 

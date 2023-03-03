@@ -1,7 +1,13 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import DO_NOTHING_SIGN, BotState
+from core.constants import (
+    DO_NOTHING_SIGN,
+    MEETING_FORMAT_OFFLINE,
+    MEETING_FORMAT_ONLINE,
+    BotState,
+)
+from handlers.handlers_utils import make_message_for_active_meeting
 from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -34,20 +40,7 @@ def ask_for_input(state: str):
             user=user.id, is_active="True"
         )
         if user_active_meeting:
-            meeting_obj = user_active_meeting[0]
-            meeting_time = meeting_obj.date_start
-            meeting_format = (
-                buttons.BTN_MEETING_FORMAT_ONLINE.text
-                if meeting_obj.format == 10
-                else buttons.BTN_MEETING_FORMAT_OFFLINE.text
-            )
-            ps = user_service_v1.get_user(id=meeting_obj.psychologist)
-            text = (
-                f"У вас уже имеется активная запись:\n"
-                f"Психолог: {ps.first_name} {ps.last_name}\n"
-                f"Когда: {meeting_time}\n"
-                f"Формат: {meeting_format}"
-            )
+            text = make_message_for_active_meeting(user_active_meeting)
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
             return BotState.END
@@ -103,7 +96,7 @@ def ask_for_input(state: str):
 
             text = "Выберите дату и время записи:\n"
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
-
+            timeslots = sorted(timeslots, key=lambda x: (x.date_start))
             for index, timeslot in enumerate(timeslots):
                 if timeslot.date_start and timeslot.profile:
                     text += (
@@ -151,9 +144,9 @@ def process_meeting_confirm(confirm: bool):
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
                 comment=comment,
-                meeting_format=10
+                meeting_format=MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MEETING_FORMAT_OFFLINE,
                 timeslot=timeslot.id,
             )
 
