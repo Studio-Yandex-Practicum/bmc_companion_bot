@@ -7,8 +7,8 @@ from pydantic import BaseModel, Extra
 class MeetingFeedbackCreate(BaseModel):
     """Схема создания отзыва о встрече."""
 
-    meeting_id: int
-    user_id: int
+    meeting: int
+    user: int
     text: None | str = None
     score: int
 

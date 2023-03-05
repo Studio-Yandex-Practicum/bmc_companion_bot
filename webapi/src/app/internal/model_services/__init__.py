@@ -1,5 +1,9 @@
 from .base import BaseModelService
-from .meetings import MeetingModelService, MeetingTypeModelService
+from .meetings import (
+    MeetingFeedbackModelService,
+    MeetingModelService,
+    MeetingTypeModelService,
+)
 from .questions import QuestionModelService
 from .tests import (
     CompletedModelService,

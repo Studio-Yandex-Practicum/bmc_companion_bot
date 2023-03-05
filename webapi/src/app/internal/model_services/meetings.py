@@ -18,6 +18,6 @@ class MeetingTypeModelService(BaseModelService):
         return db.session.query(self.model).where(self.model.name == name).first()
 
 
-class MeetingFeedbackService(BaseModelService):
+class MeetingFeedbackModelService(BaseModelService):
     def __init__(self, model):
         super().__init__(MeetingFeedback)
