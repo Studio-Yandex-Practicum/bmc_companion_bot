@@ -160,3 +160,19 @@ class MeetingListResponse(BaseModel):
     """Модель для получения списка митингов (встреч)."""
 
     data: list[MeetingResponse]
+
+
+class FeedbackResponse(BaseModel):
+    """Модель для получения краткой информации о отзыве."""
+
+    id: int | None
+    meeting: int | None = None
+    user: int | None = None
+    text: str | None = None
+    score: int | None = None
+
+
+class FeedbackListResponse(BaseModel):
+    """Модель для получения списка отзывов."""
+
+    data: list[FeedbackResponse]
