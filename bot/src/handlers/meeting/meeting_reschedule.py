@@ -1,10 +1,11 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import BotState
+from core.constants import BotState, MeetingFormat
 from handlers.meeting.root_handlers import back_to_start_menu
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
+from ui.buttons import BTN_START_MENU
 from utils import context_manager as cm
 from utils import make_message_handler, make_text_handler
 
@@ -15,14 +16,30 @@ from .helpers import context_manager
 
 def ask_for_reschedule(state: str):
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-        text = ""
         keyboard = None
         chat_data = update.message.chat
         user = user_service_v1.get_user(chat_id=chat_data.id)
         meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
+        timeslots = schedule_service_v1.get_actual_timeslots()
+
+        if not meetings:
+            text_parts = ["У вас нет записи"]
+            button = [[BTN_START_MENU]]
+            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
+            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
+
+        if len(timeslots) < 2:
+            text_parts = ["Извините, сейчас нет подходящего времени для переноса записи"]
+            button = [[BTN_START_MENU]]
+            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
+            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
 
         if state == States.TYPING_MEETING_FORMAT:
-            text = "Выберите формат участия:"
+            text_parts = ["Выберите формат участия:"]
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
 
@@ -30,33 +47,46 @@ def ask_for_reschedule(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text = "Выберите новую дату:\n"
-            timeslots = schedule_service_v1.get_actual_timeslots()
+            text_parts = ["Выберите новую дату:\n"]
 
-            for index, timeslot in enumerate(timeslots):
+            for index, timeslot in enumerate(timeslots, start=1):
                 if timeslot.date_start and timeslot.profile:
-                    text += (
-                        f"\n{index + 1}. {timeslot.profile.first_name} "
-                        f"{timeslot.profile.last_name} "
-                        f"{timeslot.date_start}"
-                    )
+                    text_parts.append(f"\n{index}. {timeslot.profile.first_name}")
+                    text_parts.append(f"{timeslot.profile.last_name} ")
+                    text_parts.append(f"{timeslot.date_start}")
 
             context_manager.set_timeslots(context, timeslots)
 
-        if state == States.TYPING_MEETING_CONFIRM:
+        if state == States.TYPING_MEETING_SLOT:
             number_of_timeslot = int(update.message.text)
+            context_manager.set_timeslot_number(context, number_of_timeslot)
+
+            text_parts = ["Выберите запись которую хотите перенести:\n"]
+
+            for index, meeting in enumerate(meetings, start=1):
+                psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
+                text_parts.append(
+                    f"\n{index}. {psychologist_profile.first_name} "
+                    f"{psychologist_profile.last_name}"
+                )
+                text_parts.append(f"{meeting.date_start}")
+
+        if state == States.TYPING_MEETING_CONFIRM:
+            meeting_number = int(update.message.text)
+            context_manager.set_meeting_number(context, meeting_number)
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
+            number_of_timeslot = context_manager.get_timeslot_number(context)
             timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
 
             context_manager.set_timeslot(context, timeslot)
 
-            text = "Давайте все проверим:\n"
-            text += f"\nФормат записи: {meeting_format}"
-            text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
-            text += f"\nДата: {timeslot.date_start}"
-
-            context_manager.set_meeting_number(context, number_of_timeslot)
+            text_parts = ["Давайте все проверим:\n"]
+            text_parts += [f"\nФормат записи: {meeting_format}"]
+            text_parts += [
+                f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
+            ]
+            text_parts += [f"\nДата: {timeslot.date_start}"]
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
@@ -64,7 +94,7 @@ def ask_for_reschedule(state: str):
         context_manager.set_user(context, user)
         cm.set_meetings(context, meetings)
 
-        await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
 
         return state
 
@@ -81,15 +111,15 @@ def meeting_update(confirm: bool):
             meeting_format = context_manager.get_meeting_format(context)
             meetings = cm.get_meetings(context)
             meeting_number = context_manager.get_meeting_number(context)
-            meeting_id = meetings[meeting_number - 1].id
+            meeting = meetings[meeting_number - 1]
             schedule_service_v1.update_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                meeting_id=meeting_id,
-                meeting_format=10
+                meeting_id=meeting.id,
+                meeting_format=MeetingFormat.ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MeetingFormat.OFFLINE,
             )
 
             psychologist_chat_id = timeslot.profile.chat_id
@@ -132,7 +162,10 @@ meeting_reschedule_section = ConversationHandler(
             ),
         ],
         States.TYPING_TIME_SLOT: [
-            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_CONFIRM)),
+            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_SLOT)),
+        ],
+        States.TYPING_MEETING_SLOT: [
+            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_CONFIRM))
         ],
         States.TYPING_MEETING_CONFIRM: [
             make_message_handler(buttons.BTN_CONFIRM_MEETING, meeting_update(True)),

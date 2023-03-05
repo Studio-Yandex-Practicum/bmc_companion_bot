@@ -40,4 +40,4 @@ class ScheduleApiService(PydanticApiService):
         return self.patch(MeetingResponse, self.url_meetings + str(meeting_id) + "/", data=data)
 
     def delete_meeting(self, meeting_id) -> MeetingResponse:
-        return self.delete(MeetingResponse, self.url_meetings + str(meeting_id))
+        self.delete(MeetingResponse, self.url_meetings + str(meeting_id) + "/")

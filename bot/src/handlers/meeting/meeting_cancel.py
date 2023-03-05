@@ -16,32 +16,54 @@ async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_T
     user = user_service_v1.get_user(chat_id=chat_data.id)
     meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
 
-    text = "Выберите запись для отмены:\n"
-    for index, meeting in enumerate(meetings):
+    text_parts = ["Выберите запись для отмены:\n"]
+    for index, meeting in enumerate(meetings, start=1):
         psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
-        text += f"\n{index+1}. {psychologist_profile.first_name} {psychologist_profile.last_name} "
-        text += f"{meeting.date_start}"
+        text_parts.append(
+            f"\n{index}. {psychologist_profile.first_name} {psychologist_profile.last_name} "
+        )
+        text_parts.append(f"{meeting.date_start}")
 
     if not meetings:
-        text = "У вас нет записи"
+        text_parts = ["У вас нет записи"]
 
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
     context_manager.set_keys(context, keyboard)
     context_manager.set_meetings(context, meetings)
 
-    await update.message.reply_text(text=text, reply_markup=keyboard)
+    await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
 
     return States.TYPING_MEETING_LIST
 
 
 async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Удаляет запись к психологу."""
-    await update.message.reply_text("Запись отменена")
-    meeting_number = int(update.message.text)
+    meeting_number = update.message.text
     meetings = context_manager.get_meetings(context)
-    meeting_id = meetings[meeting_number - 1].id
-    schedule_service_v1.delete_meeting(meeting_id=meeting_id)
+    count_of_meetings = len(meetings)
+    if str(meeting_number) == "Главное меню":
+        await back_to_start_menu(update, context)
+        return BotState.STOPPING
+    if str(meeting_number).isnumeric():
+        if int(meeting_number) <= count_of_meetings:
+            meeting_id = meetings[int(meeting_number) - 1].id
+            schedule_service_v1.delete_meeting(meeting_id=meeting_id)
+            text_parts = ["Запись отменена"]
+        else:
+            text_parts = ["Укажите верный номер записи"]
+
+    else:
+        text_parts = ["Введите цифру записи"]
+
+    buttons = [[BTN_START_MENU]]
+    keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
+
+    await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+
+    await back_to_start_menu(update, context)
+
+    return BotState.STOPPING
 
 
 meeting_cancel_section = ConversationHandler(
@@ -50,15 +72,13 @@ meeting_cancel_section = ConversationHandler(
     ],
     states={
         States.TYPING_MEETING_LIST: [
-            make_message_handler(BTN_START_MENU, back_to_start_menu),
             make_text_handler(meeting_cancel),
         ],
     },
     fallbacks=[
-        make_message_handler(BTN_START_MENU, back_to_start_menu),
+        # make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
-        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
     },
 )
