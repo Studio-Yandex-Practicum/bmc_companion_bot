@@ -54,3 +54,18 @@ class Meeting(models.Model):
         verbose_name = "Консультация"
         verbose_name_plural = "Консультации"
         ordering = ["id"]
+
+
+class MeetingFeedback(models.Model):
+    user = models.ForeignKey(
+        Profile, blank=True, null=True, on_delete=models.SET_NULL, related_name="feedbacks"
+    )
+    meeting = models.ForeignKey(
+        Meeting, blank=True, null=True, on_delete=models.CASCADE, related_name="feedbacks"
+    )
+    text = models.TextField(null=True, blank=True, verbose_name="Текст отзыва")
+    score = models.SmallIntegerField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"
