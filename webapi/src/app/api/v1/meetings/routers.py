@@ -1,9 +1,17 @@
 from http import HTTPStatus
 
-from app.internal.api_services import meeting_service, meeting_type_service
+from app.internal.api_services import (
+    meeting_feedback_service,
+    meeting_service,
+    meeting_type_service,
+)
 from app.schemas.core import GetMultiQueryParams
 from app.schemas.meetings import (
     MeetingCreate,
+    MeetingFeedbackCreate,
+    MeetingFeedbackList,
+    MeetingFeedbackResponse,
+    MeetingFeedbackUpdate,
     MeetingList,
     MeetingResponse,
     MeetingTypeCreate,
@@ -80,3 +88,38 @@ class MeetingTypeApiDetail(Resource):
         """Изменить данные о типе встречи по id."""
         meeting_type = meeting_type_service.update(meeting_type_id, body)
         return MeetingTypeResponse.from_orm(meeting_type)
+
+
+class MeetingFeedbackApiList(Resource):
+    @validate()
+    def get(self, query: GetMultiQueryParams) -> MeetingFeedbackList:
+        """Получить список отзывов."""
+        paginated_data = meeting_feedback_service.get_paginated_objects_list(
+            schema_singl_object=MeetingFeedbackResponse,
+            schema_list=MeetingFeedbackList,
+            url="/api/v1/meeting_feedbacks/",
+            query=query,
+        )
+        return MeetingFeedbackList(**paginated_data)
+
+    @validate(on_success_status=HTTPStatus.CREATED)
+    def post(self, body: MeetingFeedbackCreate) -> MeetingFeedbackResponse:
+        """Создать новый отзыв."""
+        meeting_feedback = meeting_service.create(body)
+        return MeetingFeedbackResponse.from_orm(meeting_feedback)
+
+
+class MeetingFeedbackApiDetail(Resource):
+    @validate()
+    def get(self, meeting_feedback_id: int) -> MeetingFeedbackResponse:
+        """Получить отзыв по id."""
+        meeting_feedback = meeting_feedback_service.get_object_by_id(meeting_feedback_id)
+        return MeetingFeedbackResponse.from_orm(meeting_feedback)
+
+    @validate()
+    def patch(
+        self, meeting_feedback_id: int, body: MeetingFeedbackUpdate
+    ) -> MeetingFeedbackResponse:
+        """Изменить данные о отзыве по id."""
+        meeting_feedback = meeting_feedback_service.update(meeting_feedback_id, body)
+        return MeetingFeedbackResponse.from_orm(meeting_feedback)

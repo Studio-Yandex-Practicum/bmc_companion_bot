@@ -1,6 +1,8 @@
 from app.api.v1.meetings.routers import (
     MeetingApiDetail,
     MeetingApiList,
+    MeetingFeedbackApiDetail,
+    MeetingFeedbackApiList,
     MeetingTypeApiDetail,
     MeetingTypeApiList,
 )
@@ -61,3 +63,5 @@ def register_routes(api):
     api.add_resource(UserIdFromTelegram, "/api/v1/user_id_from_chat_id/")
     api.add_resource(UserTimeSlotAPI, "/api/v1/slot/<int:id>")
     api.add_resource(UserTimeSlotAPIList, "/api/v1/slots/")
+    api.add_resource(MeetingFeedbackApiList, "/api/v1/meeting_feedbacks/")
+    api.add_resource(MeetingFeedbackApiDetail, "/api/v1/meeting_feedbacks/<int:id>")
