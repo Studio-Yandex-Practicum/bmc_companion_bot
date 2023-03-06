@@ -120,6 +120,7 @@ def process_meeting_confirm(confirm: bool):
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else MEETING_FORMAT_OFFLINE,
                 timeslot=timeslot.id,
+                comment="Повторная запись",
             )
 
             psychologist_chat_id = timeslot.profile.chat_id
