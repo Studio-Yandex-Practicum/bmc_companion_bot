@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from http import HTTPStatus
 from typing import Type
 
 from core.constants import KEY_RESULTS_FOR_PAGINATED_RESPONSE
@@ -49,6 +50,9 @@ class PydanticApiService:
 
     def _send_request(self, method: str, url: str, model: Type[BaseModel], **kwargs):
         response = getattr(self.api_client, method)(url, **kwargs)
+
+        if method == "delete" and response.status_code == HTTPStatus.NO_CONTENT:
+            return None
 
         data = response.json()
 
