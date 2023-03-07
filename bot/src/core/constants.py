@@ -57,6 +57,11 @@ class UserRole(int, Enum):
     USER = 3
 
 
+class MeetingFormat(int, Enum):
+    MEETING_FORMAT_ONLINE = 10
+    MEETING_FORMAT_OFFLINE = 20
+
+
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 DO_NOTHING_SIGN = "-"
 KEY_RESULTS_FOR_PAGINATED_RESPONSE = "results"

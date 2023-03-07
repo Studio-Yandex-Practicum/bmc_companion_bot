@@ -2,7 +2,8 @@ from datetime import datetime
 
 import phonenumbers
 from app import schedule_service_v1, user_service_v1
-from core.constants import DO_NOTHING_SIGN, BotState
+from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
+from handlers.handlers_utils import make_message_for_active_meeting
 from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -31,6 +32,15 @@ def ask_for_input(state: str):
             user = user_service_v1.create_user(
                 telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
             )
+
+        user_active_meeting = schedule_service_v1.get_meetings_by_user(
+            user=user.id, is_active="True"
+        )
+        if user_active_meeting:
+            text = make_message_for_active_meeting(user_active_meeting)
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.END
 
         if state == States.TYPING_PHONE:
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
@@ -116,8 +126,8 @@ def ask_for_input(state: str):
             context_manager.set_meeting_format(context, meeting_format)
 
             text = "Выберите дату и время записи:\n"
-            timeslots = schedule_service_v1.get_actual_timeslots()
-
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            timeslots = sorted(timeslots, key=lambda x: (x.date_start))
             for index, timeslot in enumerate(timeslots):
                 if timeslot.date_start and timeslot.profile:
                     text += (
@@ -165,9 +175,10 @@ def process_meeting_confirm(confirm: bool):
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
                 comment=comment,
-                meeting_format=10
+                meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MeetingFormat.MEETING_FORMAT_OFFLINE,
+                timeslot=timeslot.id,
             )
 
             psychologist_chat_id = timeslot.profile.chat_id
@@ -189,7 +200,7 @@ def process_meeting_confirm(confirm: bool):
 
         await back_to_start_menu(update, context)
 
-        return BotState.STOPPING
+        return BotState.END
 
     return inner
 
@@ -240,6 +251,6 @@ meeting_first_section = ConversationHandler(
     ],
     map_to_parent={
         BotState.STOPPING: States.TYPING_COMMENT,
-        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
+        BotState.END: BotState.END,
     },
 )

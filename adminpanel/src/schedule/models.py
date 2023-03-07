@@ -49,6 +49,14 @@ class Meeting(models.Model):
         default=MEETING_FORMAT_ONLINE,
         verbose_name="Формат встречи",
     )
+    timeslot = models.OneToOneField(
+        TimeSlot,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="timeslot_meetings",
+        verbose_name="Таймслот",
+    )
 
     class Meta:
         verbose_name = "Консультация"
