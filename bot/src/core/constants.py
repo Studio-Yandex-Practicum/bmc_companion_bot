@@ -58,6 +58,8 @@ class UserRole(int, Enum):
 
 
 class MeetingFormat(int, Enum):
+    ONLINE = 10
+    OFFLINE = 20
     MEETING_FORMAT_ONLINE = 10
     MEETING_FORMAT_OFFLINE = 20
 
