@@ -43,6 +43,9 @@ django-split-settings = "^1.2.0"
 djangorestframework = "^3.14.0"
 python-decouple = "^3.7"
 django-filter = "^22.1"
+django-celery-beat = "^2.4.0"
+celery = "^5.2.7"
+phonenumbers = "^8.13.6"
 
 [tool.poetry.group.lint.dependencies]
 flake8 = "^5.0.4"

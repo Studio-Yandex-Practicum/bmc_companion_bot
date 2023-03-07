@@ -10,6 +10,7 @@ class APIVersion(str, Enum):
 class Endpoint(str, Enum):
     MEETINGS = "/meetings"
     TESTS = "/tests"
+    UCE_TEST = "uce_test"
     NEXT_QUESTION = "next_question"
     SUBMIT_ANSWER = "submit_answer"
     TEST_STATUS = "test_statuses"
@@ -59,6 +60,8 @@ class UserRole(int, Enum):
 class MeetingFormat(int, Enum):
     ONLINE = 10
     OFFLINE = 20
+    MEETING_FORMAT_ONLINE = 10
+    MEETING_FORMAT_OFFLINE = 20
 
 
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

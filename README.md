@@ -26,6 +26,10 @@
 
 [Оглавление](#Оглавление)
 
+# Клонирование репозитория
+**_Важно!!!_** Склонируйте репозиторий с ключем: укажите для команды git clone параметр "--config core.autocrlf=input".
+В противном случае проект не будет запускаться в докере, если у вас Windows.
+
 # Запуск проекта
 
 Все команды, приведенные в данном руководстве, выполняются из корневой директории проекта, если
@@ -59,6 +63,11 @@ Docker version 20.10.21, build baeda1f
 <details>
 <summary>Запуск сервисов</summary>
 <br>
+<hr>
+
+**_ВАЖНО!!!_** данный раздел устарел и требует обновления. Перейди к разделу "Создание среды разработки"
+<hr>
+
 Для запуска проекта выполни следующую команду:
 ```
 docker-compose up -d --build
@@ -181,30 +190,40 @@ pre-commit installed at .git/hooks/pre-commit
 # Режим разработки
 
 <details>
-<summary>Запуск и отладка сервиса webapi</summary>
+<summary>Запуск и отладка сервиса adminpanel</summary>
 <br>
 
-Для запуска и отладки сервиса webapi нужно, чтобы была запущена база данных и redis.
+Для запуска и отладки сервиса adminpanel нужно, чтобы была запущена база данных.
 
 Сначала остановим все запущенные контейнеры:
 ```
 docker-compose down
+# make down
 ```
 Запустим базу данных и redis:
 ```
-docker-compose up -d --build postgres redis
+docker-compose up -d --build postgres
+# make run s="postgres"
 ```
-Теперь можно запустить сам сервис:
+Теперь нужно выполнять миграции. Для этого перейдем в каталог adminpanel/src
 ```
-python webapi/src/manage.py
+cd adminpanel/src
 ```
-Перейди по адресу [http://127.0.0.1:5000/api/v1/healthcheck/ping/](http://127.0.0.1:5000/api/v1/healthcheck/ping/).
-Если выдается `pong`, значит все ок.
-
-Ты можешь настраивать хост и порт с помощью переменных окружения `APP_HOST` и `APP_PORT`.
-
-Отлаживать сервис можно с помощью стандартного дебаггера в PyCharm. Для этого запусти debug файла
-`webapi/src/manage.py`.
+Выполним миграции:
+```
+python manage.py migrate
+```
+При необходимости создадим суперюзера:
+```
+python manage.py createsuperuser
+```
+Запускаем сервер:
+```
+python manage.py runserver
+```
+Для дебага в PyCharm нужно прописать в конфигурации в Script Path путь к файлу
+manage.py, а в Parameters прописать runserver и можно юзать отладчик.
+Либо просто запустить файл manage.py в режиме отладки.
 </details>
 
 <details>
@@ -245,6 +264,22 @@ python -m flask db migrate -m "Your comment"
 Применить миграции:
 ```
 python -m flask db upgrade
+```
+</details>
+
+<details>
+<summary>Запуск и отладка сервиса celery</summary>
+<br>
+Для запуска сервиса оповещений нужно находиться в папке /adminpanel/src/
+
+Запустить сервис celery worker:
+```
+celery -A config.celery worker -l info
+```
+
+Запустить сервис celery beat:
+```
+celery -A config.celery beat -l info
 ```
 </details>
 

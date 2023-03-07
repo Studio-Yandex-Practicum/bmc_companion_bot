@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     # third parties apps
     "rest_framework",
     "django_filters",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -109,3 +110,7 @@ REFERRER_POLICY = "same-origin"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "profiles.Profile"
+
+CELERY_BEAT_SCHEDULER = config.CELERY_BEAT_SCHEDULER
+CELERY_BROKER_URL = config.CELERY_BROKER_URL
+CELERY_RESULT_BACKEND = config.CELERY_RESULT_BACKEND

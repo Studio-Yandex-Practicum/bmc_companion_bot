@@ -154,3 +154,9 @@ class UserListResponse(BaseModel):
     """Модель для получения списка пользователей."""
 
     data: list[UserResponse]
+
+
+class UceTestResponse(BaseModel):
+    """Модель информации о id теста."""
+
+    id: int
