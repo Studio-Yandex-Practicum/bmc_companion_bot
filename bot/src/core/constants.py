@@ -1,10 +1,6 @@
-import os
 from enum import Enum
 
-from dotenv import load_dotenv
 from telegram.ext import ConversationHandler
-
-load_dotenv()
 
 
 class APIVersion(str, Enum):
@@ -61,9 +57,11 @@ class UserRole(int, Enum):
     USER = 3
 
 
+class MeetingFormat(int, Enum):
+    MEETING_FORMAT_ONLINE = 10
+    MEETING_FORMAT_OFFLINE = 20
+
+
 RANDOM_STRING_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 DO_NOTHING_SIGN = "-"
 KEY_RESULTS_FOR_PAGINATED_RESPONSE = "results"
-
-MEETING_FORMAT_ONLINE = int(os.getenv("MEETING_FORMAT_ONLINE"))
-MEETING_FORMAT_OFFLINE = int(os.getenv("MEETING_FORMAT_OFFLINE"))

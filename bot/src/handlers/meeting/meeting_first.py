@@ -1,12 +1,7 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import (
-    DO_NOTHING_SIGN,
-    MEETING_FORMAT_OFFLINE,
-    MEETING_FORMAT_ONLINE,
-    BotState,
-)
+from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
 from handlers.handlers_utils import make_message_for_active_meeting
 from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
@@ -144,9 +139,9 @@ def process_meeting_confirm(confirm: bool):
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
                 comment=comment,
-                meeting_format=MEETING_FORMAT_ONLINE
+                meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else MEETING_FORMAT_OFFLINE,
+                else MeetingFormat.MEETING_FORMAT_OFFLINE,
                 timeslot=timeslot.id,
             )
 

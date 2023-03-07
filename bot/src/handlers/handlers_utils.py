@@ -1,17 +1,15 @@
 from app import user_service_v1
-from core.constants import MEETING_FORMAT_ONLINE
-from dotenv import load_dotenv
+from core.constants import MeetingFormat
 from handlers.meeting import buttons
+from schemas.responses import MeetingResponse
 
-load_dotenv()
 
-
-def make_message_for_active_meeting(user_active_meeting) -> str:
+def make_message_for_active_meeting(user_active_meeting: list[MeetingResponse]) -> str:
     meeting_obj = user_active_meeting[0]
     meeting_time = meeting_obj.date_start
     meeting_format = (
         buttons.BTN_MEETING_FORMAT_ONLINE.text
-        if meeting_obj.format == MEETING_FORMAT_ONLINE
+        if meeting_obj.format == MeetingFormat.MEETING_FORMAT_ONLINE
         else buttons.BTN_MEETING_FORMAT_OFFLINE.text
     )
     ps = user_service_v1.get_user(id=meeting_obj.psychologist)
