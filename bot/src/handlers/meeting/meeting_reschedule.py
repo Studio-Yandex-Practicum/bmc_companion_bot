@@ -47,36 +47,43 @@ def ask_for_reschedule(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text_parts = ["Выберите новую дату:\n"]
+            text_part = ["Выберите новую дату:\n"]
+            list_was = [
+                "\nВы уже были у этих психологов:",
+            ]
+            list_was_not = [
+                "\n\nУ этих психологов Вы еще не были:",
+            ]
+
+            meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
+            psycho_set = {meeting.psychologist for meeting in meetings}
+
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            timeslots = sorted(
+                timeslots, key=lambda x: (x.profile.id not in psycho_set, x.date_start)
+            )
 
             for index, timeslot in enumerate(timeslots, start=1):
+                timeslot_data = (
+                    f"\n{index}. {timeslot.profile.first_name} "
+                    f"{timeslot.profile.last_name}: "
+                    f"{timeslot.date_start}"
+                )
                 if timeslot.date_start and timeslot.profile:
-                    text_parts.append(f"\n{index}. {timeslot.profile.first_name}")
-                    text_parts.append(f"{timeslot.profile.last_name} ")
-                    text_parts.append(f"{timeslot.date_start}")
+                    ts_psycho = timeslot.profile.id
+                    if ts_psycho in psycho_set:
+                        list_was.append(timeslot_data)
+                    else:
+                        list_was_not.append(timeslot_data)
 
+            text_parts = text_part + list_was + list_was_not
             context_manager.set_timeslots(context, timeslots)
 
-        if state == States.TYPING_MEETING_SLOT:
+        if state == States.TYPING_MEETING_CONFIRM:
             number_of_timeslot = int(update.message.text)
             context_manager.set_timeslot_number(context, number_of_timeslot)
-
-            text_parts = ["Выберите запись которую хотите перенести:\n"]
-
-            for index, meeting in enumerate(meetings, start=1):
-                psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
-                text_parts.append(
-                    f"\n{index}. {psychologist_profile.first_name} "
-                    f"{psychologist_profile.last_name}"
-                )
-                text_parts.append(f"{meeting.date_start}")
-
-        if state == States.TYPING_MEETING_CONFIRM:
-            meeting_number = int(update.message.text)
-            context_manager.set_meeting_number(context, meeting_number)
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
-            number_of_timeslot = context_manager.get_timeslot_number(context)
             timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
 
             context_manager.set_timeslot(context, timeslot)
@@ -116,8 +123,7 @@ def meeting_update(confirm: bool):
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
             meetings = cm.get_meetings(context)
-            meeting_number = context_manager.get_meeting_number(context)
-            meeting = meetings[meeting_number - 1]
+            meeting = meetings[0]
             schedule_service_v1.update_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
@@ -168,10 +174,7 @@ meeting_reschedule_section = ConversationHandler(
             ),
         ],
         States.TYPING_TIME_SLOT: [
-            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_SLOT)),
-        ],
-        States.TYPING_MEETING_SLOT: [
-            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_CONFIRM))
+            make_text_handler(ask_for_reschedule(States.TYPING_MEETING_CONFIRM)),
         ],
         States.TYPING_MEETING_CONFIRM: [
             make_message_handler(buttons.BTN_CONFIRM_MEETING, meeting_update(True)),
