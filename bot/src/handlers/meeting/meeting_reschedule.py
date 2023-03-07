@@ -17,8 +17,8 @@ from .helpers import context_manager
 def ask_for_reschedule(state: str):
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         keyboard = None
-        chat_data = update.message.chat
-        user = user_service_v1.get_user(chat_id=chat_data.id)
+        chat_data_id = update.message.chat.id
+        user = user_service_v1.get_user(chat_id=chat_data_id)
         meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
         timeslots = schedule_service_v1.get_actual_timeslots()
 
@@ -94,7 +94,13 @@ def ask_for_reschedule(state: str):
         context_manager.set_user(context, user)
         cm.set_meetings(context, meetings)
 
-        await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+        if text_parts:
+            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+        else:
+            text = "Извините, попробуйте ещё раз"
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
 
         return state
 
