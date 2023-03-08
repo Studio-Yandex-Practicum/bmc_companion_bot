@@ -41,4 +41,3 @@ class UceTestRequest(BaseModel):
     """Модель запроса test_id по test_name"""
 
     pass
-
