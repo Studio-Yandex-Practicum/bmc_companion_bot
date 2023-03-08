@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from schedule.models import Meeting, Profile, TimeSlot
+from schedule.models import Meeting, MeetingFeedback, Profile, TimeSlot
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -19,4 +19,10 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meeting
+        fields = "__all__"
+
+
+class MeetingFeedbackSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MeetingFeedback
         fields = "__all__"

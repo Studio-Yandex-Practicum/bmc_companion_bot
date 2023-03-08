@@ -47,3 +47,14 @@ class PsychologistInfo(BaseModel):
     cal_pass = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     deleted_at = db.Column(db.DateTime)
+
+
+class MeetingFeedback(BaseModel):
+    """Оценка встречи с психологом."""
+
+    __tablename__ = "meeting_feedbacks"
+
+    meeting = db.Column(db.Integer, db.ForeignKey("meetings.id"), nullable=False)
+    user = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    text = db.Column(db.Text)
+    score = db.Column(db.Integer)

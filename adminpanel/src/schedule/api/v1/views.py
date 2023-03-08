@@ -3,7 +3,7 @@ import datetime
 from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 from schedule.api.v1 import serializer
-from schedule.models import Meeting, TimeSlot
+from schedule.models import Meeting, MeetingFeedback, TimeSlot
 from schedule.tasks import create_notification_tasks
 
 
@@ -40,6 +40,12 @@ class MeetingViewSet(ModelViewSet):
             date_time=task_data.get("date_start"),
         )
         return super().perform_create(serializer)
+
+
+class MeetingFeedbackViewSet(ModelViewSet):
+    queryset = MeetingFeedback.objects.all()
+    serializer_class = serializer.MeetingFeedbackSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         qs = self.queryset

@@ -1,7 +1,7 @@
 from enum import Enum
 
 from base import BaseContextManager
-from schemas.responses import UserResponse
+from schemas.responses import FeedbackResponse, MeetingResponse, UserResponse
 from telegram.ext import ContextTypes
 
 
@@ -11,6 +11,10 @@ class ContextKeys(str, Enum):
     MEETING_FORMAT = "MEETING_FORMAT"
     TIMESLOTS = "TIMESLOTS"
     TIMESLOT = "TIMESLOT"
+    MEETING = "MEETING"
+    FEEDBACK = "FEEDBACK"
+    FEEDBACK_TEXT = "FEEDBACK_TEXT"
+    SCORE = "SCORE"
     MEETING_NUMBER = "MEETING_NUMBER"
     TIMESLOT_NUMBER = "TIMESLOT_NUMBER"
 
@@ -64,6 +68,30 @@ class MeetingContextManager(BaseContextManager):
 
     def get_timeslot(self, context: ContextTypes.DEFAULT_TYPE):
         return self.get(context, ContextKeys.TIMESLOT)
+
+    def set_meeting(self, context: ContextTypes.DEFAULT_TYPE, meeting: MeetingResponse):
+        self.set(context, ContextKeys.MEETING, meeting)
+
+    def get_meeting(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.MEETING)
+
+    def set_feedback(self, context: ContextTypes.DEFAULT_TYPE, feedback: FeedbackResponse):
+        self.set(context, ContextKeys.FEEDBACK, feedback)
+
+    def get_feedback(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.FEEDBACK)
+
+    def set_feedback_text(self, context: ContextTypes.DEFAULT_TYPE, feedback_text: str):
+        self.set(context, ContextKeys.FEEDBACK_TEXT, feedback_text)
+
+    def get_feedback_text(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.FEEDBACK_TEXT)
+
+    def set_score(self, context: ContextTypes.DEFAULT_TYPE, score: int):
+        self.set(context, ContextKeys.SCORE, score)
+
+    def get_score(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.SCORE)
 
 
 context_manager = MeetingContextManager()

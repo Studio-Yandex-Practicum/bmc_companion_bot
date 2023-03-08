@@ -4,6 +4,7 @@ BTN_START_MENU = KeyboardButton(text="Главное меню")
 
 BTN_SELECT_TEST = KeyboardButton(text="💯 Пройти тест")
 BTN_MAKE_MEETING = KeyboardButton(text="👍 Записаться к психологу")
+BTN_FEEDBACK = KeyboardButton(text="Обратная связь")
 BTN_ADMIN_MENU = KeyboardButton(text="Админка")
 
 BTN_ADMINS_LIST = KeyboardButton(text="Список админов")
