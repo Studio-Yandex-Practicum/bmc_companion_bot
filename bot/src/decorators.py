@@ -1,5 +1,6 @@
 from functools import wraps
 
+from app.core.constants import BotState
 from loguru import logger
 
 
@@ -13,6 +14,7 @@ def t(func):
                 "Error occurred in module %s while executing the function %s: %s"
                 % (func.__module__, func.__name__, e)
             )
+            return BotState.END
 
     return inner
 
@@ -28,5 +30,6 @@ def at(func):
                 "Error occurred in module %s while executing the function %s: %s"
                 % (func.__module__, func.__name__, e)
             )
+            return BotState.END
 
     return inner
