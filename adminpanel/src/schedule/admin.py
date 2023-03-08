@@ -30,3 +30,8 @@ class MeetingAdmin(admin.ModelAdmin):
         "user__telegram_login",
     )
     list_filter = ("psychologist", "format")
+
+
+"""@admin.register(models.MeetingFeedback)
+class MeetingFeedbackAdmin(admin.ModelAdmin):
+    list_display = ("id",)"""
