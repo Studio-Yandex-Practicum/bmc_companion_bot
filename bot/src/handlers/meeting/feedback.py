@@ -1,3 +1,6 @@
+import re
+from datetime import datetime as dt
+
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from telegram import Update
@@ -17,17 +20,18 @@ def ask_for_feedback(state: str):
         chat_data = update.message.chat
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
-        meetings = schedule_service_v1.get_meetings_by_user(user=user.id)
         if user is None:
             text = "Ваших данных нет в базе"
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.STOPPING
+            return BotState.END
+        meetings = schedule_service_v1.get_meetings_by_user(user=user.id)
         if not meetings:
-            text = "У вас еще небыло консультаций."
+            text = "У вас еще не было консультаций."
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.STOPPING
+            return BotState.END
+        meetings = [i for i in meetings if dt.strptime(i.date_start, "%d.%m.%Y %H:%M") < dt.now()]
 
         if state == States.TYPING_MEETING_NUMBER:
             text = (
@@ -35,17 +39,21 @@ def ask_for_feedback(state: str):
                 "для которой хотите оставить обратную связь"
             )
             for index, meeting in enumerate(meetings):
-                psichologist = user_service_v1.get_user(id=meeting.psychologist)
+                psychologist = user_service_v1.get_user(id=meeting.psychologist)
                 meeting_format = "Online" if meeting.format == 10 else "Очно"
                 add_meeting = (
-                    f"\n{index + 1}. {psichologist.first_name} "
-                    f"{psichologist.last_name} "
+                    f"\n{index + 1}. {psychologist.first_name} "
+                    f"{psychologist.last_name} "
                     f"{meeting.date_start} {meeting_format}. "
                     f"Тема: {meeting.comment[:30]}"
                 )
                 text += add_meeting
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
-            number_of_meeting = int(update.message.text)
+            number_of_meeting = int(re.findall("\\d+", update.message.text)[0])
+            if number_of_meeting > len(meetings):
+                text = "Введен неправильный номер !\nНет консультации под таким номером."
+                await update.message.reply_text(text=text, reply_markup=keyboard)
+                return States.TYPING_MEETING_NUMBER
             meeting = meetings[number_of_meeting - 1] if meetings else {}
             context_manager.set_meeting(context, meeting)
             feedback = schedule_service_v1.get_feedback_by_user_and_meeting(
@@ -67,7 +75,11 @@ def ask_for_feedback(state: str):
             context_manager.set_feedback_text(context, feedback_text)
             text = "Оцените встречу от 1 до 10: \n" "Введите число"
         elif state == States.FEEDBACK_SAVED:
-            score = update.message.text
+            score = int(re.findall("\\d+", update.message.text)[0])
+            if score not in range(1, 11):
+                text = "Введите корректную оценку\nВведите число 1 до 10."
+                await update.message.reply_text(text=text, reply_markup=keyboard)
+                return States.CHECK_IS_FEEDBACK_LEFT
             context_manager.set_score(context, score)
             feedback = context_manager.get_feedback(context)
             meeting = context_manager.get_meeting(context)
@@ -94,6 +106,7 @@ def ask_for_feedback(state: str):
                     )
                     await context.bot.send_message(chat_id=psychologist_chat_id, text=message)
             await update.message.reply_text(text=text, reply_markup=keyboard)
+            await back_to_start_menu(update, context)
             return BotState.END
         await update.message.reply_text(text=text, reply_markup=keyboard)
 

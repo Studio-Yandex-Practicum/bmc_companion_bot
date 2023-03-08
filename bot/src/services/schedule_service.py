@@ -47,7 +47,5 @@ class ScheduleApiService(PydanticApiService):
             data=kwargs,
         )
 
-    def get_feedback_by_user_and_meeting(
-        self, **kwargs
-    ) -> FeedbackResponse | list[FeedbackResponse] | None:
+    def get_feedback_by_user_and_meeting(self, **kwargs) -> FeedbackResponse | None:
         return self.get(FeedbackResponse, self.url_feedbacks, params=kwargs)
