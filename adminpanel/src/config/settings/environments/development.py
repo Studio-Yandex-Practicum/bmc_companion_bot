@@ -36,3 +36,5 @@ def _custom_show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": _custom_show_toolbar}
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+APPEND_SLASH = False

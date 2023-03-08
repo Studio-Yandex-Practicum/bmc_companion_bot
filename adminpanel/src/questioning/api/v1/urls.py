@@ -7,4 +7,5 @@ urlpatterns = [
     path("submit_answer", views.post_answer),
     path("test_results", views.get_test_result),
     path("test_statuses/all", views.get_all_test_statuses),
+    path("uce_test", views.uce_test_from_telegram),
 ]

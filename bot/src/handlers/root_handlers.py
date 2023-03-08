@@ -22,7 +22,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
         )
 
-    await update.message.reply_text(text, reply_markup=keyboard)
+        await update.message.reply_text(text, reply_markup=keyboard)
+
+    else:
+        await update.message.reply_text("Вы в главном меню", reply_markup=keyboard)
 
     return BotState.MENU_START_SELECTING_LEVEL
 

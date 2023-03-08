@@ -10,7 +10,12 @@ from . import buttons
 async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     text = "Выберите, что нужно сделать:"
     btns = [
-        [buttons.BTN_MEETING_FIRST, buttons.BTN_MEETING_REPEAT, buttons.BTN_MEETING_CANCEL],
+        [
+            buttons.BTN_MEETING_FIRST,
+            buttons.BTN_MEETING_REPEAT,
+            buttons.BTN_MEETING_CANCEL,
+            buttons.BTN_MEETING_RESCHEDULE,
+        ],
         [BTN_START_MENU],
     ]
     keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)

@@ -12,3 +12,14 @@ class TestCompletedAdmin(admin.ModelAdmin):
 
     def has_change_permission(self, request, obj=None):
         return False
+
+
+@admin.register(models.TestProgress)
+class TestProgressAdmin(admin.ModelAdmin):
+    list_display = ("id", "profile", "test", "question", "answer")
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

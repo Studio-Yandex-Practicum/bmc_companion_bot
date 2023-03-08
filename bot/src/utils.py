@@ -9,6 +9,7 @@ from core.constants import (
     KEY_RESULTS_FOR_PAGINATED_RESPONSE,
     RANDOM_STRING_CHARS,
 )
+from schemas.responses import MeetingResponse
 from telegram import KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import ContextTypes, MessageHandler, filters
 
@@ -72,6 +73,7 @@ class ContextKeys(str, Enum):
     QUESTION_ID = "current_question_id"
     PHONE = "phone"
     USER = "user"
+    MEETINGS = "meetings"
 
 
 class ContextManager:
@@ -125,6 +127,12 @@ class ContextManager:
 
     def get_question_id(self, context: ContextTypes.DEFAULT_TYPE) -> int:
         return context.user_data.get(ContextKeys.QUESTION_ID)
+
+    def set_meetings(self, context: ContextTypes.DEFAULT_TYPE, meetings: list[MeetingResponse]):
+        context.chat_data[ContextKeys.MEETINGS] = meetings
+
+    def get_meetings(self, context: ContextTypes.DEFAULT_TYPE) -> list[MeetingResponse]:
+        return context.chat_data.get(ContextKeys.MEETINGS)
 
 
 context_manager = ContextManager()

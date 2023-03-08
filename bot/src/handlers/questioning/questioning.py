@@ -1,5 +1,5 @@
 from core.constants import BotState
-from handlers.questioning.root_handlers import api_client, questioning_section
+from handlers.questioning.root_handlers import api_client, test_questioning_section
 from handlers.root_handlers import error_restart
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
@@ -20,7 +20,7 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
         f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
     )
     context_manager.set_test_id(context, None)
-    bot_state = await questioning_section(update, context)
+    bot_state = await test_questioning_section(update, context)
     return bot_state
 
 

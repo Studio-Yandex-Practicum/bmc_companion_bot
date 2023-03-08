@@ -13,6 +13,7 @@ from request.exceptions import (
     NoNextQuestion,
 )
 from schemas.requests import (
+    UceTestRequest,
     UserIdRequestFromTelegram,
     UserSpecificRequest,
     UserTestQuestionAnswerSpecificRequest,
@@ -27,6 +28,7 @@ from schemas.responses import (
     SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
+    UceTestResponse,
     UserIdResponse,
     UserListResponse,
     UserResponse,
@@ -177,6 +179,11 @@ class TestAPIClient(BaseAPIClient):
         url = urljoin(self._base_url, Endpoint.USER_ID_FROM_CHAT_ID)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, UserIdResponse)
+
+    def uce_test_id(self, request: UceTestRequest) -> UceTestResponse:
+        url = urljoin(self._base_url, Endpoint.UCE_TEST)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, UceTestResponse)
 
     def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
         """Запрос статуса всех тестов для данного пользователя."""
