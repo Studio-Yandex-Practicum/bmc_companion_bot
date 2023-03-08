@@ -14,6 +14,9 @@ class TimeSlotViewSet(ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset().filter(date_start__gte=datetime.datetime.now())
+        is_free = self.request.query_params.get("is_free", None)
+        if is_free == "True":
+            qs = qs.filter(timeslot_meetings__isnull=True)
         return qs
 
 
@@ -43,3 +46,10 @@ class MeetingFeedbackViewSet(ModelViewSet):
     queryset = MeetingFeedback.objects.all()
     serializer_class = serializer.MeetingFeedbackSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        qs = self.queryset
+        is_active = self.request.query_params.get("is_active", None)
+        if is_active == "True":
+            qs = super().get_queryset().filter(date_start__gte=datetime.datetime.now())
+        return qs

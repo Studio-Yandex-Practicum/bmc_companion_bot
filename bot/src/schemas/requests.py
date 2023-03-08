@@ -35,3 +35,10 @@ class MeetingIdRequest(BaseModel):
     """Схема запроса к API, требующего указания id митинга (встречи)."""
 
     meeting_id: int
+
+
+class UceTestRequest(BaseModel):
+    """Модель запроса test_id по test_name"""
+
+    pass
+

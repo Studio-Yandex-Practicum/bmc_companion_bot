@@ -32,6 +32,12 @@ class MeetingAdmin(admin.ModelAdmin):
     list_filter = ("psychologist", "format")
 
 
-"""@admin.register(models.MeetingFeedback)
+@admin.register(models.MeetingFeedback)
 class MeetingFeedbackAdmin(admin.ModelAdmin):
-    list_display = ("id",)"""
+    list_display = ("id", "user", "meeting", "score")
+    list_select_related = ("meeting", "user")
+    search_fields = (
+        "user__first_name",
+        "meeting__id",
+    )
+    list_filter = ("user", "meeting", "score")

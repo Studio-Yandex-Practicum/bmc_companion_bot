@@ -176,3 +176,9 @@ class FeedbackListResponse(BaseModel):
     """Модель для получения списка отзывов."""
 
     data: list[FeedbackResponse]
+
+
+class UceTestResponse(BaseModel):
+    """Модель информации о id теста."""
+
+    id: int

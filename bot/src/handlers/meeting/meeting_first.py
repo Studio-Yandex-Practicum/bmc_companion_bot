@@ -1,7 +1,10 @@
 from datetime import datetime
 
+import phonenumbers
 from app import schedule_service_v1, user_service_v1
-from core.constants import DO_NOTHING_SIGN, BotState
+from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
+from handlers.handlers_utils import make_message_for_active_meeting
+from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from utils import (
@@ -22,6 +25,7 @@ def ask_for_input(state: str):
         keyboard = None
         chat_data = update.message.chat
         telegram_login = chat_data.username
+        next_state = state
 
         user = user_service_v1.get_user(username=telegram_login)
         if user is None:
@@ -29,30 +33,73 @@ def ask_for_input(state: str):
                 telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
             )
 
+        user_active_meeting = schedule_service_v1.get_meetings_by_user(
+            user=user.id, is_active="True"
+        )
+        if user_active_meeting:
+            text = make_message_for_active_meeting(user_active_meeting)
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.END
+
         if state == States.TYPING_PHONE:
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
         elif state == States.TYPING_FIRST_NAME:
-            phone = update.message.text
-            if phone != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, phone=phone)
             text = make_ask_for_input_information(
                 "Как Вас зовут? Введите только имя", user.first_name
             )
+            phone = update.message.text
+            if phone != DO_NOTHING_SIGN:
+                is_phone_valid = False
+                try:
+                    parsed_phone = phonenumbers.parse(phone, None)
+                    is_phone_valid = phonenumbers.is_valid_number(parsed_phone)
+                except phonenumbers.NumberParseException:
+                    text = make_ask_for_input_information(
+                        "Ваш номер телефона неверный, введите еще раз", user.phone
+                    )
+                    next_state = States.TYPING_PHONE
+                if is_phone_valid:
+                    user = user_service_v1.update_user(user.id, phone=phone)
+
         elif state == States.TYPING_LAST_NAME:
+            text = make_ask_for_input_information("Введите фамилию", user.last_name)
             first_name = update.message.text
             if first_name != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, first_name=first_name)
-            text = make_ask_for_input_information("Введите фамилию", user.last_name)
+                if not first_name.isalpha():
+                    text = make_ask_for_input_information(
+                        "Имя не может содержать символы и цифры, введите еще раз", user.first_name
+                    )
+                    next_state = States.TYPING_FIRST_NAME
+                else:
+                    user = user_service_v1.update_user(user.id, first_name=first_name.title())
+
         elif state == States.TYPING_AGE:
+            text = make_ask_for_input_information("Введите возраст", user.age)
             last_name = update.message.text
             if last_name != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, last_name=last_name)
-            text = make_ask_for_input_information("Введите возраст", user.age)
+                if not last_name.isalpha():
+                    text = make_ask_for_input_information(
+                        "Фамилия не может содержать символы и цифры, введите еще раз",
+                        user.last_name,
+                    )
+                    next_state = States.TYPING_LAST_NAME
+
+                else:
+                    user = user_service_v1.update_user(user.id, last_name=last_name.title())
+
         elif state == States.TYPING_TEST_SCORE:
+            text = make_ask_for_input_information("Введите свой балл за тест НДО", user.uce_score)
             age = update.message.text
             if age != DO_NOTHING_SIGN:
-                user = user_service_v1.update_user(user.id, age=age)
-            text = make_ask_for_input_information("Введите свой балл за тест НДО", user.uce_score)
+                if not age.isdigit():
+                    text = make_ask_for_input_information(
+                        "Возраст может быть только положительным и должен содержать только цифры",
+                        user.age,
+                    )
+                    next_state = States.TYPING_AGE
+                else:
+                    user = user_service_v1.update_user(user.id, age=age)
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
@@ -79,8 +126,8 @@ def ask_for_input(state: str):
             context_manager.set_meeting_format(context, meeting_format)
 
             text = "Выберите дату и время записи:\n"
-            timeslots = schedule_service_v1.get_actual_timeslots()
-
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            timeslots = sorted(timeslots, key=lambda x: (x.date_start))
             for index, timeslot in enumerate(timeslots):
                 if timeslot.date_start and timeslot.profile:
                     text += (
@@ -111,15 +158,9 @@ def ask_for_input(state: str):
 
         await update.message.reply_text(text=text, reply_markup=keyboard)
 
-        return state
+        return next_state
 
     return inner
-
-
-async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    text = "выполняется переход на прохождение теста НДО:"
-    await update.message.reply_text(text)
-    return "---"
 
 
 def process_meeting_confirm(confirm: bool):
@@ -134,9 +175,10 @@ def process_meeting_confirm(confirm: bool):
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
                 comment=comment,
-                meeting_format=10
+                meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MeetingFormat.MEETING_FORMAT_OFFLINE,
+                timeslot=timeslot.id,
             )
 
             psychologist_chat_id = timeslot.profile.chat_id
@@ -158,7 +200,7 @@ def process_meeting_confirm(confirm: bool):
 
         await back_to_start_menu(update, context)
 
-        return BotState.STOPPING
+        return BotState.END
 
     return inner
 
@@ -181,7 +223,7 @@ meeting_first_section = ConversationHandler(
             make_text_handler(ask_for_input(States.TYPING_TEST_SCORE)),
         ],
         States.TYPING_TEST_SCORE: [
-            make_message_handler(buttons.BTN_I_DONT_KNOW, go_to_test),
+            uce_test_section,
             make_text_handler(ask_for_input(States.TYPING_COMMENT)),
         ],
         States.TYPING_COMMENT: [
@@ -208,6 +250,7 @@ meeting_first_section = ConversationHandler(
         # make_message_handler(BTN_TESTS_MENU, menu_tests),
     ],
     map_to_parent={
-        BotState.STOPPING: BotState.END,
+        BotState.STOPPING: States.TYPING_COMMENT,
+        BotState.END: BotState.END,
     },
 )
