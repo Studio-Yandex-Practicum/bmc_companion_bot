@@ -61,7 +61,7 @@ def export_table_to_excel(modeladmin, request, queryset):
             "Телеграм психолога",
             "Телеграм пациента",
             "Отзыв",
-            "Score",
+            "Оценка",
         ]
     )
     for row in data:
