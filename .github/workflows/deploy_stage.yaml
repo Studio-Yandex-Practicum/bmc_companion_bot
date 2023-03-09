@@ -1,0 +1,53 @@
+name: Deploy workflow
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build containers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://npm.pkg.github.com/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        script:
+          sudo docker-compose stop
+          sudo docker-compose rm webapi
+          sudo docker-compose rm bot
+          rm .env
+          touch .env
+          echo SECRET_KEY='${{ secrets.SECRET_KEY }}' >> .env
+          echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+          echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+          echo DB_HOST=${{ secrets.DB_HOST }} >> .env
+          echo DB_PORT=${{ secrets.DB_PORT }} >> .env
+          echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
+          sudo docker-compose up -d --build
+          sudo docker-compose exec -T webapi python manage.py makemigrations
+          sudo docker-compose exec -T webapi python manage.py migrate
+          sudo docker-compose exec -T webapi python manage.py collectstatic --no-input
+          sudo docker-compose exec -T bot python manage.py makemigrations
+          sudo docker-compose exec -T bot python manage.py migrate
+          sudo docker-compose exec -T bot python manage.py collectstatic --no-input
