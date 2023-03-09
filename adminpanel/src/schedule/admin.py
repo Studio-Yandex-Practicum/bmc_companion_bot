@@ -64,7 +64,7 @@ def export_table_to_excel(modeladmin, request, queryset):
             "Оценка",
         ]
     )
-    for row in data:
+    for row in reversed(data):
         ws.append(
             [
                 row["meeting__timeslot__date_start"].strftime("%d.%m.%Y"),
