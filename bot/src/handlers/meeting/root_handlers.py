@@ -1,3 +1,4 @@
+from app import schedule_service_v1, user_service_v1
 from core.constants import MEETING_PRICE, BotState
 from handlers.root_handlers import start
 from telegram import ReplyKeyboardMarkup, Update
@@ -8,12 +9,13 @@ from . import buttons
 
 
 async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = (
-        "Стоимость консультации психолога (1 час):\n"
-        f"Сейчас {MEETING_PRICE} р.\n"
-        "Обычная цена 2000 р.\n"
-        "Выберите, что нужно сделать:"
-    )
+    username = update.message.chat.username
+    user = user_service_v1.get_user(username=username)
+    number_of_user_meetings = len(schedule_service_v1.get_meetings_by_user(user=user.id))
+    text = "Длительность консультации психолога (50 мин.):\n"
+    if number_of_user_meetings >= 5:
+        text += f"Сейчас {MEETING_PRICE} р.\n" "Обычная цена 2000 р.\n"
+    text += "Выберите, что нужно сделать:"
     btns = [
         [
             buttons.BTN_MEETING_FIRST,

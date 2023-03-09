@@ -81,6 +81,7 @@ def ask_for_repeat_meeting(state: str):
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
             timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
+            number_of_user_meetings = len(schedule_service_v1.get_meetings_by_user(user=user.id))
 
             context_manager.set_timeslot(context, timeslot)
 
@@ -88,7 +89,8 @@ def ask_for_repeat_meeting(state: str):
             text += f"\nФормат записи: {meeting_format}"
             text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
             text += f"\nДата: {timeslot.date_start}"
-            text += f"\nСтоимость консультации: {MEETING_PRICE} р."
+            if number_of_user_meetings >= 5:
+                text += f"\nСтоимость консультации: {MEETING_PRICE} р."
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
