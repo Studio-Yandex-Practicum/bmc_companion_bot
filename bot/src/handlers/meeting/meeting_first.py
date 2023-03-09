@@ -2,7 +2,7 @@ from datetime import datetime
 
 import phonenumbers
 from app import schedule_service_v1, user_service_v1
-from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
+from core.constants import DO_NOTHING_SIGN, MEETING_PRICE, BotState, MeetingFormat
 from handlers.handlers_utils import make_message_for_active_meeting
 from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
@@ -150,6 +150,7 @@ def ask_for_input(state: str):
             text += f"\nФормат записи: {meeting_format}"
             text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
             text += f"\nДата: {timeslot.date_start}"
+            text += f"\nСтоимость консультации: {MEETING_PRICE} р."
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)

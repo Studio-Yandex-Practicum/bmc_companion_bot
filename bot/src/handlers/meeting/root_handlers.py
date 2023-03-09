@@ -1,4 +1,4 @@
-from core.constants import BotState
+from core.constants import MEETING_PRICE, BotState
 from handlers.root_handlers import start
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
@@ -8,7 +8,12 @@ from . import buttons
 
 
 async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    text = "Выберите, что нужно сделать:"
+    text = (
+        "Стоимость консультации психолога (1 час):\n"
+        f"Сейчас {MEETING_PRICE} р.\n"
+        "Обычная цена 2000 р.\n"
+        "Выберите, что нужно сделать:"
+    )
     btns = [
         [
             buttons.BTN_MEETING_FIRST,
