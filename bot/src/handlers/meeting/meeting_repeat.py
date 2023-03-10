@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import MEETING_PRICE, BotState, MeetingFormat
+from core.constants import MEETING_CURRENT_PRICE, BotState, MeetingFormat
+from core.settings import NUMBER_OF_FREE_MEETINGS
 from handlers.handlers_utils import make_message_for_active_meeting
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -89,8 +90,8 @@ def ask_for_repeat_meeting(state: str):
             text += f"\nФормат записи: {meeting_format}"
             text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
             text += f"\nДата: {timeslot.date_start}"
-            if number_of_user_meetings >= 5:
-                text += f"\nСтоимость консультации: {MEETING_PRICE} р."
+            if number_of_user_meetings >= NUMBER_OF_FREE_MEETINGS:
+                text += f"\nСтоимость консультации: {MEETING_CURRENT_PRICE} р."
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
