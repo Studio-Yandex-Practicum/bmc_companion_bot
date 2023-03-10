@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
+from decorators import at
 from handlers.handlers_utils import make_message_for_active_meeting
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -14,6 +15,7 @@ from .root_handlers import back_to_start_menu
 
 
 def ask_for_repeat_meeting(state: str):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         keyboard = None
@@ -101,6 +103,7 @@ def ask_for_repeat_meeting(state: str):
     return inner
 
 
+@at
 async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = "выполняется переход на прохождение теста НДО:"
     await update.message.reply_text(text)
@@ -108,6 +111,7 @@ async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def process_meeting_confirm(confirm: bool):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
             user = context_manager.get_user(context)
@@ -117,7 +121,6 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                comment="О разном",
                 meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else MeetingFormat.MEETING_FORMAT_OFFLINE,

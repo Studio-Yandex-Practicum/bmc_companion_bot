@@ -2,6 +2,7 @@ from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
+from decorators import at, t
 from handlers.meeting.root_handlers import back_to_start_menu
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -14,7 +15,9 @@ from .enums import States
 from .helpers import context_manager
 
 
+@t
 def ask_for_reschedule(state: str):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         keyboard = None
         chat_data_id = update.message.chat.id
@@ -55,13 +58,14 @@ def ask_for_reschedule(state: str):
                 "\n\nУ этих психологов Вы еще не были:",
             ]
 
-            meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
+            meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
             psycho_set = {meeting.psychologist for meeting in meetings}
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             timeslots = sorted(
                 timeslots, key=lambda x: (x.profile.id not in psycho_set, x.date_start)
             )
+            print(timeslots)
 
             for index, timeslot in enumerate(timeslots, start=1):
                 timeslot_data = (
@@ -80,6 +84,8 @@ def ask_for_reschedule(state: str):
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:
+            if not update.message.text.isnumeric():
+                return States.TYPING_MEETING_FORMAT
             number_of_timeslot = int(update.message.text)
             context_manager.set_timeslot_number(context, number_of_timeslot)
             meeting_format = context_manager.get_meeting_format(context)
@@ -114,16 +120,20 @@ def ask_for_reschedule(state: str):
     return inner
 
 
+@t
 def meeting_update(confirm: bool):
     """Обновление записи пользователя"""
 
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
             user = context_manager.get_user(context)
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
             meetings = cm.get_meetings(context)
+            # !!!!!!!!!!!!!!!!!!!
             meeting = meetings[0]
+            # ###
             schedule_service_v1.update_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
@@ -182,9 +192,10 @@ meeting_reschedule_section = ConversationHandler(
         ],
     },
     fallbacks=[
-        # make_message_handler(BTN_START_MENU, back_to_start_menu),
+        make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
+        BotState.END: BotState.MENU_MEETING_SELECTING_LEVEL,
     },
 )

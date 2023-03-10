@@ -1,4 +1,5 @@
 from core.constants import BotState
+from decorators import at
 from handlers.questioning.questioning import next_question
 from handlers.root_handlers import error_restart
 from telegram import Update
@@ -7,6 +8,7 @@ from ui.buttons import BTN_START_MENU
 from utils import context_manager
 
 
+@at
 async def test_selector(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     selected_text = update.message.text
     tests = context_manager.get_tests(context)

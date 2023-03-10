@@ -3,6 +3,7 @@ from datetime import datetime as dt
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
+from decorators import at, t
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_FEEDBACK, BTN_START_MENU
@@ -13,7 +14,9 @@ from .helpers import context_manager
 from .root_handlers import back_to_start_menu
 
 
+@t
 def ask_for_feedback(state: str):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         keyboard = ""
@@ -134,6 +137,6 @@ feedback_section = ConversationHandler(
         make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
-        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
+        BotState.END: BotState.END,
     },
 )

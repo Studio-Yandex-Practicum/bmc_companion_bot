@@ -3,6 +3,7 @@ from datetime import datetime
 import phonenumbers
 from app import schedule_service_v1, user_service_v1
 from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
+from decorators import at, t
 from handlers.handlers_utils import make_message_for_active_meeting
 from handlers.questioning.uce_test_selection import uce_test_section
 from telegram import ReplyKeyboardMarkup, Update
@@ -19,7 +20,9 @@ from .helpers import context_manager
 from .root_handlers import back_to_start_menu
 
 
+@t
 def ask_for_input(state: str):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         keyboard = None
@@ -164,6 +167,7 @@ def ask_for_input(state: str):
 
 
 def process_meeting_confirm(confirm: bool):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
             user = context_manager.get_user(context)
