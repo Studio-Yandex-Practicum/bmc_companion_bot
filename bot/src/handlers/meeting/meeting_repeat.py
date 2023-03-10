@@ -57,7 +57,11 @@ def ask_for_repeat_meeting(state: str):
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             timeslots = sorted(
-                timeslots, key=lambda x: (x.profile.id not in psycho_set, x.date_start)
+                timeslots,
+                key=lambda x: (
+                    x.profile.id not in psycho_set,
+                    datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"),
+                ),
             )
 
             for index, timeslot in enumerate(timeslots, start=1):
@@ -73,7 +77,11 @@ def ask_for_repeat_meeting(state: str):
                     else:
                         list_was_not.append(timeslot_data)
 
-            text = "".join(text_list + list_was + list_was_not)
+            text = (
+                "".join(text_list + list_was + list_was_not)
+                if len(list_was_not) > 1
+                else "".join(text_list + list_was)
+            )
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:

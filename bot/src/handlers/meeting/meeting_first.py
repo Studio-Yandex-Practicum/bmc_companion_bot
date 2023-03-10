@@ -127,7 +127,9 @@ def ask_for_input(state: str):
 
             text = "Выберите дату и время записи:\n"
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
-            timeslots = sorted(timeslots, key=lambda x: (x.date_start))
+            timeslots = sorted(
+                timeslots, key=lambda x: (datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"))
+            )
             for index, timeslot in enumerate(timeslots):
                 if timeslot.date_start and timeslot.profile:
                     text += (
