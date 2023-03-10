@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import BotState, MeetingFormat
+from core.constants import MEETING_CURRENT_PRICE, BotState, MeetingFormat
+from core.settings import NUMBER_OF_FREE_MEETINGS
 from handlers.handlers_utils import make_message_for_active_meeting
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
@@ -89,6 +90,7 @@ def ask_for_repeat_meeting(state: str):
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
             timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
+            number_of_user_meetings = len(schedule_service_v1.get_meetings_by_user(user=user.id))
 
             context_manager.set_timeslot(context, timeslot)
 
@@ -96,6 +98,8 @@ def ask_for_repeat_meeting(state: str):
             text += f"\nФормат записи: {meeting_format}"
             text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
             text += f"\nДата: {timeslot.date_start}"
+            if number_of_user_meetings >= NUMBER_OF_FREE_MEETINGS:
+                text += f"\nСтоимость консультации: {MEETING_CURRENT_PRICE} р."
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
@@ -125,7 +129,6 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                comment="О разном",
                 meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else MeetingFormat.MEETING_FORMAT_OFFLINE,
