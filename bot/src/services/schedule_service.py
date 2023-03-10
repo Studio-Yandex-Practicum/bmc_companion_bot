@@ -54,7 +54,7 @@ class ScheduleApiService(PydanticApiService):
         return self.get(FeedbackResponse, self.url_feedbacks, params=kwargs)
 
     def update_meeting(
-        self, psychologist_id: int, user_id: int, date_start, meeting_format, meeting_id
+        self, psychologist_id: int, user_id: int, date_start, meeting_format, meeting_id, timeslot
     ) -> MeetingResponse:
         data = {
             "psychologist": psychologist_id,
@@ -62,6 +62,7 @@ class ScheduleApiService(PydanticApiService):
             "date_start": date_start,
             "format": meeting_format,
             "meeting_id": meeting_id,
+            "timeslot": timeslot,
         }
         return self.patch(MeetingResponse, self.url_meetings + str(meeting_id) + "/", data=data)
 

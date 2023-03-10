@@ -131,14 +131,13 @@ def meeting_update(confirm: bool):
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
             meetings = cm.get_meetings(context)
-            # !!!!!!!!!!!!!!!!!!!
             meeting = meetings[0]
-            # ###
             schedule_service_v1.update_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
                 meeting_id=meeting.id,
+                timeslot=timeslot.id,
                 meeting_format=MeetingFormat.ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
                 else MeetingFormat.OFFLINE,

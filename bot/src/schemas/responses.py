@@ -148,6 +148,7 @@ class MeetingResponse(BaseModel):
     comment: str | None = ""
     format: int | None = None
     date_start: str | None = ""
+    timeslot: int | None
 
 
 class UserListResponse(BaseModel):
