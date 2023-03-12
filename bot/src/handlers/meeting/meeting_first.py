@@ -28,7 +28,7 @@ def ask_for_input(state: str):
         next_state = state
 
         user = user_service_v1.get_user(username=telegram_login)
-        if user is None:
+        if not user:
             user = user_service_v1.create_user(
                 telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
             )
@@ -42,6 +42,17 @@ def ask_for_input(state: str):
             await back_to_start_menu(update, context)
             return BotState.END
 
+        timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+        if not timeslots:
+            text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.END
+
+        timeslots = sorted(
+            timeslots, key=lambda x: (datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"))
+        )
+
         if state == States.TYPING_PHONE:
             text = make_ask_for_input_information("Введите номер телефона", user.phone)
         elif state == States.TYPING_FIRST_NAME:
@@ -50,17 +61,19 @@ def ask_for_input(state: str):
             )
             phone = update.message.text
             if phone != DO_NOTHING_SIGN:
-                is_phone_valid = False
                 try:
-                    parsed_phone = phonenumbers.parse(phone, None)
-                    is_phone_valid = phonenumbers.is_valid_number(parsed_phone)
-                except phonenumbers.NumberParseException:
+                    parsed_phone = phonenumbers.parse(phone, "RU")
+                    if not phonenumbers.is_valid_number(parsed_phone):
+                        raise ValueError
+                    phone = phonenumbers.format_number(
+                        parsed_phone, phonenumbers.PhoneNumberFormat.INTERNATIONAL
+                    )
+                    user = user_service_v1.update_user(user.id, phone=phone)
+                except (phonenumbers.NumberParseException, ValueError):
                     text = make_ask_for_input_information(
                         "Ваш номер телефона неверный, введите еще раз", user.phone
                     )
                     next_state = States.TYPING_PHONE
-                if is_phone_valid:
-                    user = user_service_v1.update_user(user.id, phone=phone)
 
         elif state == States.TYPING_LAST_NAME:
             text = make_ask_for_input_information("Введите фамилию", user.last_name)
@@ -84,7 +97,6 @@ def ask_for_input(state: str):
                         user.last_name,
                     )
                     next_state = States.TYPING_LAST_NAME
-
                 else:
                     user = user_service_v1.update_user(user.id, last_name=last_name.title())
 
@@ -125,36 +137,43 @@ def ask_for_input(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text = "Выберите дату и время записи:\n"
-            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
-            timeslots = sorted(
-                timeslots, key=lambda x: (datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"))
-            )
-            for index, timeslot in enumerate(timeslots):
+            text = ["Выберите дату и время записи:\n"]
+            for index, timeslot in enumerate(timeslots, start=1):
                 if timeslot.date_start and timeslot.profile:
-                    text += (
-                        f"\n{index + 1}. {timeslot.profile.first_name} "
+                    text.append(
+                        f"\n{index}. {timeslot.profile.first_name} "
                         f"{timeslot.profile.last_name} "
                         f"{timeslot.date_start}"
                     )
-
+            text = "".join(text)
             context_manager.set_timeslots(context, timeslots)
 
         elif state == States.TYPING_MEETING_CONFIRM:
-            number_of_timeslot = int(update.message.text)
-            meeting_format = context_manager.get_meeting_format(context)
-            timeslots = context_manager.get_timeslots(context) or []
-            timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
+            raw_value = update.message.text
+            if not raw_value.isdigit():
+                text = "Нужно ввести только номер записи."
+                next_state = States.TYPING_TIME_SLOT
+            else:
+                number_of_timeslot = int(raw_value)
+                meeting_format = context_manager.get_meeting_format(context)
+                timeslots = context_manager.get_timeslots(context)
+                print(timeslots, number_of_timeslot)
+                if len(timeslots) < number_of_timeslot:
+                    text = "Такой записи не существует. Выберите другую."
+                    next_state = States.TYPING_TIME_SLOT
+                else:
+                    timeslot = timeslots[number_of_timeslot - 1]
+                    context_manager.set_timeslot(context, timeslot)
 
-            context_manager.set_timeslot(context, timeslot)
+                    text = "Давайте все проверим:\n"
+                    text += f"\nФормат записи: {meeting_format}"
+                    text += (
+                        f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
+                    )
+                    text += f"\nДата: {timeslot.date_start}"
 
-            text = "Давайте все проверим:\n"
-            text += f"\nФормат записи: {meeting_format}"
-            text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
-            text += f"\nДата: {timeslot.date_start}"
-
-            btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+                    btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
+                    keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
 
         context_manager.set_user(context, user)
 

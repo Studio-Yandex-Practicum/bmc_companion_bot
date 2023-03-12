@@ -16,6 +16,7 @@ ALLOWED_HOSTS = config.ALLOWED_HOSTS.split(" ")
 # Installed apps for development only:
 INSTALLED_APPS += [
     "debug_toolbar",
+    "drf_spectacular",
 ]
 
 # Django debug toolbar:
