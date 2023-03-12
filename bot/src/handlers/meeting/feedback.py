@@ -23,7 +23,6 @@ def ask_for_feedback(state: str):
         chat_data = update.message.chat
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
-        print(user)
         if user is None:
             text = "Ваших данных нет в базе"
             await update.message.reply_text(text=text)
@@ -59,12 +58,10 @@ def ask_for_feedback(state: str):
                 return States.TYPING_MEETING_NUMBER
             meeting = meetings[number_of_meeting - 1] if meetings else {}
             context_manager.set_meeting(context, meeting)
-            print(meeting)
             feedback = schedule_service_v1.get_feedback_by_user_and_meeting(
                 user=user.id,
                 meeting=meeting.id,
             )
-            print(feedback)
             if feedback:
                 context_manager.set_feedback(context, feedback)
                 feedback_text = feedback[0].text
