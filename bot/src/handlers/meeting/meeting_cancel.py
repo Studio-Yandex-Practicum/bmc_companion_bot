@@ -1,5 +1,5 @@
 from app import schedule_service_v1, user_service_v1
-from core.constants import BotState
+from core.constants import BotState, MeetingFormat
 from decorators import at
 from handlers.meeting.root_handlers import back_to_start_menu
 from telegram import ReplyKeyboardMarkup, Update
@@ -9,6 +9,7 @@ from utils import context_manager, make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States
+from .messages import psychologist_meeting_message
 
 
 @at
@@ -16,8 +17,7 @@ async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_T
     """Получить список записей встреч клиента."""
     chat_data_id = update.message.chat.id
     user = user_service_v1.get_user(chat_id=chat_data_id)
-    meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id, is_active="True")
-
+    meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, is_active="True")
     text_parts = ["Запись для отмены:\n"]
     for index, meeting in enumerate(meetings):
         psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
@@ -51,6 +51,17 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await back_to_start_menu(update, context)
         return BotState.STOPPING
+    psychologist_id = meetings[0].psychologist
+    if psychologist_id:
+        chat_data_id = update.message.chat.id
+        meeting = meetings[0]
+        user = user_service_v1.get_user(chat_id=chat_data_id)
+        psychologist = user_service_v1.get_user(id=psychologist_id)
+        meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
+        meeting_text = await psychologist_meeting_message(
+            meeting_format, user, meeting, header="Ваша запись была отменена:\n"
+        )
+        await context.bot.send_message(chat_id=psychologist.chat_id, text=meeting_text)
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
 
@@ -71,9 +82,10 @@ meeting_cancel_section = ConversationHandler(
         ],
     },
     fallbacks=[
-        # make_message_handler(BTN_START_MENU, back_to_start_menu),
+        make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
+        BotState.END: BotState.MENU_MEETING_SELECTING_LEVEL,
     },
 )

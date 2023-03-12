@@ -14,7 +14,7 @@ async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
     text = "Выберите, что нужно сделать:"
     chat_data_id = update.message.chat.id
     user = user_service_v1.get_user(chat_id=chat_data_id)
-    meetings = schedule_service_v1.get_meetings_by_user(chat_id=user.chat_id)
+    meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, is_active="True")
     meetings = [i for i in meetings if dt.strptime(i.date_start, "%d.%m.%Y %H:%M") > dt.now()]
     if meetings:
         btns = [[buttons.BTN_MEETING_CANCEL, buttons.BTN_MEETING_RESCHEDULE], [BTN_START_MENU]]
