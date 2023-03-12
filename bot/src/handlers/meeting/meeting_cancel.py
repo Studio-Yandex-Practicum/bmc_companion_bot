@@ -17,6 +17,7 @@ async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_T
     """Получить список записей встреч клиента."""
     chat_data_id = update.message.chat.id
     user = user_service_v1.get_user(chat_id=chat_data_id)
+    context_manager.set_user(context, user)
     meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, is_active="True")
     text_parts = ["Запись для отмены:\n"]
     for index, meeting in enumerate(meetings):
@@ -53,9 +54,8 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return BotState.STOPPING
     psychologist_id = meetings[0].psychologist
     if psychologist_id:
-        chat_data_id = update.message.chat.id
         meeting = meetings[0]
-        user = user_service_v1.get_user(chat_id=chat_data_id)
+        user = context_manager.get_user(context)
         psychologist = user_service_v1.get_user(id=psychologist_id)
         meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
         meeting_text = await psychologist_meeting_message(
