@@ -57,9 +57,11 @@ def ask_for_repeat_meeting(state: str):
             psycho_set = {meeting.psychologist for meeting in meetings}
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+
             timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in psycho_set))
 
             text = await user_choose_timeslot_message(timeslots, psycho_set)
+
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:
