@@ -1,6 +1,7 @@
 from functools import wraps
 
-from app.core.constants import BotState
+from core.constants import BotState
+from handlers.meeting.root_handlers import back_to_start_menu
 from loguru import logger
 
 
@@ -30,6 +31,8 @@ def at(func):
                 "Error occurred in module %s while executing the function %s: %s"
                 % (func.__module__, func.__name__, e)
             )
+            await back_to_start_menu(*args, **kwargs)
+
             return BotState.END
 
     return inner

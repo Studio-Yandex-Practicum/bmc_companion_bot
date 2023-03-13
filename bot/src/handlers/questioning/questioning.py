@@ -1,8 +1,10 @@
 from core.constants import BotState
+from decorators import at
 from handlers.questioning.root_handlers import api_client, test_questioning_section
 from handlers.root_handlers import error_restart
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
+    UceTestRequest,
     UserTestQuestionAnswerSpecificRequest,
     UserTestSpecificRequest,
 )
@@ -12,18 +14,22 @@ from ui.buttons import BTN_START_MENU
 from utils import context_manager
 
 
+@at
 async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
     test_result = api_client.test_result(UserTestSpecificRequest(user_id=user_id, test_id=test_id))
-    await update.message.reply_text(
-        f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
-    )
+    uce_test_id = api_client.uce_test_id(UceTestRequest()).id
+    text = f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
+    if test_id == uce_test_id:
+        text += "\nРекомендуем записаться на консультацию!"
+    await update.message.reply_text(text)
     context_manager.set_test_id(context, None)
     bot_state = await test_questioning_section(update, context)
     return bot_state
 
 
+@at
 async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
@@ -49,6 +55,7 @@ async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     return BotState.QUESTIONING
 
 
+@at
 async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
     answers = context_manager.get_answers(context)
