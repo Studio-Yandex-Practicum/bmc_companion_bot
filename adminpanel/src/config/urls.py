@@ -18,6 +18,7 @@ from config.settings.components.base import STATIC_ROOT, STATIC_URL
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -29,6 +30,15 @@ urlpatterns = [
 
 urlpatterns += [
     path("__debug__/", include(debug_toolbar.urls)),
+]
+
+urlpatterns += [
+    path("api/v1/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/v1/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
 ]
 
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)
