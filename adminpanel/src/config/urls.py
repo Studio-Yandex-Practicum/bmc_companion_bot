@@ -14,6 +14,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 import debug_toolbar
+from config.settings.components.base import STATIC_ROOT, STATIC_URL
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -38,3 +40,5 @@ urlpatterns += [
         name="swagger-ui",
     ),
 ]
+
+urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

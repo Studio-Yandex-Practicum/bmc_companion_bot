@@ -22,3 +22,10 @@ class ProfileViewSet(ModelViewSet):
         "chat_id",
         "telegram_login",
     ]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        id = self.request.query_params.get("id", None)
+        if id:
+            qs = qs.filter(id=id)
+        return qs

@@ -1,5 +1,6 @@
 from app import user_service_v1
 from core.constants import APIVersion, BotState
+from decorators import at
 from handlers.meeting.buttons import BTN_I_DONT_KNOW
 from handlers.meeting.enums import States
 from handlers.questioning.questioning import next_question, question_handler
@@ -14,6 +15,7 @@ from utils import context_manager, make_message_handler
 api_client = TestAPIClient(APIVersion.V1.value)
 
 
+@at
 async def go_to_uce_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = "выполняется переход на прохождение теста НДО:"
     chat_data = update.message.chat

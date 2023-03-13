@@ -1,5 +1,6 @@
 from app import user_service_v1
 from core.constants import APIVersion, BotState
+from decorators import at
 from handlers.root_handlers import start
 from request.clients import TestAPIClient
 from schemas.requests import UserSpecificRequest
@@ -11,6 +12,7 @@ from utils import context_manager
 api_client = TestAPIClient(APIVersion.V1.value)
 
 
+@at
 async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     await update.message.reply_text("Это раздел тестирования.")
     chat_data = update.message.chat
@@ -44,6 +46,7 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
     return BotState.MENU_TEST_SELECTING_LEVEL
 
 
+@at
 async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     await start(update, context)
     return BotState.END
