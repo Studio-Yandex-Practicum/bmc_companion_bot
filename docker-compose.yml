@@ -31,6 +31,46 @@ services:
         ports:
             - "8000:8000"
 
+    celery:
+        <<: *base-service
+        build:
+            context: .
+            dockerfile: ./docker/celery/Dockerfile
+        environment:
+            - APP_HOST=adminpanel
+            - APP_PORT=8000
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - ./adminpanel/src:/src
+    
+    celery_beat:
+        <<: *base-service
+        build:
+            context: .
+            dockerfile: ./docker/celery_beat/Dockerfile
+        environment:
+            - APP_HOST=adminpanel
+            - APP_PORT=8000
+            - POSTGRES_HOST=postgres
+            - POSTGRES_PORT=5432
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
+            - CELERY_BROKER_URL=redis://redis:6379
+            - CELERY_RESULT_BACKEND=redis://redis:6379
+        depends_on:
+            - postgres
+            - redis
+            - celery
+        volumes:
+            - ./adminpanel/src:/src
+
     nginx:
         <<: *base-service
         image: nginx:1.21.6-alpine

@@ -19,7 +19,7 @@ TASK_FOR_PATIENT = "send_notification_to_patient"
 TASK_FOR_PSYCHOLOGIST = "send_notification_to_psychologist"
 
 
-def make_notification_time(date_time, minutes_earlier=60):
+def make_notification_time(date_time, minutes_earlier=600000):
     """Создает время отправки оповещения"""
     return datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M:%S") - datetime.timedelta(
         minutes=minutes_earlier
@@ -53,10 +53,10 @@ def create_notification_tasks(psychologist_chat_id, patient_chat_id, date_time):
 @shared_task(name=TASK_FOR_PATIENT)
 def send_notification_to_patient(chat_id):
     """Отправляет оповещение пациенту"""
-    requests.get(URL_MAIN + URL_CHAT_ID + chat_id + URL_TEXT + TEXT_FOR_PATIENT)
+    requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PATIENT)
 
 
 @shared_task(name=TASK_FOR_PSYCHOLOGIST)
 def send_notification_to_psychologist(chat_id):
     """Отправляет оповещение психологу"""
-    requests.get(URL_MAIN + URL_CHAT_ID + chat_id + URL_TEXT + TEXT_FOR_PSYCHOLOGIST)
+    requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PSYCHOLOGIST)
