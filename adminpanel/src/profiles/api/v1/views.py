@@ -24,7 +24,7 @@ class ProfileViewSet(ModelViewSet):
     ]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = self.queryset
         id = self.request.query_params.get("id", None)
         if id:
             qs = qs.filter(id=id)
