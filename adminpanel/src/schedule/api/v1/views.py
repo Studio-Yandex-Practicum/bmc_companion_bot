@@ -4,7 +4,11 @@ from rest_framework import permissions
 from rest_framework.viewsets import ModelViewSet
 from schedule.api.v1 import serializer
 from schedule.models import Meeting, MeetingFeedback, TimeSlot
-from schedule.tasks import create_notification_tasks
+from schedule.tasks import (
+    create_feedback_notification,
+    create_notification_tasks,
+    delete_notification_tasks,
+)
 
 
 class TimeSlotViewSet(ModelViewSet):
@@ -44,7 +48,36 @@ class MeetingViewSet(ModelViewSet):
             patient_chat_id=task_data.get("user").chat_id,
             date_time=task_data.get("date_start"),
         )
+        create_feedback_notification(
+            patient_chat_id=task_data.get("user").chat_id, date_time=task_data.get("date_start")
+        )
         return super().perform_create(serializer)
+
+    def perform_update(self, serializer):
+        instance = self.get_object()
+        delete_notification_tasks(
+            psychologist_chat_id=instance.psychologist.chat_id,
+            patient_chat_id=instance.user.chat_id,
+            date_time=instance.timeslot.date_start,
+        )
+        task_data = serializer.validated_data
+        create_notification_tasks(
+            psychologist_chat_id=task_data.get("psychologist").chat_id,
+            patient_chat_id=task_data.get("user").chat_id,
+            date_time=task_data.get("date_start"),
+        )
+        create_feedback_notification(
+            patient_chat_id=task_data.get("user").chat_id, date_time=task_data.get("date_start")
+        )
+        return super().perform_update(serializer)
+
+    def perform_destroy(self, instance):
+        delete_notification_tasks(
+            psychologist_chat_id=instance.psychologist.chat_id,
+            patient_chat_id=instance.user.chat_id,
+            date_time=instance.timeslot.date_start,
+        )
+        return super().perform_destroy(instance)
 
     def get_queryset(self):
         qs = self.queryset
