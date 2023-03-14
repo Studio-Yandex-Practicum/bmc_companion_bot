@@ -11,7 +11,7 @@ class Profile(AbstractUser):
     )
     age = models.SmallIntegerField(null=True, blank=True, verbose_name="Возраст")
     uce_score = models.SmallIntegerField(
-        null=True, blank=True, default=0, verbose_name="Бал за тест НДО"
+        null=True, blank=True, default=0, verbose_name="Балл за тест НДО"
     )
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram id")
     chat_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram chat_id")
