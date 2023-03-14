@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - develop
-    types: [closed]
+    # types: [closed]
 
 env:
   REGISTRY: ghcr.io
@@ -22,24 +22,24 @@ jobs:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     environment:
-      name: Stage
+      name: deploy_stage
 
     steps:
       - name: Check out the repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Docker login
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
+      - name: Build and push(bot container)
+        uses: docker/build-push-action@v4
         with:
           context: .
-          file: Dockerfile
+          file: ./docker/bot/Dockerfile
           labels: runnumber=${GITHUB_RUN_ID}
           push: true
           tags: |
@@ -47,12 +47,25 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+      - name: Build and push(admin container)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/adminpanel/Dockerfile
+          labels: runnumber=${GITHUB_RUN_ID}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:stage,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
     needs: build_and_push_docker_image
     environment:
-      name: Stage
+      name: deploy_stage
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -63,7 +76,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "docker-compose.yaml,nginx/default.conf"
+          source: "docker-compose.yaml, ./docker/nginx/default.conf"
           target: ${{ env.DEPLOY_PATH }}
 
       - name: Create .env file
@@ -88,7 +101,7 @@ jobs:
     name: Start application
     runs-on: ubuntu-latest
     environment:
-      name: Stage
+      name: deploy_stage
     needs: deploy
     steps:
       - name: Start appication
@@ -102,7 +115,8 @@ jobs:
             docker image prune -f
             docker pull  ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.IMAGE_NAME }}:latest
             docker-compose --file docker-compose.yaml stop
-            docker-compose --file docker-compose.yaml rm webapi
+            docker-compose --file docker-compose.yaml rm bot
+            docker-compose --file docker-compose.yaml rm adminpanel
             docker-compose --file docker-compose.yaml up -d
       - name: Making migrations
         uses: appleboy/ssh-action@master
@@ -112,4 +126,5 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
-            docker-compose exec -T -w ${{ env.WORK_DIR }} webapi alembic upgrade head
+            docker-compose exec -T -w ${{ env.WORK_DIR }} bot alembic upgrade head
+            docker-compose exec -T -w ${{ env.WORK_DIR }} adminpanel alembic upgrade head
