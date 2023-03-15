@@ -104,12 +104,7 @@ class MeetingFeedbackViewSet(ModelViewSet):
         meeting_id = self.request.query_params.get("meeting", None)
         user_id = self.request.query_params.get("user", None)
         if meeting_id and user_id:
-            qs = (
-                super()
-                .get_queryset()
-                .order_by("date_start")
-                .filter(meeting=meeting_id, user=user_id)
-            )
+            qs = super().get_queryset().filter(meeting=meeting_id, user=user_id)
         if is_active == "True":
             qs = qs.filter(date_start__gte=datetime.datetime.now())
         return qs
