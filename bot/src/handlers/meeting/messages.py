@@ -4,7 +4,7 @@ FORMAT = "Формат записи: "
 FORMAT_ONLINE = "Онлайн"
 FORMAT_OFFLINE = "Очно"
 ADDRESS = "Адрес: "
-DEFAULT_ADDRESS = "Адрес по умолчанию"
+DEFAULT_ADDRESS = "ул. Дуки, д.86"
 PSYCOLOGIST = "Психолог: "
 DATE = "Дата и время: "
 YOU_WERE = "Вы уже были у этих психологов:"
@@ -47,8 +47,13 @@ async def user_check_meeting_message(format, first_name, last_name, date, addres
     return "\n".join(text)
 
 
-async def user_choose_timeslot_message(timeslots, psycho_set={}):
+async def user_choose_timeslot_message(timeslots, psycho_set={}, is_sixth_meeting=False):
     text = [CHOOSE_DATE]
+    if is_sixth_meeting:
+        text.append(
+            "Вы побывали на 5 бесплатных консультациях, стоимость консультации для вас - 800р"
+            + "(обычная цена - 2000р)\n"
+        )
     list_was = []
     list_was_not = []
     for index, timeslot in enumerate(timeslots, start=1):

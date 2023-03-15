@@ -48,32 +48,29 @@ def export_table_to_excel(modeladmin, request, queryset):
                 ws.cell(row=row, column=col_num + 1).value = str(field_name)
             row += 1
             for row_num, test in enumerate(user_test_results):
-                ws.cell(row=row + row_num, column=1).value = str(test.test.name)
-                ws.cell(row=row + row_num, column=2).value = str(test.value)
-            row += 2
+                ws.cell(row=row, column=1).value = str(test.test.name)
+                ws.cell(row=row, column=2).value = str(test.value)
+                row += 1
+            row += 1
         if user_feedbacks:
             for col_num, field_name in enumerate(FEEDBACK_EXPORT_FIELDS):
                 ws.cell(row=row, column=col_num + 1).value = str(field_name)
             row += 1
             for row_num, feedback in enumerate(user_feedbacks):
-                ws.cell(row=row + row_num, column=1).value = str(
+                ws.cell(row=row, column=1).value = str(
                     feedback.meeting.date_start.strftime("%d.%m.%Y")
                 )
-                ws.cell(row=row + row_num, column=2).value = str(
+                ws.cell(row=row, column=2).value = str(
                     feedback.meeting.date_start.strftime("%H:%M")
                 )
-                ws.cell(row=row + row_num, column=3).value = str(
-                    feedback.meeting.psychologist.last_name
-                )
-                ws.cell(row=row + row_num, column=4).value = str(
-                    feedback.meeting.psychologist.first_name
-                )
-                ws.cell(row=row + row_num, column=5).value = str(
-                    feedback.meeting.psychologist.telegram_login
-                )
-                ws.cell(row=row + row_num, column=6).value = str(feedback.text)
-                ws.cell(row=row + row_num, column=7).value = str(feedback.score)
-            row += 2
+                ws.cell(row=row, column=3).value = str(feedback.meeting.psychologist.last_name)
+                ws.cell(row=row, column=4).value = str(feedback.meeting.psychologist.first_name)
+                ws.cell(row=row, column=5).value = str(feedback.meeting.psychologist.telegram_login)
+                ws.cell(row=row, column=6).value = str(feedback.text)
+                ws.cell(row=row, column=7).value = str(feedback.score)
+                row += 1
+            row += 1
+        row += 1
     response = HttpResponse(
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )

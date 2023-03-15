@@ -12,6 +12,9 @@ class TimeSlot(models.Model):
         verbose_name = "Таймслот"
         verbose_name_plural = "Таймслоты"
 
+    def __str__(self):
+        return f"{self.date_start} {self.profile.last_name} {self.profile.first_name}"
+
 
 class Meeting(models.Model):
     MEETING_FORMAT_ONLINE = 10

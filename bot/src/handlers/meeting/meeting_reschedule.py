@@ -56,10 +56,15 @@ def ask_for_reschedule(state: str):
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, past="True")
+            is_sixth_meeting = False
+            if len(meetings) > 4:
+                is_sixth_meeting = True
             psycho_set = {meeting.psychologist for meeting in meetings}
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in psycho_set))
-            text_parts = await user_choose_timeslot_message(timeslots, psycho_set)
+            text_parts = await user_choose_timeslot_message(
+                timeslots, psycho_set, is_sixth_meeting=is_sixth_meeting
+            )
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:

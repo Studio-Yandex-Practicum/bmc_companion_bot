@@ -13,8 +13,8 @@ URL_MAIN = f"https://api.telegram.org/bot{config.BOT_TOKEN}/sendMessage"
 URL_CHAT_ID = "?chat_id="
 URL_TEXT = "&text="
 
-TEXT_FOR_PATIENT = "Через час у вас встреча с психологом"
-TEXT_FOR_PSYCHOLOGIST = "Через час у вас встреча с пациентом"
+TEXT_FOR_PATIENT = "Напоминаем о встрече с психологом сегодня в"
+TEXT_FOR_PSYCHOLOGIST = "Напоминаем о встрече с пациентом сегодня в"
 TEXT_FOR_FEEDBACK = "Вы только что побывали на консультации. Пожалуйста, оставьте обратную связь."
 
 TASK_FOR_PATIENT = "send_notification_to_patient"
@@ -34,13 +34,13 @@ def make_notification_name(task, chat_id, date_time):
     return f"{task}-{chat_id}-{date_time}"
 
 
-def make_task(task, clocked_time, chat_id, date_time):
+def make_task(task, clocked_time, chat_id, date_time=" "):
     """Создает задачу на отправку оповещения"""
     PeriodicTask.objects.create(
         clocked=clocked_time,
         name=make_notification_name(task, chat_id, date_time),
         task=task,
-        args=json.dumps([chat_id]),
+        args=json.dumps([chat_id, date_time]),
         one_off=True,
     )
 
@@ -90,18 +90,22 @@ def delete_notification_tasks(psychologist_chat_id, patient_chat_id, date_time):
 
 
 @shared_task(name=TASK_FOR_PATIENT)
-def send_notification_to_patient(chat_id):
+def send_notification_to_patient(chat_id, date_time):
     """Отправляет оповещение пациенту"""
-    requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PATIENT)
+    requests.get(
+        URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PATIENT + date_time[10:]
+    )
 
 
 @shared_task(name=TASK_FOR_PSYCHOLOGIST)
-def send_notification_to_psychologist(chat_id):
+def send_notification_to_psychologist(chat_id, date_time):
     """Отправляет оповещение психологу"""
-    requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PSYCHOLOGIST)
+    requests.get(
+        URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_PSYCHOLOGIST + date_time[10:]
+    )
 
 
 @shared_task(name=TASK_FOR_FEEDBACK)
-def send_feedback_notification(chat_id):
+def send_feedback_notification(chat_id, date_time):
     """Отправляет оповещение после консультации"""
     requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_FEEDBACK)
