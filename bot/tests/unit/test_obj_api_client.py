@@ -37,7 +37,10 @@ test_object_1 = ModelOne(**test_object_1_data)
 test_object_2_data = {"text": "dolor sit amet", "number": 69}
 test_object_2 = ModelOne(**test_object_2_data)
 
-test_objects_data = {"test_obj_1_id": test_object_1_data, "test_obj_2_id": test_object_2_data}
+test_objects_data = {
+    "test_obj_1_id": test_object_1_data,
+    "test_obj_2_id": test_object_2_data,
+}
 test_objects = [test_object_1, test_object_2]
 
 

@@ -50,7 +50,12 @@ def all_test_statuses(user_id: int) -> dict:
     completed = TestSerializer(completed_tests, many=True).data
     active = TestSerializer(active_tests, many=True).data
     avalaible = TestSerializer(avalaible_tests, many=True).data
-    data = {"user_id": user_id, "completed": completed, "active": active, "available": avalaible}
+    data = {
+        "user_id": user_id,
+        "completed": completed,
+        "active": active,
+        "available": avalaible,
+    }
     return data
 
 
@@ -119,5 +124,11 @@ def test_result(user_id: int, test_id: int) -> dict[str, int]:
         raise ResultNotFound
     test = Test.objects.get(id=test_id)
     value = test_completed.value
-    data = {"user_id": user_id, "id": test.id, "type": test.type, "name": test.name, "value": value}
+    data = {
+        "user_id": user_id,
+        "id": test.id,
+        "type": test.type,
+        "name": test.name,
+        "value": value,
+    }
     return data

@@ -150,16 +150,19 @@ def process_meeting_confirm(confirm: bool):
 meeting_repeat_section = ConversationHandler(
     entry_points=[
         make_message_handler(
-            buttons.BTN_MEETING_REPEAT, ask_for_repeat_meeting(States.TYPING_MEETING_FORMAT)
+            buttons.BTN_MEETING_REPEAT,
+            ask_for_repeat_meeting(States.TYPING_MEETING_FORMAT),
         ),
     ],
     states={
         States.TYPING_MEETING_FORMAT: [
             make_message_handler(
-                buttons.BTN_MEETING_FORMAT_ONLINE, ask_for_repeat_meeting(States.TYPING_TIME_SLOT)
+                buttons.BTN_MEETING_FORMAT_ONLINE,
+                ask_for_repeat_meeting(States.TYPING_TIME_SLOT),
             ),
             make_message_handler(
-                buttons.BTN_MEETING_FORMAT_OFFLINE, ask_for_repeat_meeting(States.TYPING_TIME_SLOT)
+                buttons.BTN_MEETING_FORMAT_OFFLINE,
+                ask_for_repeat_meeting(States.TYPING_TIME_SLOT),
             ),
         ],
         States.TYPING_TIME_SLOT: [

@@ -49,7 +49,8 @@ class MeetingViewSet(ModelViewSet):
             date_time=task_data.get("date_start"),
         )
         create_feedback_notification(
-            patient_chat_id=task_data.get("user").chat_id, date_time=task_data.get("date_start")
+            patient_chat_id=task_data.get("user").chat_id,
+            date_time=task_data.get("date_start"),
         )
         return super().perform_create(serializer)
 
@@ -67,7 +68,8 @@ class MeetingViewSet(ModelViewSet):
             date_time=task_data.get("date_start"),
         )
         create_feedback_notification(
-            patient_chat_id=task_data.get("user").chat_id, date_time=task_data.get("date_start")
+            patient_chat_id=task_data.get("user").chat_id,
+            date_time=task_data.get("date_start"),
         )
         return super().perform_update(serializer)
 
