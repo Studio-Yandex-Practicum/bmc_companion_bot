@@ -153,6 +153,8 @@ def ask_for_input(state: str):
             text = await user_choose_timeslot_message(timeslots)
 
             context_manager.set_timeslots(context, timeslots)
+            btns = [[buttons.BTN_NOT_CONFIRM_MEETING]]
+            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
 
         elif state == States.TYPING_MEETING_CONFIRM:
             number_of_timeslot = re.findall("\\d+", update.message.text) or []
@@ -177,8 +179,8 @@ def ask_for_input(state: str):
                 timeslot.date_start,
             )
 
-        btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-        keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            btns = [[buttons.BTN_CONFIRM_MEETING], [buttons.BTN_NOT_CONFIRM_MEETING]]
+            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
 
         context_manager.set_user(context, user)
 
@@ -221,7 +223,7 @@ def process_meeting_confirm(confirm: bool):
 
         await back_to_start_menu(update, context)
 
-        return BotState.END
+        return BotState.STOPPING
 
     return inner
 
@@ -273,6 +275,6 @@ meeting_first_section = ConversationHandler(
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
-        BotState.END: BotState.MENU_MEETING_SELECTING_LEVEL,
+        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
     },
 )
