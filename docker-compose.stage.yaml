@@ -1,6 +1,6 @@
 x-base-service: &base-service
     env_file: ./.env
-    restart: on-failure
+#    restart: on-failure
 
 services:
     bot:
