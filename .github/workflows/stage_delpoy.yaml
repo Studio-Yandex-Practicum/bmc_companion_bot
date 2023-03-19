@@ -93,7 +93,7 @@ jobs:
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
             echo DB_HOST=${{ secrets.DB_HOST }} >> .env
             echo DB_PORT=${{ secrets.DB_PORT }} >> .env
-            echo BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
+            echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
   start_application:
     name: Start application
