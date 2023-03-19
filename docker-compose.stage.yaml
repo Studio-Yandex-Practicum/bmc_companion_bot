@@ -22,28 +22,28 @@ services:
         ports:
             - 8000:8000
 
-    celery:
-        <<: *base-service
-        build:
-            context: .
-            dockerfile: ./docker/celery/Dockerfile
-        depends_on:
-            - postgres
-            - redis
-        volumes:
-            - ./adminpanel/src:/src
-
-    celery_beat:
-        <<: *base-service
-        build:
-            context: .
-            dockerfile: ./docker/celery_beat/Dockerfile
-        depends_on:
-            - postgres
-            - redis
-            - celery
-        volumes:
-            - ./adminpanel/src:/src
+#    celery:
+#        <<: *base-service
+#        build:
+#            context: .
+#            dockerfile: ./docker/celery/Dockerfile
+#        depends_on:
+#            - postgres
+#            - redis
+#        volumes:
+#            - ./adminpanel/src:/src
+#
+#    celery_beat:
+#        <<: *base-service
+#        build:
+#            context: .
+#            dockerfile: ./docker/celery_beat/Dockerfile
+#        depends_on:
+#            - postgres
+#            - redis
+#            - celery
+#        volumes:
+#            - ./adminpanel/src:/src
 
     nginx:
         <<: *base-service
