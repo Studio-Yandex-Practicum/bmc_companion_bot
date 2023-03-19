@@ -5,17 +5,15 @@ x-base-service: &base-service
 services:
     bot:
         <<: *base-service
-        build:
-            context: .
-            dockerfile: ./docker/bot/Dockerfile
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_bot:latest
+        container_name: bmc_bot
         depends_on:
             - adminpanel
 
     adminpanel:
         <<: *base-service
-        build:
-            context: .
-            dockerfile: ./docker/adminpanel/Dockerfile
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+        container_name: bmc_adminpanel
         depends_on:
             - postgres
             - redis
@@ -64,8 +62,6 @@ services:
         image: postgres:14.3-alpine
         ports:
           - ${POSTGRES_PORT}:${POSTGRES_PORT}
-        env_file:
-          - .env
         command: -p ${POSTGRES_PORT}
         volumes:
             - pgdata:/var/lib/postgresql/data
