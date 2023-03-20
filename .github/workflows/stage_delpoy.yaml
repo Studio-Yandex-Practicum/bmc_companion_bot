@@ -12,7 +12,7 @@ env:
   BOT_IMAGE_NAME: bmc_companion_bot
   ADMINPANEL_IMAGE_NAME: bmc_companion_adminpanel
   DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-  WORK_DIR: /BMC_COMPANION_BOT
+  WORK_DIR: /BMC
 
 defaults:
   run:
@@ -104,7 +104,7 @@ jobs:
       name: stage_deploy
     needs: deploy
     steps:
-      - name: Start appication
+      - name: Start application
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}

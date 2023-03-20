@@ -4,8 +4,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_VERSION=1.4.0
 
-ARG HOME_DIR=/src
-WORKDIR $HOME_DIR
+WORKDIR /BMC
 
 RUN python -m pip install --upgrade pip \
     && pip install --no-cache-dir poetry==${POETRY_VERSION}
