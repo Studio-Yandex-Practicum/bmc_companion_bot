@@ -1,8 +1,43 @@
 x-base-service: &base-service
     env_file: ./.env
+    environment:
+        - COMPOSE_PROJECT_NAME=bmc
+        - DOCKER_BUILDKIT=1
+        - ENVIRONMENT=development
+        - DJANGO_SETTINGS_MODULE=config.settings
+        - ADMINPANEL_HOST=adminpanel
+        - ADMINPANEL_PORT=8000
+        - ADMINPANEL_WEB_PROTOCOL=http
+        - ADMINPANEL_LISTEN_PORT=80
+        - ADMIN=ADMIN
+        - ROOT=ROOT
+        - USER=USER
+        - REDIS_HOST=redis
+        - REDIS_PORT=6379
+        - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
+        - CELERY_BROKER_URL=redis://redis:6379
+        - CELERY_RESULT_BACKEND=redis://redis:6379
+
 #    restart: on-failure
 
 services:
+    postgres:
+        <<: *base-service
+        image: postgres:14.3-alpine
+        ports:
+            - 6100:6100
+        command: -p 6100
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    redis:
+        <<: *base-service
+        image: redis:7-alpine
+        ports:
+            - 6379:6379
+        volumes:
+            - redis_data:/data
+
     bot:
         <<: *base-service
         image: ghcr.io/studio-yandex-practicum/bmc_companion_bot:latest
@@ -57,23 +92,6 @@ services:
         depends_on:
             - adminpanel
 
-    postgres:
-        <<: *base-service
-        image: postgres:14.3-alpine
-        ports:
-          - 6100:6100
-        command: -p 6100
-        volumes:
-            - pgdata:/var/lib/postgresql/data
-
-
-    redis:
-        <<: *base-service
-        image: redis:7-alpine
-        ports:
-            - 6379:6379
-        volumes:
-            - redis_data:/data
 
 volumes:
     pgdata:

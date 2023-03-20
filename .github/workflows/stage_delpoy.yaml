@@ -74,7 +74,7 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "docker-compose.stage.yaml, docker/nginx/, docker/celery"
+          source: "docker-compose.stage.yaml, docker/nginx/"
           target: ${{ env.DEPLOY_PATH }}
 
       - name: Create .env file
@@ -88,6 +88,8 @@ jobs:
             mv docker-compose.stage.yaml docker-compose.yaml
             rm -f .env
             touch .env
+            echo ALLOWED_HOSTS=${{ secrets.HOST }} >> .env
+            echo TZ=${{ secrets.TZ }} >> .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
