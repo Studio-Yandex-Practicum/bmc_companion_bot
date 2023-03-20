@@ -33,7 +33,6 @@ meeting_section = ConversationHandler(
     },
 )
 
-
 feedback_section = ConversationHandler(
     entry_points=[
         make_message_handler(BTN_FEEDBACK, ask_for_feedback(States.TYPING_MEETING_NUMBER)),
@@ -43,9 +42,12 @@ feedback_section = ConversationHandler(
             make_text_handler(ask_for_feedback(States.CHECK_IS_FEEDBACK_LEFT)),
         ],
         States.CHECK_IS_FEEDBACK_LEFT: [
-            make_text_handler(ask_for_feedback(States.TYPING_SCORE)),
+            make_text_handler(ask_for_feedback(States.TYPING_COMFORT_SCORE)),
         ],
-        States.TYPING_SCORE: [
+        States.TYPING_COMFORT_SCORE: [
+            make_text_handler(ask_for_feedback(States.TYPING_BETTER_SCORE)),
+        ],
+        States.TYPING_BETTER_SCORE: [
             make_text_handler(ask_for_feedback(States.FEEDBACK_SAVED)),
         ],
     },

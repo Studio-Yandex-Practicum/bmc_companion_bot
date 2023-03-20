@@ -1,4 +1,5 @@
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 from profiles.models import Profile
 
 
@@ -70,6 +71,17 @@ class Meeting(models.Model):
         ordering = ["id"]
 
 
+class MeetingPeriodicTask(PeriodicTask):
+    meeting = models.ForeignKey(
+        Meeting,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="meeting_periodic_task",
+        verbose_name="Консультация",
+    )
+
+
 class MeetingFeedback(models.Model):
     user = models.ForeignKey(
         Profile,
@@ -88,7 +100,12 @@ class MeetingFeedback(models.Model):
         verbose_name="Консультация",
     )
     text = models.TextField(null=True, blank=True, verbose_name="Текст отзыва")
-    score = models.SmallIntegerField(null=True, blank=True, verbose_name="Оценка")
+    comfort_score = models.SmallIntegerField(
+        null=True, blank=True, verbose_name="Оценка комфорта на консультации"
+    )
+    better_score = models.SmallIntegerField(
+        null=True, blank=True, verbose_name="Оценка улучшений после консультации"
+    )
 
     class Meta:
         verbose_name = "Отзыв"

@@ -48,7 +48,8 @@ def export_table_to_excel(modeladmin, request, queryset):
             "meeting__psychologist__telegram_login",
             "user__telegram_login",
             "text",
-            "score",
+            "comfort_score",
+            "better_score",
         )
     )
     wb = openpyxl.Workbook()
@@ -61,7 +62,8 @@ def export_table_to_excel(modeladmin, request, queryset):
             "Телеграм психолога",
             "Телеграм пациента",
             "Отзыв",
-            "Оценка",
+            "Оценка комфорта",
+            "Оценка улучшений",
         ]
     )
     for row in reversed(data):
@@ -75,7 +77,8 @@ def export_table_to_excel(modeladmin, request, queryset):
                 row["meeting__psychologist__telegram_login"],
                 row["user__telegram_login"],
                 row["text"],
-                row["score"],
+                row["comfort_score"],
+                row["better_score"],
             ]
         )
     response = HttpResponse(
@@ -89,16 +92,14 @@ def export_table_to_excel(modeladmin, request, queryset):
 
 @admin.register(models.MeetingFeedback)
 class MeetingFeedbackAdmin(admin.ModelAdmin):
-    list_display = (
-        "id",
-        "user",
-        "meeting",
-        "score",
-    )
+    list_display = ("id", "user", "meeting", "comfort_score", "better_score")
     list_select_related = ("meeting", "user")
     search_fields = (
         "user__first_name",
         "meeting__id",
     )
-    list_filter = ("user", "meeting", "score")
+    list_filter = (
+        "user",
+        "meeting",
+    )
     actions = [export_table_to_excel]

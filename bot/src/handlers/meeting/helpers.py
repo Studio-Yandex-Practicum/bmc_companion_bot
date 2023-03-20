@@ -14,7 +14,8 @@ class ContextKeys(str, Enum):
     MEETING = "MEETING"
     FEEDBACK = "FEEDBACK"
     FEEDBACK_TEXT = "FEEDBACK_TEXT"
-    SCORE = "SCORE"
+    COMFORT_SCORE = "COMFORT_SCORE"
+    BETTER_SCORE = "BETTER_SCORE"
     MEETING_NUMBER = "MEETING_NUMBER"
     TIMESLOT_NUMBER = "TIMESLOT_NUMBER"
 
@@ -87,11 +88,17 @@ class MeetingContextManager(BaseContextManager):
     def get_feedback_text(self, context: ContextTypes.DEFAULT_TYPE):
         return self.get(context, ContextKeys.FEEDBACK_TEXT)
 
-    def set_score(self, context: ContextTypes.DEFAULT_TYPE, score: int):
-        self.set(context, ContextKeys.SCORE, score)
+    def set_comfort_score(self, context: ContextTypes.DEFAULT_TYPE, score: int):
+        self.set(context, ContextKeys.COMFORT_SCORE, score)
 
-    def get_score(self, context: ContextTypes.DEFAULT_TYPE):
-        return self.get(context, ContextKeys.SCORE)
+    def set_better_score(self, context: ContextTypes.DEFAULT_TYPE, score: int):
+        self.set(context, ContextKeys.BETTER_SCORE, score)
+
+    def get_comfort_score(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.COMFORT_SCORE)
+
+    def get_better_score(self, context: ContextTypes.DEFAULT_TYPE):
+        return self.get(context, ContextKeys.BETTER_SCORE)
 
 
 context_manager = MeetingContextManager()
