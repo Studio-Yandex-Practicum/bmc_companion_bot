@@ -13,9 +13,9 @@ server {
         proxy_pass http://${ADMINPANEL_HOST}:${ADMINPANEL_PORT}/;
     }
 
-    location /static/ {
-        root /var/html/;
-    }
+#    location /static/ {
+#        root /var/html/;
+#    }
 
     error_page   404              /404.html;
     error_page   500 502 503 504  /50x.html;
