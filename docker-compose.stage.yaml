@@ -1,7 +1,6 @@
 x-base-service: &base-service
     env_file: ./.env
     environment:
-        - COMPOSE_PROJECT_NAME=bmc
         - DOCKER_BUILDKIT=1
         - ENVIRONMENT=development
         - DJANGO_SETTINGS_MODULE=config.settings
@@ -56,29 +55,40 @@ services:
             - ./adminpanel/src:/src
         ports:
             - 8000:8000
+        command:
+            - /scripts/wait-dependencies.sh
+            - /scripts/start.sh
 
-#    celery:
-#        <<: *base-service
+    celery:
+        <<: *base-service
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+        container_name: bmc_celery
 #        build:
 #            context: .
 #            dockerfile: ./docker/celery/Dockerfile
-#        depends_on:
-#            - postgres
-#            - redis
-#        volumes:
-#            - ./adminpanel/src:/src
-#
-#    celery_beat:
-#        <<: *base-service
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - ./adminpanel/src:/src
+        command:
+            - celery -A config.celery worker -l info
+
+    celery_beat:
+        <<: *base-service
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+        container_name: bmc_celery_beat
 #        build:
 #            context: .
 #            dockerfile: ./docker/celery_beat/Dockerfile
-#        depends_on:
-#            - postgres
-#            - redis
-#            - celery
-#        volumes:
-#            - ./adminpanel/src:/src
+        depends_on:
+            - postgres
+            - redis
+            - celery
+        volumes:
+            - ./adminpanel/src:/src
+        command:
+            - celery -A config.celery beat -l info
 
     nginx:
         <<: *base-service
@@ -86,7 +96,7 @@ services:
         volumes:
             - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./docker/nginx/templates:/etc/nginx/templates
-            - static_value:/var/html/static/
+#            - static_value:/var/html/static/
         ports:
             - 80:80
         depends_on:
