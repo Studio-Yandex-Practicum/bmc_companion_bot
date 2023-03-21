@@ -56,7 +56,7 @@ services:
         ports:
             - 8000:8000
         command:
-            - /scripts/entrypoint.sh
+            - /scripts/entrypoint_adminpanel.sh
 #            - /scripts/wait-dependencies.sh
 #            - /scripts/start.sh
 
@@ -73,7 +73,7 @@ services:
         volumes:
             - ./adminpanel/src:/src
         command:
-            - /scripts/celery.sh
+            - /scripts/entrypoint_celery.sh
 
     celery_beat:
         <<: *base-service
@@ -89,7 +89,7 @@ services:
         volumes:
             - ./adminpanel/src:/src
         command:
-            - /scripts/celery_beat.sh
+            - /scripts/entrypoint_celery_beat.sh
 
     nginx:
         <<: *base-service
