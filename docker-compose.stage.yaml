@@ -3,7 +3,7 @@ x-base-service: &base-service
     environment:
         - DOCKER_BUILDKIT=1
         - ENVIRONMENT=production
-        - ALLOWED_HOSTS=adminpanel
+        - ALLOWED_HOSTS=adminpanel 158.160.12.237
         - ADMINPANEL_HOST=adminpanel
         - ADMINPANEL_PORT=8000
         - ADMINPANEL_WEB_PROTOCOL=http
