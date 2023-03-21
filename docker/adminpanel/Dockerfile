@@ -29,4 +29,4 @@ RUN poetry config virtualenvs.create false \
 
 COPY ./adminpanel/src .
 
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+#ENTRYPOINT ["/scripts/entrypoint.sh"]

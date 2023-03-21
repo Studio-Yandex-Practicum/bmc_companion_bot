@@ -2,8 +2,7 @@ x-base-service: &base-service
     env_file: ./.env
     environment:
         - DOCKER_BUILDKIT=1
-        - ENVIRONMENT=development
-        - DJANGO_SETTINGS_MODULE=config.settings
+        - ENVIRONMENT=production
         - ADMINPANEL_HOST=adminpanel
         - ADMINPANEL_PORT=8000
         - ADMINPANEL_WEB_PROTOCOL=http
@@ -56,8 +55,9 @@ services:
         ports:
             - 8000:8000
         command:
-            - /scripts/wait-dependencies.sh
-            - /scripts/start.sh
+            - /scripts/entrypoint.sh
+#            - /scripts/wait-dependencies.sh
+#            - /scripts/start.sh
 
     celery:
         <<: *base-service
