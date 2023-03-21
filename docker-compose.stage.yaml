@@ -2,7 +2,7 @@ x-base-service: &base-service
     env_file: ./.env
     environment:
         - DOCKER_BUILDKIT=1
-        - ENVIRONMENT=production
+        - ENVIRONMENT=development
         - ALLOWED_HOSTS=adminpanel 158.160.12.237
         - ADMINPANEL_HOST=adminpanel
         - ADMINPANEL_PORT=8000
