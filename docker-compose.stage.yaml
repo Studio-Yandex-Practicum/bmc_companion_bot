@@ -73,7 +73,7 @@ services:
         volumes:
             - ./adminpanel/src:/src
         command:
-            - celery -A config.celery worker -l info
+            - /scripts/celery.sh
 
     celery_beat:
         <<: *base-service
@@ -89,7 +89,7 @@ services:
         volumes:
             - ./adminpanel/src:/src
         command:
-            - celery -A config.celery beat -l info
+            - /scripts/celery_beat.sh
 
     nginx:
         <<: *base-service
