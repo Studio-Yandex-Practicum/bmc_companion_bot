@@ -32,6 +32,7 @@ pydantic = "^1.10.6"
 psycopg2-binary = "^2.9.5"
 python-dotenv = "^1.0.0"
 gunicorn = "^20.1.0"
+redis = "^4.5.2"
 
 [tool.poetry.group.bot.dependencies]
 python-telegram-bot = "^20.1"
