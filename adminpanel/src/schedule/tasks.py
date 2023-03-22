@@ -2,12 +2,15 @@ from __future__ import absolute_import, unicode_literals
 
 import datetime
 import json
+import time
 
 import requests
 from celery import shared_task
 from config.settings.components import config
-from django_celery_beat.models import ClockedSchedule, PeriodicTask
+from django_celery_beat.models import ClockedSchedule
 from loguru import logger
+from profiles.models import Profile
+from schedule.models import MeetingPeriodicTask
 
 URL_MAIN = f"https://api.telegram.org/bot{config.BOT_TOKEN}/sendMessage"
 URL_CHAT_ID = "?chat_id="
@@ -20,13 +23,15 @@ TEXT_FOR_FEEDBACK = "Вы только что побывали на консул
 TASK_FOR_PATIENT = "send_notification_to_patient"
 TASK_FOR_PSYCHOLOGIST = "send_notification_to_psychologist"
 TASK_FOR_FEEDBACK = "send_feedback_notification"
+TASK_FOR_MAILING = "send_notification_to_everyone"
 
 
-def make_notification_time(date_time, minutes_earlier=1000000):
+def make_notification_time(date_time, minutes=120, after=False):
     """Создает время отправки оповещения"""
-    return datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M") - datetime.timedelta(
-        minutes=minutes_earlier
-    )
+    dt = datetime.datetime.strptime(date_time, "%Y-%m-%d %H:%M")
+    if after:
+        return dt + datetime.timedelta(minutes=minutes)
+    return dt - datetime.timedelta(minutes=minutes)
 
 
 def make_notification_name(task, chat_id, date_time):
@@ -34,9 +39,10 @@ def make_notification_name(task, chat_id, date_time):
     return f"{task}-{chat_id}-{date_time}"
 
 
-def make_task(task, clocked_time, chat_id, date_time=" "):
+def make_task(task, meeting_id, clocked_time, chat_id, date_time=" "):
     """Создает задачу на отправку оповещения"""
-    PeriodicTask.objects.create(
+    MeetingPeriodicTask.objects.create(
+        meeting=meeting_id,
         clocked=clocked_time,
         name=make_notification_name(task, chat_id, date_time),
         task=task,
@@ -45,42 +51,39 @@ def make_task(task, clocked_time, chat_id, date_time=" "):
     )
 
 
-def delete_task(task, chat_id, date_time):
+def delete_task(task, meeting):
     try:
-
-        name = make_notification_name(task, chat_id, date_time)
-        task = PeriodicTask.objects.get(name=name, task=task)
+        task = MeetingPeriodicTask.objects.get(meeting=meeting, task=task)
 
         task.delete()
-    except Exception as e:
-        logger.error(
-            "Error occurred in module %s while executing the function %s: %s" % (chat_id, task, e)
-        )
+    except Exception:
         return
 
 
-def create_notification_tasks(psychologist_chat_id, patient_chat_id, date_time):
+def create_notification_tasks(meeting_id, psychologist_chat_id, patient_chat_id, date_time):
     """Создает задачи для оповещения пациента и психолога"""
     date_time = datetime.datetime.strftime(date_time, "%Y-%m-%d %H:%M")
     clocked = ClockedSchedule.objects.create(clocked_time=make_notification_time(date_time))
-    make_task(TASK_FOR_PSYCHOLOGIST, clocked, psychologist_chat_id, date_time)
-    make_task(TASK_FOR_PATIENT, clocked, patient_chat_id, date_time)
+    make_task(TASK_FOR_PSYCHOLOGIST, meeting_id, clocked, psychologist_chat_id, date_time)
+    make_task(TASK_FOR_PATIENT, meeting_id, clocked, patient_chat_id, date_time)
 
 
-def create_feedback_notification(patient_chat_id, date_time):
+def create_feedback_notification(meeting_id, patient_chat_id, date_time):
     """Создает задачу для напоминания о фидбеке"""
     date_time = datetime.datetime.strftime(date_time, "%Y-%m-%d %H:%M")
-    clocked = ClockedSchedule.objects.create(clocked_time=make_notification_time(date_time))
-    make_task(TASK_FOR_FEEDBACK, clocked, patient_chat_id, date_time)
+    clocked = ClockedSchedule.objects.create(
+        clocked_time=make_notification_time(date_time, minutes=70, after=True)
+    )
+    make_task(TASK_FOR_FEEDBACK, meeting_id, clocked, patient_chat_id, date_time)
 
 
-def delete_notification_tasks(psychologist_chat_id, patient_chat_id, date_time):
+def delete_notification_tasks(meeting_id, psychologist_chat_id, patient_chat_id, date_time):
     """Удаляет задачи для консультации"""
     date_time = datetime.datetime.strftime(date_time, "%Y-%m-%d %H:%M")
     try:
-        delete_task(TASK_FOR_PSYCHOLOGIST, psychologist_chat_id, date_time)
-        delete_task(TASK_FOR_PATIENT, patient_chat_id, date_time)
-        delete_task(TASK_FOR_FEEDBACK, patient_chat_id, date_time)
+        delete_task(TASK_FOR_PSYCHOLOGIST, meeting_id)
+        delete_task(TASK_FOR_PATIENT, meeting_id)
+        delete_task(TASK_FOR_FEEDBACK, meeting_id)
     except Exception as e:
         logger.error(
             "Error occurred in module %s while executing the function %s: %s"
@@ -109,3 +112,13 @@ def send_notification_to_psychologist(chat_id, date_time):
 def send_feedback_notification(chat_id, date_time):
     """Отправляет оповещение после консультации"""
     requests.get(URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + TEXT_FOR_FEEDBACK)
+
+
+@shared_task(name=TASK_FOR_MAILING)
+def send_notification_to_everyone(text):
+    chat_ids = Profile.objects.values_list("chat_id", flat=True)
+    for chat_id in chat_ids:
+        requests.get(
+            URL_MAIN + URL_CHAT_ID + f"{chat_id}" + URL_TEXT + text + "&parse_mode=markdown"
+        )
+        time.sleep(1)

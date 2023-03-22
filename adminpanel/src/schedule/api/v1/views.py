@@ -42,39 +42,46 @@ class MeetingViewSet(ModelViewSet):
     ]
 
     def perform_create(self, serializer):
+        super().perform_create(serializer)
+        instance = Meeting.objects.get(id=serializer.data.get("id"))
         task_data = serializer.validated_data
         create_notification_tasks(
+            meeting_id=instance,
             psychologist_chat_id=task_data.get("psychologist").chat_id,
             patient_chat_id=task_data.get("user").chat_id,
             date_time=task_data.get("date_start"),
         )
         create_feedback_notification(
+            meeting_id=instance,
             patient_chat_id=task_data.get("user").chat_id,
             date_time=task_data.get("date_start"),
         )
-        return super().perform_create(serializer)
 
     def perform_update(self, serializer):
         instance = self.get_object()
         delete_notification_tasks(
+            meeting_id=instance,
             psychologist_chat_id=instance.psychologist.chat_id,
             patient_chat_id=instance.user.chat_id,
-            date_time=instance.timeslot.date_start,
+            date_time=instance.date_start,
         )
         task_data = serializer.validated_data
         create_notification_tasks(
+            meeting_id=instance,
             psychologist_chat_id=task_data.get("psychologist").chat_id,
             patient_chat_id=task_data.get("user").chat_id,
             date_time=task_data.get("date_start"),
         )
         create_feedback_notification(
+            meeting_id=instance,
             patient_chat_id=task_data.get("user").chat_id,
             date_time=task_data.get("date_start"),
         )
-        return super().perform_update(serializer)
+        super().perform_update(serializer)
 
     def perform_destroy(self, instance):
         delete_notification_tasks(
+            meeting_id=instance,
             psychologist_chat_id=instance.psychologist.chat_id,
             patient_chat_id=instance.user.chat_id,
             date_time=instance.timeslot.date_start,

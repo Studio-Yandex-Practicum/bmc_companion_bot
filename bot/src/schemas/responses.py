@@ -170,7 +170,8 @@ class FeedbackResponse(BaseModel):
     meeting: int | None = None
     user: int | None = None
     text: str | None = None
-    score: int | None = None
+    comfort_score: int | None = None
+    better_score: int | None = None
 
 
 class FeedbackListResponse(BaseModel):
