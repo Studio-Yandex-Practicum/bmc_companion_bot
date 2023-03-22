@@ -4,9 +4,7 @@ from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
 from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler
-from ui.buttons import BTN_FEEDBACK, BTN_START_MENU
-from utils import make_message_handler, make_text_handler
+from telegram.ext import ContextTypes
 
 from .enums import States
 from .helpers import context_manager
@@ -50,6 +48,8 @@ def ask_for_feedback(state: str):
                     f"Тема: {meeting.comment[:30]}"
                 )
                 text += add_meeting
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
             number_of_meeting = int(re.findall("\\d+", update.message.text)[0])
             if number_of_meeting > len(meetings):
@@ -68,33 +68,59 @@ def ask_for_feedback(state: str):
                 text = (
                     "Вы уже оставляли обратную связь для этой встречи: \n"
                     f"{feedback_text} \n"
-                    "Введите текст обратной связи (мы обновим его)."
+                    "Оставьте отзыв заново (мы обновим его)."
+                    "Оцените насколько вам было комфортно на консультации:"
                 )
             else:
                 context_manager.set_feedback(context, feedback)
-                text = "Введите текст обратной связи:"
-        elif state == States.TYPING_SCORE:
-            feedback_text = update.message.text
-            context_manager.set_feedback_text(context, feedback_text)
-            text = "Оцените встречу от 1 до 10: \n" "Введите число"
-        elif state == States.FEEDBACK_SAVED:
-            score = int(re.findall("\\d+", update.message.text)[0])
-            if score not in range(1, 11):
+                text = "Оцените насколько вам было комфортно на консультации:"
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+
+        elif state == States.TYPING_COMFORT_SCORE:
+            score_text = update.message.text
+            comfort_score = re.findall("\\d+", score_text) or []
+            if not comfort_score or int(comfort_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.CHECK_IS_FEEDBACK_LEFT
-            context_manager.set_score(context, score)
+            context_manager.set_comfort_score(context, comfort_score[0])
+            text = (
+                "Оцените насколько вам стало лучше после консультации от 1 до 10 \nВведите число:"
+            )
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+
+        elif state == States.TYPING_BETTER_SCORE:
+            better_score = re.findall("\\d+", update.message.text) or []
+            if not better_score or int(better_score[0]) not in range(1, 11):
+                text = "Введите корректную оценку\nВведите число 1 до 10."
+                await update.message.reply_text(text=text, reply_markup=keyboard)
+                return States.TYPING_COMFORT_SCORE
+            context_manager.set_better_score(context, better_score[0])
+            text = "Введите ваш отзыв:"
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+
+        elif state == States.FEEDBACK_SAVED:
+            context_manager.set_feedback_text(context, update.message.text)
             feedback = context_manager.get_feedback(context)
             meeting = context_manager.get_meeting(context)
             feedback_text = context_manager.get_feedback_text(context)
             text = "Спасибо за ваш отзыв."
+            comfort_score = int(context_manager.get_comfort_score(context))
+            better_score = int(context_manager.get_better_score(context))
             if feedback:
                 schedule_service_v1.update_feedback(
-                    feedback_id=feedback[0].id, text=feedback_text, score=score
+                    feedback_id=feedback[0].id,
+                    text=feedback_text,
+                    comfort_score=comfort_score,
+                    better_score=better_score,
                 )
             else:
                 schedule_service_v1.create_feedback(
-                    meeting_id=meeting.id, user_id=user.id, text=feedback_text, score=score
+                    meeting_id=meeting.id,
+                    user_id=user.id,
+                    text=feedback_text,
+                    comfort_score=comfort_score,
+                    better_score=better_score,
                 )
             if user.id == meeting.user:
                 psychologist_chat_id = user_service_v1.get_user(id=meeting.psychologist).chat_id
@@ -107,32 +133,7 @@ def ask_for_feedback(state: str):
             await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
-        await update.message.reply_text(text=text, reply_markup=keyboard)
 
         return state
 
     return inner
-
-
-feedback_section = ConversationHandler(
-    entry_points=[
-        make_message_handler(BTN_FEEDBACK, ask_for_feedback(States.TYPING_MEETING_NUMBER)),
-    ],
-    states={
-        States.TYPING_MEETING_NUMBER: [
-            make_text_handler(ask_for_feedback(States.CHECK_IS_FEEDBACK_LEFT)),
-        ],
-        States.CHECK_IS_FEEDBACK_LEFT: [
-            make_text_handler(ask_for_feedback(States.TYPING_SCORE)),
-        ],
-        States.TYPING_SCORE: [
-            make_text_handler(ask_for_feedback(States.FEEDBACK_SAVED)),
-        ],
-    },
-    fallbacks=[
-        make_message_handler(BTN_START_MENU, back_to_start_menu),
-    ],
-    map_to_parent={
-        BotState.END: BotState.END,
-    },
-)

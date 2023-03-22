@@ -33,13 +33,14 @@ class ScheduleApiService(PydanticApiService):
         return self.post(MeetingResponse, self.url_meetings, data=data)
 
     def create_feedback(
-        self, meeting_id: int, user_id: int, text: str, score: int
+        self, meeting_id: int, user_id: int, text: str, comfort_score: int, better_score: int
     ) -> FeedbackResponse:
         data = {
             "meeting": meeting_id,
             "user": user_id,
             "text": text,
-            "score": score,
+            "comfort_score": comfort_score,
+            "better_score": better_score,
         }
         return self.post(FeedbackResponse, self.url_feedbacks, data=data)
 

@@ -60,6 +60,11 @@ def ask_for_repeat_meeting(state: str):
             psycho_set = {meeting.psychologist for meeting in meetings}
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            if not timeslots:
+                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
+                await update.message.reply_text(text=text)
+                await back_to_start_menu(update, context)
+                return BotState.STOPPING
 
             timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in psycho_set))
 

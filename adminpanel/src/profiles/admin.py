@@ -18,7 +18,8 @@ FEEDBACK_EXPORT_FIELDS = (
     "Имя психолога",
     "Телеграм психолога",
     "Отзыв",
-    "Оценка",
+    "Оценка комфорта",
+    "Оценка улучшений",
 )
 
 
@@ -67,7 +68,8 @@ def export_table_to_excel(modeladmin, request, queryset):
                 ws.cell(row=row, column=4).value = str(feedback.meeting.psychologist.first_name)
                 ws.cell(row=row, column=5).value = str(feedback.meeting.psychologist.telegram_login)
                 ws.cell(row=row, column=6).value = str(feedback.text)
-                ws.cell(row=row, column=7).value = str(feedback.score)
+                ws.cell(row=row, column=7).value = str(feedback.comfort_score)
+                ws.cell(row=row, column=8).value = str(feedback.better_score)
                 row += 1
             row += 1
         row += 1

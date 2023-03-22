@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 
 
 class Profile(AbstractUser):
@@ -18,3 +19,7 @@ class Profile(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} ({self.telegram_login})"
+
+
+class AllUsersNotification(PeriodicTask):
+    text = models.TextField()
