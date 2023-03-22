@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import openpyxl as openpyxl
+import openpyxl
 from django.contrib import admin
 from django.http import HttpResponse
 

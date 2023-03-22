@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import openpyxl as openpyxl
+import openpyxl
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponse
@@ -94,7 +94,7 @@ class ProfileAdmin(UserAdmin):
         "telegram_id",
         "chat_id",
     )
-    # actions = [export_table_to_excel]
+    actions = [export_table_to_excel]
     list_filter = ("is_staff", "is_active")
     fieldsets = (
         (
