@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 import httpx
 from core.constants import APIVersion, Endpoint, HTTPMethod, UserRole
-from core.settings import settings
+from core.settings import WEB_API_URL, settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
     APIClientRequestError,
@@ -33,8 +33,6 @@ from schemas.responses import (
     UserListResponse,
     UserResponse,
 )
-
-WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
@@ -232,5 +230,8 @@ class TestAPIClient(BaseAPIClient):
 
 
 user_service = ObjAPIClient(
-    api_version="/v1", endpoint="/users/", model=UserResponse, many_model=UserListResponse
+    api_version="/v1",
+    endpoint="/users/",
+    model=UserResponse,
+    many_model=UserListResponse,
 )
