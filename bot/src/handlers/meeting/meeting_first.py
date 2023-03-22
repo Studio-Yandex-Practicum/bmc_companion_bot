@@ -40,9 +40,7 @@ def ask_for_input(state: str):
         user = user_service_v1.get_user(username=telegram_login)
         if not user:
             user = user_service_v1.create_user(
-                telegram_login=telegram_login,
-                first_name=chat_data.first_name,
-                chat_id=chat_data.id,
+                telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
             )
 
         user_active_meeting = schedule_service_v1.get_meetings_by_user(
@@ -93,8 +91,7 @@ def ask_for_input(state: str):
             if first_name != DO_NOTHING_SIGN:
                 if not first_name.isalpha():
                     text = make_ask_for_input_information(
-                        "Имя не может содержать символы и цифры, введите еще раз",
-                        user.first_name,
+                        "Имя не может содержать символы и цифры, введите еще раз", user.first_name
                     )
                     next_state = States.TYPING_FIRST_NAME
                 else:
@@ -257,12 +254,10 @@ meeting_first_section = ConversationHandler(
         ],
         States.TYPING_MEETING_FORMAT: [
             make_message_handler(
-                buttons.BTN_MEETING_FORMAT_ONLINE,
-                ask_for_input(States.TYPING_TIME_SLOT),
+                buttons.BTN_MEETING_FORMAT_ONLINE, ask_for_input(States.TYPING_TIME_SLOT)
             ),
             make_message_handler(
-                buttons.BTN_MEETING_FORMAT_OFFLINE,
-                ask_for_input(States.TYPING_TIME_SLOT),
+                buttons.BTN_MEETING_FORMAT_OFFLINE, ask_for_input(States.TYPING_TIME_SLOT)
             ),
         ],
         States.TYPING_TIME_SLOT: [
