@@ -28,7 +28,7 @@ def ask_for_reschedule(state: str):
         keyboard = None
         chat_data_id = update.message.chat.id
         user = user_service_v1.get_user(chat_id=chat_data_id)
-        meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
+        meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, is_active="True")
         timeslots = schedule_service_v1.get_actual_timeslots()
 
         if not meetings:
