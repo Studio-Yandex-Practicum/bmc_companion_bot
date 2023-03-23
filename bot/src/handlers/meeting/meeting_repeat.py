@@ -51,9 +51,6 @@ def ask_for_repeat_meeting(state: str):
 
         if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
-            if meeting_format not in ("Очно", "Online"):
-                text = "Неверный формат. Выберите формат участия:"
-                return States.TYPING_MEETING_FORMAT
             context_manager.set_meeting_format(context, meeting_format)
 
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")

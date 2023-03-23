@@ -12,6 +12,8 @@ from .helpers import context_manager
 from .messages import psychologist_meeting_message
 from .root_handlers import back_to_start_menu
 
+ONE_TO_TEN = [i for i in range(1, 11)]
+
 
 @t
 def ask_for_feedback(state: str):
@@ -85,6 +87,7 @@ def ask_for_feedback(state: str):
             else:
                 context_manager.set_feedback(context, feedback)
                 text = "Оцените насколько вам было комфортно на консультации:"
+                keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_COMFORT_SCORE:
@@ -98,6 +101,7 @@ def ask_for_feedback(state: str):
             text = (
                 "Оцените насколько вам стало лучше после консультации от 1 до 10 \nВведите число:"
             )
+            keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_BETTER_SCORE:
