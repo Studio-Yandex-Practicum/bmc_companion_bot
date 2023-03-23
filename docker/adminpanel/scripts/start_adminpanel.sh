@@ -1,3 +1,4 @@
 #!/bin/sh
 python manage.py collectstatic --noinput
+python manage.py migrate --noinput
 gunicorn -b 0.0.0.0:8000 -w 4 config.wsgi:application
