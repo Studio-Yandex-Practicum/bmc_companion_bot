@@ -3,7 +3,7 @@ import re
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
-from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
 
@@ -112,7 +112,7 @@ def ask_for_feedback(state: str):
                 return States.TYPING_COMFORT_SCORE
             context_manager.set_better_score(context, better_score[0])
             text = "Введите ваш отзыв:"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=ReplyKeyboardRemove())
 
         elif state == States.FEEDBACK_SAVED:
             context_manager.set_feedback_text(context, update.message.text)
