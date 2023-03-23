@@ -48,9 +48,11 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Удаляет запись к психологу."""
     meeting_number = update.message.text
     meetings = context_manager.get_meetings(context)
-    if meeting_number == "Отмена записи" and datetime.strptime(
-        meetings[0].date_start, "%d.%m.%Y %H:%M"
-    ) < datetime.now() - timedelta(hours=12):
+    if (
+        meeting_number == "Отмена записи"
+        and datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
+        > datetime.now()
+    ):
         schedule_service_v1.delete_meeting(meeting_id=meetings[0].id)
         text_parts = ["Запись отменена"]
         psychologist_id = meetings[0].psychologist
