@@ -51,8 +51,8 @@ def ask_for_feedback(state: str):
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
-            number_of_meeting = int(re.findall("\\d+", update.message.text)[0])
-            if number_of_meeting > len(meetings):
+            number_of_meeting = re.findall("\\d+", update.message.text) or []
+            if not number_of_meeting or int(number_of_meeting[0]) > len(meetings):
                 text = "Введен неправильный номер !\nНет консультации под таким номером."
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_MEETING_NUMBER
