@@ -56,7 +56,7 @@ def ask_for_feedback(state: str):
                 text = "Введен неправильный номер !\nНет консультации под таким номером."
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_MEETING_NUMBER
-            meeting = meetings[number_of_meeting - 1] if meetings else {}
+            meeting = meetings[int(number_of_meeting[0]) - 1] if meetings else {}
             context_manager.set_meeting(context, meeting)
             feedback = schedule_service_v1.get_feedback_by_user_and_meeting(
                 user=user.id,
