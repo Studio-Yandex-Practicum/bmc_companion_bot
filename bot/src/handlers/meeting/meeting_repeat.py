@@ -26,7 +26,7 @@ def ask_for_repeat_meeting(state: str):
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         btns = [[BTN_START_MENU]]
-        keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
+        keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
 
