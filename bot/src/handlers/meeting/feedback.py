@@ -12,7 +12,7 @@ from .helpers import context_manager
 from .messages import psychologist_meeting_message
 from .root_handlers import back_to_start_menu
 
-ONE_TO_TEN = [KeyboardButton(text=str(i)) for i in range(1, 11)]
+ONE_TO_TEN_BUTTONS = [[KeyboardButton(text=str(i)) for i in range(1, 11)], [BTN_START_MENU]]
 
 
 @t
@@ -85,7 +85,7 @@ def ask_for_feedback(state: str):
             else:
                 context_manager.set_feedback(context, feedback)
                 text = "Оцените насколько вам было комфортно на консультации:"
-            keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_COMFORT_SCORE:
@@ -93,19 +93,21 @@ def ask_for_feedback(state: str):
             comfort_score = re.findall("\\d+", score_text) or []
             if not comfort_score or int(comfort_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
+                keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.CHECK_IS_FEEDBACK_LEFT
             context_manager.set_comfort_score(context, comfort_score[0])
             text = (
                 "Оцените насколько вам стало лучше после консультации от 1 до 10 \nВведите число:"
             )
-            keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_BETTER_SCORE:
             better_score = re.findall("\\d+", update.message.text) or []
             if not better_score or int(better_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
+                keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_COMFORT_SCORE
             context_manager.set_better_score(context, better_score[0])
