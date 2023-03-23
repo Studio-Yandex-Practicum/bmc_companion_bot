@@ -24,6 +24,12 @@ def ask_for_feedback(state: str):
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
 
+        if update.message.text == "Главное меню":
+            text = "Выполняется переход в главное меню"
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.END
+
         if user is None:
             text = "Ваших данных нет в базе"
             await update.message.reply_text(text=text, reply_markup=keyboard)
@@ -55,13 +61,6 @@ def ask_for_feedback(state: str):
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
-
-            if update.message.text == "Главное меню":
-                text = "Выполняется переход в главное меню"
-                await update.message.reply_text(text=text, reply_markup=keyboard)
-                await back_to_start_menu(update, context)
-                return BotState.END
-
             number_of_meeting = re.findall("\\d+", update.message.text) or []
 
             if not number_of_meeting or int(number_of_meeting[0]) > len(meetings):
