@@ -35,7 +35,9 @@ def ask_for_reschedule(state: str):
             text_parts = ["У вас нет записи"]
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
-            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+            await update.message.reply_text(
+                text="".join(text_parts), reply_markup=keyboard, resize_keyboard=True
+            )
             await back_to_start_menu(update, context)
             return BotState.STOPPING
 
@@ -53,7 +55,9 @@ def ask_for_reschedule(state: str):
             text_parts += ["\nДо консультации осталось менее 12 часов, её невозможно перенести."]
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
-            await update.message.reply_text(text="\n".join(text_parts), reply_markup=keyboard)
+            await update.message.reply_text(
+                text="\n".join(text_parts), reply_markup=keyboard, resize_keyboard=True
+            )
             await back_to_start_menu(update, context)
             return BotState.STOPPING
 
@@ -61,7 +65,9 @@ def ask_for_reschedule(state: str):
             text_parts = "Извините, сейчас нет подходящего времени для переноса записи."
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
-            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+            await update.message.reply_text(
+                text="".join(text_parts), reply_markup=keyboard, resize_keyboard=True
+            )
             await back_to_start_menu(update, context)
             return BotState.STOPPING
 
@@ -90,7 +96,9 @@ def ask_for_reschedule(state: str):
             timeslots = context_manager.get_timeslots(context) or []
             if not number_of_timeslot or int(number_of_timeslot[0]) > len(timeslots):
                 text = "Введен неправильный номер !\nНет таймслота под таким номером."
-                await update.message.reply_text(text=text, reply_markup=keyboard)
+                await update.message.reply_text(
+                    text=text, reply_markup=keyboard, resize_keyboard=True
+                )
                 await back_to_start_menu(update, context)
                 return BotState.STOPPING
             else:
@@ -115,7 +123,7 @@ def ask_for_reschedule(state: str):
         cm.set_meetings(context, meetings)
 
         if text_parts:
-            await update.message.reply_text(text_parts, reply_markup=keyboard)
+            await update.message.reply_text(text_parts, reply_markup=keyboard, resize_keyboard=True)
         else:
             text = "Извините, попробуйте ещё раз"
             await update.message.reply_text(text=text)

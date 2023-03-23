@@ -32,7 +32,7 @@ def ask_for_repeat_meeting(state: str):
         user = user_service_v1.get_user(username=telegram_login)
         if user is None:
             text = "Ваших данных нет в базе"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
             return BotState.STOPPING
 
         user_active_meeting = schedule_service_v1.get_meetings_by_user(
@@ -102,7 +102,7 @@ def ask_for_repeat_meeting(state: str):
 
         context_manager.set_user(context, user)
 
-        await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         return state
 

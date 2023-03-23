@@ -26,20 +26,20 @@ def ask_for_feedback(state: str):
 
         if update.message.text == "Главное меню":
             text = "Выполняется переход в главное меню"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
             await back_to_start_menu(update, context)
             return BotState.END
 
         if user is None:
             text = "Ваших данных нет в базе"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
             await back_to_start_menu(update, context)
             return BotState.END
         meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, past="True")
 
         if not meetings:
             text = "У вас еще не было консультаций."
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
             await back_to_start_menu(update, context)
             return BotState.END
 
@@ -58,7 +58,7 @@ def ask_for_feedback(state: str):
                     f"Тема: {meeting.comment[:30]}"
                 )
                 text += add_meeting
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
             number_of_meeting = re.findall("\\d+", update.message.text) or []
@@ -85,30 +85,34 @@ def ask_for_feedback(state: str):
             else:
                 context_manager.set_feedback(context, feedback)
                 text = "Оцените насколько вам было комфортно на консультации:"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         elif state == States.TYPING_COMFORT_SCORE:
             score_text = update.message.text
             comfort_score = re.findall("\\d+", score_text) or []
             if not comfort_score or int(comfort_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
-                await update.message.reply_text(text=text, reply_markup=keyboard)
+                await update.message.reply_text(
+                    text=text, reply_markup=keyboard, resize_keyboard=True
+                )
                 return States.CHECK_IS_FEEDBACK_LEFT
             context_manager.set_comfort_score(context, comfort_score[0])
             text = (
                 "Оцените насколько вам стало лучше после консультации от 1 до 10 \nВведите число:"
             )
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         elif state == States.TYPING_BETTER_SCORE:
             better_score = re.findall("\\d+", update.message.text) or []
             if not better_score or int(better_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
-                await update.message.reply_text(text=text, reply_markup=keyboard)
+                await update.message.reply_text(
+                    text=text, reply_markup=keyboard, resize_keyboard=True
+                )
                 return States.TYPING_COMFORT_SCORE
             context_manager.set_better_score(context, better_score[0])
             text = "Введите ваш отзыв:"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         elif state == States.FEEDBACK_SAVED:
             context_manager.set_feedback_text(context, update.message.text)
@@ -141,7 +145,7 @@ def ask_for_feedback(state: str):
                         meeting_format, user, meeting, header="Вам оставлена обратная связь:\n"
                     )
                     await context.bot.send_message(chat_id=psychologist_chat_id, text=message)
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
             await back_to_start_menu(update, context)
             return BotState.END
 

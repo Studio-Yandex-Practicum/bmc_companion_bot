@@ -38,7 +38,9 @@ async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_T
     context_manager.set_keys(context, keyboard)
     context_manager.set_meetings(context, meetings)
 
-    await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+    await update.message.reply_text(
+        text="".join(text_parts), reply_markup=keyboard, resize_keyboard=True
+    )
 
     return States.TYPING_MEETING_LIST
 
@@ -72,7 +74,9 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
 
-    await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+    await update.message.reply_text(
+        text="".join(text_parts), reply_markup=keyboard, resize_keyboard=True
+    )
 
     await back_to_start_menu(update, context)
 

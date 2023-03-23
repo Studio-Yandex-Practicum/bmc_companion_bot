@@ -184,7 +184,7 @@ def ask_for_input(state: str):
 
         context_manager.set_user(context, user)
 
-        await update.message.reply_text(text=text, reply_markup=keyboard)
+        await update.message.reply_text(text=text, reply_markup=keyboard, resize_keyboard=True)
 
         return next_state
 
