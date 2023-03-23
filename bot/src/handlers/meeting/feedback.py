@@ -87,7 +87,7 @@ def ask_for_feedback(state: str):
             else:
                 context_manager.set_feedback(context, feedback)
                 text = "Оцените насколько вам было комфортно на консультации:"
-                keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup([ONE_TO_TEN, [BTN_START_MENU]], resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_COMFORT_SCORE:
