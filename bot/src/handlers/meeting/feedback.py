@@ -3,8 +3,9 @@ import re
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
-from telegram import Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+from ui.buttons import BTN_START_MENU
 
 from .enums import States
 from .helpers import context_manager
@@ -17,19 +18,20 @@ def ask_for_feedback(state: str):
     @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
-        keyboard = ""
+        buttons = [[BTN_START_MENU]]
+        keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
         if user is None:
             text = "Ваших данных нет в базе"
-            await update.message.reply_text(text=text)
+            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
         meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, past="True")
         if not meetings:
             text = "У вас еще не было консультаций."
-            await update.message.reply_text(text=text)
+            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
 
