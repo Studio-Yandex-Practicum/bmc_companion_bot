@@ -118,7 +118,4 @@ jobs:
             docker-compose --file docker-compose.yaml stop
             docker-compose --file docker-compose.yaml rm bot
             docker-compose --file docker-compose.yaml rm adminpanel
-            docker-compose --file docker-compose.yaml rm celery
-            docker-compose --file docker-compose.yaml rm celery_beat
             docker-compose --file docker-compose.yaml up -d
-            docker-compose exec -T adminpanel python manage.py migrate --noinput
