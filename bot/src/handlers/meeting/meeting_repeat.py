@@ -53,7 +53,7 @@ def ask_for_repeat_meeting(state: str):
             meeting_format = update.message.text
             if meeting_format not in ("Очно", "Online"):
                 text = "Неверный формат. Выберите формат участия:"
-                await update.message.reply_text(text=text)
+                await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_MEETING_FORMAT
             context_manager.set_meeting_format(context, meeting_format)
 
