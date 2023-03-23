@@ -12,7 +12,7 @@ YOU_WERENT = "\nУ этих психологов Вы еще не были:"
 NEW_MEETING = "У вас новая запись:\n"
 PATIENT = "Пациент: "
 PHONE = "Телефон: "
-CHOOSE_DATE = "Выберите дату:\n"
+CHOOSE_DATE = "Введите порядковый номер консультации:\n"
 
 
 async def psychologist_meeting_message(format, user, timeslot, header=NEW_MEETING):
