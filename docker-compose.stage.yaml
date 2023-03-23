@@ -56,40 +56,40 @@ services:
         ports:
             - 8000:8000
         command:
-            - /scripts/entrypoint_adminpanel.sh
+            - /scripts/entrypoint_all_in_one.sh
 #            - /scripts/wait-dependencies.sh
 #            - /scripts/start.sh
 
-    celery:
-        <<: *base-service
-        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
-        container_name: bmc_celery
+#    celery:
+#        <<: *base-service
+#        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+#        container_name: bmc_celery
 #        build:
 #            context: .
 #            dockerfile: ./docker/celery/Dockerfile
-        depends_on:
-            - postgres
-            - redis
-        volumes:
-            - ./adminpanel/src:/src
-        command:
-            - /scripts/entrypoint_celery.sh
+#        depends_on:
+#            - postgres
+#            - redis
+#        volumes:
+#            - ./adminpanel/src:/src
+#        command:
+#            - /scripts/entrypoint_celery.sh
 
-    celery_beat:
-        <<: *base-service
-        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
-        container_name: bmc_celery_beat
+#    celery_beat:
+#        <<: *base-service
+#        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+#        container_name: bmc_celery_beat
 #        build:
 #            context: .
 #            dockerfile: ./docker/celery_beat/Dockerfile
-        depends_on:
-            - postgres
-            - redis
-            - celery
-        volumes:
-            - ./adminpanel/src:/src
-        command:
-            - /scripts/entrypoint_celery_beat.sh
+#        depends_on:
+#            - postgres
+#            - redis
+#            - celery
+#        volumes:
+#            - ./adminpanel/src:/src
+#        command:
+#            - /scripts/entrypoint_celery_beat.sh
 
     nginx:
         <<: *base-service
