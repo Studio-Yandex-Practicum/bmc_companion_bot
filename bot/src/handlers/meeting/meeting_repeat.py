@@ -5,7 +5,7 @@ from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
 from decorators import at
 from handlers.handlers_utils import make_message_for_active_meeting
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_START_MENU
 from utils import make_message_handler, make_text_handler
@@ -71,7 +71,7 @@ def ask_for_repeat_meeting(state: str):
             text = await user_choose_timeslot_message(
                 timeslots, psycho_set, is_sixth_meeting=is_sixth_meeting
             )
-
+            keyboard = ReplyKeyboardRemove()
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:
