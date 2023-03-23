@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
 from decorators import at
@@ -46,10 +48,14 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Удаляет запись к психологу."""
     meeting_number = update.message.text
     meetings = context_manager.get_meetings(context)
-    if meeting_number == "Отмена записи":
+    if meeting_number == "Отмена записи" and meetings[0].date_start < datetime.now() - timedelta(
+        hours=12
+    ):
         schedule_service_v1.delete_meeting(meeting_id=meetings[0].id)
         text_parts = ["Запись отменена"]
     else:
+        text_parts = ["До записи осталось менее 12 часов, её невозможно отменить."]
+        await update.message.reply_text(text="".join(text_parts))
         await back_to_start_menu(update, context)
         return BotState.STOPPING
     psychologist_id = meetings[0].psychologist
