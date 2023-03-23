@@ -3,7 +3,7 @@ import re
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
 
@@ -12,7 +12,7 @@ from .helpers import context_manager
 from .messages import psychologist_meeting_message
 from .root_handlers import back_to_start_menu
 
-ONE_TO_TEN = [i for i in range(1, 11)]
+ONE_TO_TEN = [KeyboardButton(text=str(i)) for i in range(1, 11)]
 
 
 @t
