@@ -40,7 +40,7 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
         buttons.append([KeyboardButton(text=test.name)])
         context_manager.get_tests(context)[test.name] = test.id
     buttons.append([BTN_START_MENU])
-    keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
     context_manager.set_keys(context, keyboard)
     await update.message.reply_text(text, reply_markup=keyboard)
     return BotState.MENU_TEST_SELECTING_LEVEL

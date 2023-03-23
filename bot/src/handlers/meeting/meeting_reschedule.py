@@ -34,7 +34,7 @@ def ask_for_reschedule(state: str):
         if not meetings:
             text_parts = ["У вас нет записи"]
             button = [[BTN_START_MENU]]
-            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(button, resize_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.STOPPING
@@ -52,7 +52,7 @@ def ask_for_reschedule(state: str):
                 text_parts.append(f"{meeting.date_start}")
             text_parts += ["\nДо консультации осталось менее 12 часов, её невозможно перенести."]
             button = [[BTN_START_MENU]]
-            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(button, resize_keyboard=True)
             await update.message.reply_text(text="\n".join(text_parts), reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.STOPPING
@@ -60,7 +60,7 @@ def ask_for_reschedule(state: str):
         if len(timeslots) < 2:
             text_parts = "Извините, сейчас нет подходящего времени для переноса записи."
             button = [[BTN_START_MENU]]
-            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(button, resize_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.STOPPING
@@ -68,7 +68,7 @@ def ask_for_reschedule(state: str):
         if state == States.TYPING_MEETING_FORMAT:
             text_parts = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
@@ -109,7 +109,7 @@ def ask_for_reschedule(state: str):
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
         cm.set_meetings(context, meetings)

@@ -47,10 +47,14 @@ def ask_for_repeat_meeting(state: str):
         if state == States.TYPING_MEETING_FORMAT:
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
+            if meeting_format not in ("Очно", "Online"):
+                text = "Неверный формат. Выберите формат участия:"
+                await update.message.reply_text(text=text)
+                return States.TYPING_MEETING_FORMAT
             context_manager.set_meeting_format(context, meeting_format)
 
             meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
@@ -98,7 +102,7 @@ def ask_for_repeat_meeting(state: str):
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True, resize_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
 

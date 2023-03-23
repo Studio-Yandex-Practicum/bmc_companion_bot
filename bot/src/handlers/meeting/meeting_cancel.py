@@ -34,7 +34,7 @@ async def get_meetings_list_user(update: Update, context: ContextTypes.DEFAULT_T
         [buttons.BTN_MEETING_CANCEL],
         [BTN_START_MENU],
     ]
-    keyboard = ReplyKeyboardMarkup(keys, one_time_keyboard=True, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(keys, resize_keyboard=True)
     context_manager.set_keys(context, keyboard)
     context_manager.set_meetings(context, meetings)
 
@@ -70,7 +70,7 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text_parts = ["До записи осталось менее 12 часов, её невозможно отменить."]
 
     buttons = [[BTN_START_MENU]]
-    keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
 
     await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
 
