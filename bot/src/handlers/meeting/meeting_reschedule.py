@@ -40,7 +40,7 @@ def ask_for_reschedule(state: str):
             return BotState.STOPPING
 
         if (
-            datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
+            datetime.strptime(meetings[-1].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
             > datetime.now()
         ):
             text_parts = ["До консультации осталось менее 12 часов, её невозможно перенести"]
