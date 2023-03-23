@@ -43,14 +43,14 @@ def ask_for_reschedule(state: str):
             datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
             < datetime.now()
         ):
-            text_parts = ["Ваша консультация\n"]
+            text_parts = ["Ваша консультация:\n"]
             for index, meeting in enumerate(meetings):
                 psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
                 text_parts.append(
-                    f"\n{psychologist_profile.first_name} {psychologist_profile.last_name} "
+                    f"{psychologist_profile.first_name} {psychologist_profile.last_name} "
                 )
                 text_parts.append(f"{meeting.date_start}")
-            text_parts += ["До консультации осталось менее 12 часов, её невозможно перенести"]
+            text_parts += ["\nДо консультации осталось менее 12 часов, её невозможно перенести."]
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
             await update.message.reply_text(text="\n".join(text_parts), reply_markup=keyboard)
@@ -58,7 +58,7 @@ def ask_for_reschedule(state: str):
             return BotState.STOPPING
 
         if len(timeslots) < 2:
-            text_parts = "Извините, сейчас нет подходящего времени для переноса записи"
+            text_parts = "Извините, сейчас нет подходящего времени для переноса записи."
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
