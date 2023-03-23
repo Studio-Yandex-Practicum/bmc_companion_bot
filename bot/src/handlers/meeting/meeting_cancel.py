@@ -49,7 +49,8 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     meeting_number = update.message.text
     meetings = context_manager.get_meetings(context)
     if not meetings or meeting_number != "Отмена записи":
-        text_parts = ["Выполняется переход в главное меню"]
+        await back_to_start_menu(update, context)
+        return BotState.STOPPING
     if (
         datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
         > datetime.now()

@@ -61,7 +61,7 @@ def ask_for_repeat_meeting(state: str):
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             if not timeslots:
-                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
+                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть позже."
                 await update.message.reply_text(text=text)
                 await back_to_start_menu(update, context)
                 return BotState.STOPPING

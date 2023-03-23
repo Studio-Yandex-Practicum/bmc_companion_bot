@@ -27,8 +27,6 @@ def ask_for_feedback(state: str):
         user = user_service_v1.get_user(username=telegram_login)
 
         if update.message.text == "Главное меню":
-            text = "Выполняется переход в главное меню"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
 
@@ -81,7 +79,7 @@ def ask_for_feedback(state: str):
                 text = (
                     "Вы уже оставляли обратную связь для этой встречи: \n"
                     f"{feedback_text} \n"
-                    "Оставьте отзыв заново (мы обновим его)."
+                    "Оставьте отзыв заново (мы обновим его).\n\n"
                     "Оцените насколько вам было комфортно на консультации:"
                 )
             else:
