@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
@@ -32,7 +32,18 @@ def ask_for_reschedule(state: str):
         timeslots = schedule_service_v1.get_actual_timeslots()
 
         if not meetings:
-            text_parts = "У вас нет записи"
+            text_parts = ["У вас нет записи"]
+            button = [[BTN_START_MENU]]
+            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
+            await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
+
+        if (
+            datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
+            > datetime.now()
+        ):
+            text_parts = ["До консультации осталось менее 12 часов, её невозможно перенести"]
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
