@@ -153,4 +153,50 @@ class Migration(migrations.Migration):
                 verbose_name="Пациент",
             ),
         ),
+        migrations.RemoveField(
+            model_name="meetingfeedback",
+            name="score",
+        ),
+        migrations.AddField(
+            model_name="meetingfeedback",
+            name="better_score",
+            field=models.SmallIntegerField(
+                blank=True, null=True, verbose_name="Оценка улучшений после консультации"
+            ),
+        ),
+        migrations.AddField(
+            model_name="meetingfeedback",
+            name="comfort_score",
+            field=models.SmallIntegerField(
+                blank=True, null=True, verbose_name="Оценка комфорта на консультации"
+            ),
+        ),
+        migrations.CreateModel(
+            name="MeetingPeriodicTask",
+            fields=[
+                (
+                    "periodictask_ptr",
+                    models.OneToOneField(
+                        auto_created=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        parent_link=True,
+                        primary_key=True,
+                        serialize=False,
+                        to="django_celery_beat.periodictask",
+                    ),
+                ),
+                (
+                    "meeting",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="meeting_periodic_task",
+                        to="schedule.meeting",
+                        verbose_name="Консультация",
+                    ),
+                ),
+            ],
+            bases=("django_celery_beat.periodictask",),
+        ),
     ]
