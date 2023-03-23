@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
 from decorators import at
@@ -46,22 +48,27 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Удаляет запись к психологу."""
     meeting_number = update.message.text
     meetings = context_manager.get_meetings(context)
-    if meeting_number == "Отмена записи":
+    if not meetings or meeting_number != "Отмена записи":
+        text_parts = ["Выполняется переход в главное меню"]
+    elif (
+        datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
+        > datetime.now()
+    ):
         schedule_service_v1.delete_meeting(meeting_id=meetings[0].id)
         text_parts = ["Запись отменена"]
+        psychologist_id = meetings[0].psychologist
+        if psychologist_id:
+            meeting = meetings[0]
+            user = context_manager.get_user(context)
+            psychologist = user_service_v1.get_user(id=psychologist_id)
+            meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
+            meeting_text = await psychologist_meeting_message(
+                meeting_format, user, meeting, header="Ваша запись была отменена:\n"
+            )
+            await context.bot.send_message(chat_id=psychologist.chat_id, text=meeting_text)
     else:
-        await back_to_start_menu(update, context)
-        return BotState.STOPPING
-    psychologist_id = meetings[0].psychologist
-    if psychologist_id:
-        meeting = meetings[0]
-        user = context_manager.get_user(context)
-        psychologist = user_service_v1.get_user(id=psychologist_id)
-        meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
-        meeting_text = await psychologist_meeting_message(
-            meeting_format, user, meeting, header="Ваша запись была отменена:\n"
-        )
-        await context.bot.send_message(chat_id=psychologist.chat_id, text=meeting_text)
+        text_parts = ["До записи осталось менее 12 часов, её невозможно отменить."]
+
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
 

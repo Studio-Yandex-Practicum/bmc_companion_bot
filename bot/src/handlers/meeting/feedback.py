@@ -3,8 +3,9 @@ import re
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
-from telegram import Update
+from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
+from ui.buttons import BTN_START_MENU
 
 from .enums import States
 from .helpers import context_manager
@@ -17,19 +18,28 @@ def ask_for_feedback(state: str):
     @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
-        keyboard = ""
+        buttons = [[BTN_START_MENU]]
+        keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
+
+        if update.message.text == "Главное меню":
+            text = "Выполняется переход в главное меню"
+            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.END
+
         if user is None:
             text = "Ваших данных нет в базе"
-            await update.message.reply_text(text=text)
+            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
         meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, past="True")
+
         if not meetings:
             text = "У вас еще не было консультаций."
-            await update.message.reply_text(text=text)
+            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
 
@@ -51,12 +61,13 @@ def ask_for_feedback(state: str):
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.CHECK_IS_FEEDBACK_LEFT:
-            number_of_meeting = int(re.findall("\\d+", update.message.text)[0])
-            if number_of_meeting > len(meetings):
+            number_of_meeting = re.findall("\\d+", update.message.text) or []
+
+            if not number_of_meeting or int(number_of_meeting[0]) > len(meetings):
                 text = "Введен неправильный номер !\nНет консультации под таким номером."
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_MEETING_NUMBER
-            meeting = meetings[number_of_meeting - 1] if meetings else {}
+            meeting = meetings[int(number_of_meeting[0]) - 1] if meetings else {}
             context_manager.set_meeting(context, meeting)
             feedback = schedule_service_v1.get_feedback_by_user_and_meeting(
                 user=user.id,

@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState, MeetingFormat
@@ -28,19 +28,37 @@ def ask_for_reschedule(state: str):
         keyboard = None
         chat_data_id = update.message.chat.id
         user = user_service_v1.get_user(chat_id=chat_data_id)
-        meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="True")
+        meetings = schedule_service_v1.get_meetings_by_user(user_id=user.id, is_active="True")
         timeslots = schedule_service_v1.get_actual_timeslots()
 
         if not meetings:
-            text_parts = "У вас нет записи"
+            text_parts = ["У вас нет записи"]
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.STOPPING
 
+        if (
+            datetime.strptime(meetings[0].date_start, "%d.%m.%Y %H:%M") - timedelta(hours=12)
+            < datetime.now()
+        ):
+            text_parts = ["Ваша консультация:\n"]
+            for index, meeting in enumerate(meetings):
+                psychologist_profile = user_service_v1.get_user(id=meeting.psychologist)
+                text_parts.append(
+                    f"{psychologist_profile.first_name} {psychologist_profile.last_name} "
+                )
+                text_parts.append(f"{meeting.date_start}")
+            text_parts += ["\nДо консультации осталось менее 12 часов, её невозможно перенести."]
+            button = [[BTN_START_MENU]]
+            keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
+            await update.message.reply_text(text="\n".join(text_parts), reply_markup=keyboard)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
+
         if len(timeslots) < 2:
-            text_parts = "Извините, сейчас нет подходящего времени для переноса записи"
+            text_parts = "Извините, сейчас нет подходящего времени для переноса записи."
             button = [[BTN_START_MENU]]
             keyboard = ReplyKeyboardMarkup(button, one_time_keyboard=True)
             await update.message.reply_text(text="".join(text_parts), reply_markup=keyboard)
