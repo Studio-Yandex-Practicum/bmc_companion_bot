@@ -53,21 +53,19 @@ async def meeting_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ):
         schedule_service_v1.delete_meeting(meeting_id=meetings[0].id)
         text_parts = ["Запись отменена"]
+        psychologist_id = meetings[0].psychologist
+        if psychologist_id:
+            meeting = meetings[0]
+            user = context_manager.get_user(context)
+            psychologist = user_service_v1.get_user(id=psychologist_id)
+            meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
+            meeting_text = await psychologist_meeting_message(
+                meeting_format, user, meeting, header="Ваша запись была отменена:\n"
+            )
+            await context.bot.send_message(chat_id=psychologist.chat_id, text=meeting_text)
     else:
         text_parts = ["До записи осталось менее 12 часов, её невозможно отменить."]
-        await update.message.reply_text(text="".join(text_parts))
-        await back_to_start_menu(update, context)
-        return BotState.STOPPING
-    psychologist_id = meetings[0].psychologist
-    if psychologist_id:
-        meeting = meetings[0]
-        user = context_manager.get_user(context)
-        psychologist = user_service_v1.get_user(id=psychologist_id)
-        meeting_format = "Онлайн" if meeting.format == MeetingFormat.ONLINE else "Очно"
-        meeting_text = await psychologist_meeting_message(
-            meeting_format, user, meeting, header="Ваша запись была отменена:\n"
-        )
-        await context.bot.send_message(chat_id=psychologist.chat_id, text=meeting_text)
+
     buttons = [[BTN_START_MENU]]
     keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
 
