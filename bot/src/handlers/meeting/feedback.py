@@ -3,7 +3,7 @@ import re
 from app import schedule_service_v1, user_service_v1
 from core.constants import BotState
 from decorators import at, t
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
 
@@ -12,6 +12,8 @@ from .helpers import context_manager
 from .messages import psychologist_meeting_message
 from .root_handlers import back_to_start_menu
 
+ONE_TO_TEN_BUTTONS = [[KeyboardButton(text=str(i)) for i in range(1, 11)], [BTN_START_MENU]]
+
 
 @t
 def ask_for_feedback(state: str):
@@ -19,14 +21,12 @@ def ask_for_feedback(state: str):
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
         buttons = [[BTN_START_MENU]]
-        keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True, resize_keyboard=True)
+        keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
         user = user_service_v1.get_user(username=telegram_login)
 
         if update.message.text == "Главное меню":
-            text = "Выполняется переход в главное меню"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
             await back_to_start_menu(update, context)
             return BotState.END
 
@@ -79,12 +79,13 @@ def ask_for_feedback(state: str):
                 text = (
                     "Вы уже оставляли обратную связь для этой встречи: \n"
                     f"{feedback_text} \n"
-                    "Оставьте отзыв заново (мы обновим его)."
+                    "Оставьте отзыв заново (мы обновим его).\n\n"
                     "Оцените насколько вам было комфортно на консультации:"
                 )
             else:
                 context_manager.set_feedback(context, feedback)
                 text = "Оцените насколько вам было комфортно на консультации:"
+            keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_COMFORT_SCORE:
@@ -92,23 +93,26 @@ def ask_for_feedback(state: str):
             comfort_score = re.findall("\\d+", score_text) or []
             if not comfort_score or int(comfort_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
+                keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.CHECK_IS_FEEDBACK_LEFT
             context_manager.set_comfort_score(context, comfort_score[0])
             text = (
                 "Оцените насколько вам стало лучше после консультации от 1 до 10 \nВведите число:"
             )
+            keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
             await update.message.reply_text(text=text, reply_markup=keyboard)
 
         elif state == States.TYPING_BETTER_SCORE:
             better_score = re.findall("\\d+", update.message.text) or []
             if not better_score or int(better_score[0]) not in range(1, 11):
                 text = "Введите корректную оценку\nВведите число 1 до 10."
+                keyboard = ReplyKeyboardMarkup(ONE_TO_TEN_BUTTONS, resize_keyboard=True)
                 await update.message.reply_text(text=text, reply_markup=keyboard)
                 return States.TYPING_COMFORT_SCORE
             context_manager.set_better_score(context, better_score[0])
             text = "Введите ваш отзыв:"
-            await update.message.reply_text(text=text, reply_markup=keyboard)
+            await update.message.reply_text(text=text, reply_markup=ReplyKeyboardRemove())
 
         elif state == States.FEEDBACK_SAVED:
             context_manager.set_feedback_text(context, update.message.text)

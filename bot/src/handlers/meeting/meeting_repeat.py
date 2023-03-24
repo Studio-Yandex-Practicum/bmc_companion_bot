@@ -25,7 +25,8 @@ def ask_for_repeat_meeting(state: str):
     @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
-        keyboard = None
+        btns = [[BTN_START_MENU]]
+        keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
 
@@ -47,7 +48,7 @@ def ask_for_repeat_meeting(state: str):
         if state == States.TYPING_MEETING_FORMAT:
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
@@ -61,7 +62,7 @@ def ask_for_repeat_meeting(state: str):
 
             timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
             if not timeslots:
-                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
+                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть позже."
                 await update.message.reply_text(text=text)
                 await back_to_start_menu(update, context)
                 return BotState.STOPPING
@@ -71,7 +72,6 @@ def ask_for_repeat_meeting(state: str):
             text = await user_choose_timeslot_message(
                 timeslots, psycho_set, is_sixth_meeting=is_sixth_meeting
             )
-
             context_manager.set_timeslots(context, timeslots)
 
         if state == States.TYPING_MEETING_CONFIRM:
@@ -98,7 +98,7 @@ def ask_for_repeat_meeting(state: str):
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
 

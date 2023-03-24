@@ -124,7 +124,7 @@ def ask_for_input(state: str):
                     user = user_service_v1.update_user(user.id, age=age)
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         elif state == States.TYPING_COMMENT:
             uce_score = update.message.text
@@ -133,7 +133,7 @@ def ask_for_input(state: str):
             text = "О чем бы вы хотели поговорить с психологом?"
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         elif state == States.TYPING_MEETING_FORMAT:
             comment = update.message.text
@@ -141,7 +141,7 @@ def ask_for_input(state: str):
 
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         elif state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
@@ -154,7 +154,7 @@ def ask_for_input(state: str):
 
             context_manager.set_timeslots(context, timeslots)
             btns = [[buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         elif state == States.TYPING_MEETING_CONFIRM:
             number_of_timeslot = re.findall("\\d+", update.message.text) or []
@@ -180,7 +180,7 @@ def ask_for_input(state: str):
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING], [buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
 

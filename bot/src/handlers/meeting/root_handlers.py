@@ -30,7 +30,7 @@ async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
                 [BTN_START_MENU],
             ]
     # btns += [BTN_START_MENU]
-    keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
     await update.message.reply_text(text, reply_markup=keyboard)
     return BotState.MENU_MEETING_SELECTING_LEVEL
 

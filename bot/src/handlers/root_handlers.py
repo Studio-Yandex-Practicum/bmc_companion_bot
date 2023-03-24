@@ -14,7 +14,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "В нашем проекте есть настоящие профессионалы, которые помогут Вам сделать это."
     )
     buttons = [[BTN_SELECT_TEST], [BTN_MAKE_MEETING], [BTN_FEEDBACK]]
-    keyboard = ReplyKeyboardMarkup(buttons, one_time_keyboard=True)
+    keyboard = ReplyKeyboardMarkup(buttons, resize_keyboard=True)
 
     user = user_service_v1.get_user(username=telegram_login)
     if user is None:

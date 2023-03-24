@@ -23,8 +23,8 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
     text = f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
     if test_id == uce_test_id:
         text += "\nРекомендуем записаться на консультацию!"
-    await update.message.reply_text(text)
     context_manager.set_test_id(context, None)
+    await update.message.reply_text(text)
     bot_state = await test_questioning_section(update, context)
     return bot_state
 
