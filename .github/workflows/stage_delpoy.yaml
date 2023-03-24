@@ -126,14 +126,14 @@ jobs:
             docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest
             docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:latest
 
-            docker-compose --file docker-compose.yaml stop
-            docker-compose --file docker-compose.yaml rm bot
-            docker-compose --file docker-compose.yaml rm adminpanel
-            docker-compose --file docker-compose.yaml rm nginx
-            docker-compose --file docker-compose.yaml up -d
+            docker-compose stop
+            docker-compose rm bot
+            docker-compose rm adminpanel
+            docker-compose rm nginx
+            docker-compose up -d
 
   make_migrations:
-    name: Migrations
+    name: Migrations and collect static
     runs-on: ubuntu-latest
     environment:
       name: stage_deploy
@@ -147,5 +147,5 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
-            docker-compose --file docker-compose.yaml python manage.py migrate --noinput
-            docker-compose --file docker-compose.yaml python manage.py collectstatic --noinput
+            docker-compose exec adminpanel python manage.py migrate --noinput
+            docker-compose exec adminpanel python manage.py collectstatic --noinput
