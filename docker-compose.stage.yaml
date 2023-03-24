@@ -3,28 +3,27 @@ x-base-service: &base-service
     environment:
         - DOCKER_BUILDKIT=1
         - ENVIRONMENT=development
-        - ALLOWED_HOSTS=adminpanel 158.160.12.237
-        - ADMINPANEL_HOST=adminpanel
-        - ADMINPANEL_PORT=8000
-        - ADMINPANEL_WEB_PROTOCOL=http
-        - ADMINPANEL_LISTEN_PORT=80
-        - ADMIN=ADMIN
-        - ROOT=ROOT
-        - USER=USER
-        - REDIS_HOST=redis
-        - REDIS_PORT=6379
-        - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
-        - CELERY_BROKER_URL=redis://redis:6379
-        - CELERY_RESULT_BACKEND=redis://redis:6379
-
+#        - ALLOWED_HOSTS=adminpanel 158.160.12.237
+#        - ADMINPANEL_HOST=adminpanel
+#        - ADMINPANEL_PORT=8000
+#        - ADMINPANEL_WEB_PROTOCOL=http
+#        - ADMINPANEL_LISTEN_PORT=80
+#        - ADMIN=ADMIN
+#        - ROOT=ROOT
+#        - USER=USER
+#        - REDIS_HOST=redis
+#        - REDIS_PORT=6379
+#        - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
+#        - CELERY_BROKER_URL=redis://redis:6379
+#        - CELERY_RESULT_BACKEND=redis://redis:6379
 #    restart: on-failure
 
 services:
     postgres:
         <<: *base-service
         image: postgres:14.3-alpine
-        ports:
-            - 6100:6100
+        expose:
+            - 6100
         command: -p 6100
         volumes:
             - pgdata:/var/lib/postgresql/data
@@ -53,43 +52,12 @@ services:
             - redis
         volumes:
             - ./adminpanel/src:/src
-        ports:
-            - 8000:8000
+        expose:
+            - 8000
+#        ports:
+#            - 8000:8000
         command:
             - /scripts/entrypoint_all_in_one.sh
-#            - /scripts/wait-dependencies.sh
-#            - /scripts/start.sh
-
-#    celery:
-#        <<: *base-service
-#        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
-#        container_name: bmc_celery
-#        build:
-#            context: .
-#            dockerfile: ./docker/celery/Dockerfile
-#        depends_on:
-#            - postgres
-#            - redis
-#        volumes:
-#            - ./adminpanel/src:/src
-#        command:
-#            - /scripts/entrypoint_celery.sh
-
-#    celery_beat:
-#        <<: *base-service
-#        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
-#        container_name: bmc_celery_beat
-#        build:
-#            context: .
-#            dockerfile: ./docker/celery_beat/Dockerfile
-#        depends_on:
-#            - postgres
-#            - redis
-#            - celery
-#        volumes:
-#            - ./adminpanel/src:/src
-#        command:
-#            - /scripts/entrypoint_celery_beat.sh
 
     nginx:
         <<: *base-service
