@@ -14,7 +14,7 @@ class Endpoint(str, Enum):
     NEXT_QUESTION = "next_question"
     SUBMIT_ANSWER = "submit_answer"
     TEST_STATUS = "test_statuses"
-    ALL_TEST_STATUSES = "test_statuses/all/"
+    ALL_TEST_STATUSES = "test_statuses/all"
     TEST_RESULT = "test_results"
     ALL_TEST_RESULTS = "test_results/all"
     CHECK_ANSWER = "check_answer"
