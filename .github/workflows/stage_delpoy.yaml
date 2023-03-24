@@ -147,5 +147,5 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ${{ env.DEPLOY_PATH }}
-            docker-compose exec adminpanel python manage.py migrate --noinput
-            docker-compose exec adminpanel python manage.py collectstatic --noinput
+            docker-compose exec -T adminpanel python manage.py migrate --noinput
+            docker-compose exec -T adminpanel python manage.py collectstatic --noinput
