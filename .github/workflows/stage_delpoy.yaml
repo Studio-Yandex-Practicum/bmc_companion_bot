@@ -131,21 +131,3 @@ jobs:
             docker-compose rm adminpanel
             docker-compose rm nginx
             docker-compose up -d
-
-  make_migrations:
-    name: Migrations and collect static
-    runs-on: ubuntu-latest
-    environment:
-      name: stage_deploy
-    needs: start_application
-    steps:
-      - name: Migrate
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: ${{ secrets.SSH_PASSWORD }}
-          script: |
-            cd ${{ env.DEPLOY_PATH }}
-            docker-compose exec -T adminpanel python manage.py migrate --noinput
-            docker-compose exec -T adminpanel python manage.py collectstatic --noinput
