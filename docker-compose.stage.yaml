@@ -8,9 +8,9 @@ x-base-service: &base-service
 #        - ADMINPANEL_PORT=8000
 #        - ADMINPANEL_WEB_PROTOCOL=http
 #        - ADMINPANEL_LISTEN_PORT=80
-#        - ADMIN=ADMIN
-#        - ROOT=ROOT
-#        - USER=USER
+        - ADMIN=ADMIN
+        - ROOT=ROOT
+        - USER=USER
 #        - REDIS_HOST=redis
 #        - REDIS_PORT=6379
 #        - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
@@ -22,8 +22,8 @@ services:
     postgres:
         <<: *base-service
         image: postgres:14.3-alpine
-        expose:
-            - 6100
+        ports:
+            - 6100:6100
         command: -p 6100
         volumes:
             - pgdata:/var/lib/postgresql/data
