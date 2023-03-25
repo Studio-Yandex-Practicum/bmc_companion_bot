@@ -47,7 +47,7 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:stage,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest,
             ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:${{ github.sha }}
-      - name: Build and push (admin container)
+      - name: Build and push (adminpanel container)
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -96,6 +96,17 @@ jobs:
             echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env
             echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
+            echo ADMINPANEL_HOST=${{ secrets.ADMINPANEL_HOST }} >> .env
+            echo ADMINPANEL_PORT=${{ secrets.ADMINPANEL_PORT }} >> .env
+            echo ADMINPANEL_WEB_PROTOCOL=${{ secrets.ADMINPANEL_WEB_PROTOCOL }} >> .env
+            echo ADMINPANEL_LISTEN_PORT=${{ secrets.ADMINPANEL_LISTEN_PORT }} >> .env
+            echo REDIS_HOST=${{ secrets.REDIS_HOST }} >> .env
+            echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
+            echo CELERY_BEAT_SCHEDULER=${{ secrets.CELERY_BEAT_SCHEDULER }} >> .env
+            echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env
+            echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env
+
   start_application:
     name: Start application
     runs-on: ubuntu-latest
@@ -112,13 +123,11 @@ jobs:
           script: |
             cd ${{ env.DEPLOY_PATH }}
             docker image prune -f
-            docker pull  ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest
-            docker pull  ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:latest
 
-            docker-compose --file docker-compose.yaml stop
-            docker-compose --file docker-compose.yaml rm bot
-            docker-compose --file docker-compose.yaml rm adminpanel
-            docker-compose --file docker-compose.yaml rm celery
-            docker-compose --file docker-compose.yaml rm celery_beat
-            docker-compose --file docker-compose.yaml up -d
-            docker-compose exec -T adminpanel python manage.py migrate --noinput
+            docker-compose stop
+            docker-compose rm bot
+            docker-compose rm adminpanel
+            docker-compose rm nginx
+            docker-compose up -d

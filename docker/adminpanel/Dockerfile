@@ -30,3 +30,4 @@ RUN poetry config virtualenvs.create false \
 COPY ./adminpanel/src .
 
 #ENTRYPOINT ["/scripts/entrypoint.sh"]
+#CMD ["/scripts/entrypoint_all_in_one.sh"]
