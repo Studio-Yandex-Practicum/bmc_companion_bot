@@ -23,6 +23,5 @@ questioning_section = ConversationHandler(
     map_to_parent={
         BotState.STOPPING: BotState.END,
         BotState.END: BotState.MENU_TEST_SELECTING_LEVEL,
-        BotState.MENU_TEST_SELECTING_LEVEL: BotState.MENU_START_SELECTING_LEVEL,
     },
 )
