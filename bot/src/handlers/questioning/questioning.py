@@ -80,14 +80,16 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return BotState.QUESTIONING
     answer_id = context_manager.get_answers(context)[answer_text]
-    api_client.submit_answer(
-        UserTestQuestionAnswerSpecificRequest(
-            user_id=context_manager.get_user_id(context),
-            test_id=context_manager.get_test_id(context),
-            question_id=context_manager.get_question_id(context),
-            answer_id=answer_id,
+    question_id = context_manager.get_question_id(context)
+    if answer_id and question_id:
+        api_client.submit_answer(
+            UserTestQuestionAnswerSpecificRequest(
+                user_id=context_manager.get_user_id(context),
+                test_id=context_manager.get_test_id(context),
+                question_id=question_id,
+                answer_id=answer_id,
+            )
         )
-    )
     bot_state = await next_question(update, context)
     return bot_state
 
