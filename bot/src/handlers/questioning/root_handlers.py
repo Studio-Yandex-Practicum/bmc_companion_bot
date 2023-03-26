@@ -17,7 +17,7 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
     await update.message.reply_text("Это раздел тестирования.")
     chat_data = update.message.chat
     telegram_login = chat_data.username
-    user = user_service_v1.get_user(username=telegram_login)
+    user = user_service_v1.get_user(chat_id=chat_data.id)
     if user is None:
         user = user_service_v1.create_user(
             telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
