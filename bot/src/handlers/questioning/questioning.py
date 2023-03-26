@@ -1,3 +1,4 @@
+from app import user_service_v1
 from core.constants import BotState
 from decorators import at
 from handlers.questioning.root_handlers import api_client, test_questioning_section
@@ -23,6 +24,7 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
     uce_test_id = api_client.uce_test_id(UceTestRequest()).id
     text = f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
     if test_id == uce_test_id:
+        user_service_v1.update_user(int(user_id), uce_score=int(test_result.value))
         text += "\nРекомендуем записаться на консультацию!"
     context_manager.set_test_id(context, None)
     await update.message.reply_text(text)
