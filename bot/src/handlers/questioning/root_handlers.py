@@ -34,6 +34,9 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
         text = "Вы можете пройти один из следующих тестов: "
     else:
         text = "Вы уже прошли все доступные тесты."
+        await update.message.reply_text(text)
+        await start(update, context)
+        return BotState.END
     buttons = []
     context_manager.set_tests(context, {})
     for test in test_list:
