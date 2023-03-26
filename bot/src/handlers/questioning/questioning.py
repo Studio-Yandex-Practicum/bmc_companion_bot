@@ -1,6 +1,10 @@
 from core.constants import BotState
 from decorators import at
-from handlers.questioning.root_handlers import api_client, test_questioning_section
+from handlers.questioning.root_handlers import (
+    api_client,
+    back_to_start_menu,
+    test_questioning_section,
+)
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
     UceTestRequest,
@@ -59,6 +63,7 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
     answers = context_manager.get_answers(context)
     if not answers:
+        await back_to_start_menu(update, context)
         return BotState.STOPPING
     if answer_text not in context_manager.get_answers(context):
         await update.message.reply_text(
