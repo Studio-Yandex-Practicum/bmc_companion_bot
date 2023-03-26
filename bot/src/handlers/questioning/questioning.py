@@ -1,7 +1,11 @@
 from app import user_service_v1
 from core.constants import BotState
 from decorators import at
-from handlers.questioning.root_handlers import api_client, test_questioning_section
+from handlers.questioning.root_handlers import (
+    api_client,
+    back_to_start_menu,
+    test_questioning_section,
+)
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
     UceTestRequest,
@@ -27,6 +31,7 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
         user_service_v1.update_user(int(user_id), uce_score=int(test_result.value))
         text += "\nРекомендуем записаться на консультацию!"
         await update.message.reply_text(text)
+        await back_to_start_menu(update, context)
         return BotState.END
     context_manager.set_test_id(context, None)
     await update.message.reply_text(text)
