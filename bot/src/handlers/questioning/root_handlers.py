@@ -13,6 +13,12 @@ api_client = TestAPIClient(APIVersion.V1.value)
 
 
 @at
+async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
+    await start(update, context)
+    return BotState.END
+
+
+@at
 async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     await update.message.reply_text("Это раздел тестирования.")
     chat_data = update.message.chat
@@ -34,6 +40,9 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
         text = "Вы можете пройти один из следующих тестов: "
     else:
         text = "Вы уже прошли все доступные тесты."
+        await update.message.reply_text(text)
+        await back_to_start_menu(update, context)
+        return BotState.END
     buttons = []
     context_manager.set_tests(context, {})
     for test in test_list:
@@ -44,9 +53,3 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
     context_manager.set_keys(context, keyboard)
     await update.message.reply_text(text, reply_markup=keyboard)
     return BotState.MENU_TEST_SELECTING_LEVEL
-
-
-@at
-async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
-    await start(update, context)
-    return BotState.END

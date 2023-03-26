@@ -50,14 +50,14 @@ def ask_for_input(state: str):
             text = make_message_for_active_meeting(user_active_meeting)
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.END
+            return BotState.STOPPING
 
         timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
         if not timeslots:
             text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.END
+            return BotState.STOPPING
 
         timeslots = sorted(
             timeslots, key=lambda x: (datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"))
@@ -128,7 +128,7 @@ def ask_for_input(state: str):
 
         elif state == States.TYPING_COMMENT:
             uce_score = update.message.text
-            if uce_score != DO_NOTHING_SIGN:
+            if uce_score != DO_NOTHING_SIGN and uce_score.isnumeric():
                 user = user_service_v1.update_user(user.id, uce_score=uce_score)
             text = "О чем бы вы хотели поговорить с психологом?"
 

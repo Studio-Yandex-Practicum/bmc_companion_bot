@@ -1,7 +1,11 @@
+from app import user_service_v1
 from core.constants import BotState
 from decorators import at
-from handlers.questioning.root_handlers import api_client, test_questioning_section
-from handlers.root_handlers import error_restart
+from handlers.questioning.root_handlers import (
+    api_client,
+    back_to_start_menu,
+    test_questioning_section,
+)
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
     UceTestRequest,
@@ -18,11 +22,17 @@ from utils import context_manager
 async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
+    if not test_id:
+        return await test_questioning_section(update, context)
     test_result = api_client.test_result(UserTestSpecificRequest(user_id=user_id, test_id=test_id))
     uce_test_id = api_client.uce_test_id(UceTestRequest()).id
     text = f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
     if test_id == uce_test_id:
+        user_service_v1.update_user(int(user_id), uce_score=int(test_result.value))
         text += "\nРекомендуем записаться на консультацию!"
+        await update.message.reply_text(text)
+        await back_to_start_menu(update, context)
+        return BotState.END
     context_manager.set_test_id(context, None)
     await update.message.reply_text(text)
     bot_state = await test_questioning_section(update, context)
@@ -33,6 +43,8 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
 async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
+    if not test_id:
+        return await test_questioning_section(update, context)
     try:
         next_question = api_client.next_question(
             UserTestSpecificRequest(user_id=user_id, test_id=test_id)
@@ -60,7 +72,7 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
     answers = context_manager.get_answers(context)
     if not answers:
-        error_restart(update, context)
+        return await next_question(update, context)
     if answer_text not in context_manager.get_answers(context):
         await update.message.reply_text(
             "Выберите ответ из предложенных вариантов",
@@ -68,14 +80,16 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return BotState.QUESTIONING
     answer_id = context_manager.get_answers(context)[answer_text]
-    api_client.submit_answer(
-        UserTestQuestionAnswerSpecificRequest(
-            user_id=context_manager.get_user_id(context),
-            test_id=context_manager.get_test_id(context),
-            question_id=context_manager.get_question_id(context),
-            answer_id=answer_id,
+    question_id = context_manager.get_question_id(context)
+    if answer_id and question_id:
+        api_client.submit_answer(
+            UserTestQuestionAnswerSpecificRequest(
+                user_id=context_manager.get_user_id(context),
+                test_id=context_manager.get_test_id(context),
+                question_id=question_id,
+                answer_id=answer_id,
+            )
         )
-    )
     bot_state = await next_question(update, context)
     return bot_state
 

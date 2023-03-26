@@ -10,7 +10,12 @@ from telegram.ext import CommandHandler, ConversationHandler
 class StartCommand(BaseCommand):
     @classmethod
     def get_handler(cls):
-        selection_handlers = [admin_section, questioning_section, meeting_section, feedback_section]
+        selection_handlers = [
+            admin_section,
+            questioning_section,
+            meeting_section,
+            feedback_section,
+        ]
 
         conv_handler = ConversationHandler(
             entry_points=[CommandHandler("start", start)],
