@@ -3,7 +3,6 @@ from handlers.admin.entrypoint import admin_section
 from handlers.base import BaseCommand
 from handlers.meeting.entrypoint import feedback_section, meeting_section
 from handlers.questioning.entrypoint import questioning_section
-from handlers.questioning.uce_test_selection import uce_test_section
 from handlers.root_handlers import help_command, start
 from telegram.ext import CommandHandler, ConversationHandler
 
@@ -14,7 +13,6 @@ class StartCommand(BaseCommand):
         selection_handlers = [
             admin_section,
             questioning_section,
-            uce_test_section,
             meeting_section,
             feedback_section,
         ]
