@@ -28,6 +28,3 @@ RUN poetry config virtualenvs.create false \
     && poetry add psycopg2
 
 COPY ./adminpanel/src .
-
-#ENTRYPOINT ["/scripts/entrypoint.sh"]
-#CMD ["/scripts/entrypoint_all_in_one.sh"]

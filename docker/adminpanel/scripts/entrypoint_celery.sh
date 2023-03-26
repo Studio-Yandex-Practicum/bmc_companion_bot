@@ -1,7 +1,0 @@
-#!/bin/sh
-set -e
-
-/scripts/wait-dependencies.sh
-/scripts/start_celery.sh
-
-exec "$@"
