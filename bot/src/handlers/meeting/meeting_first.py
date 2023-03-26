@@ -57,7 +57,7 @@ def ask_for_input(state: str):
             text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть завтра."
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.END
+            return BotState.STOPPING
 
         timeslots = sorted(
             timeslots, key=lambda x: (datetime.strptime(x.date_start, "%d.%m.%Y %H:%M"))
