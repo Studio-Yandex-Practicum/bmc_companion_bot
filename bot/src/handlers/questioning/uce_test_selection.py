@@ -3,12 +3,10 @@ from core.constants import APIVersion, BotState
 from decorators import at
 from handlers.meeting.buttons import BTN_I_DONT_KNOW
 from handlers.questioning.questioning import next_question, question_handler
-from handlers.questioning.root_handlers import back_to_start_menu
 from request.clients import TestAPIClient
 from schemas.requests import UceTestRequest
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
-from ui.buttons import BTN_START_MENU
 from utils import context_manager, make_message_handler
 
 api_client = TestAPIClient(APIVersion.V1.value)
@@ -39,7 +37,7 @@ uce_test_section = ConversationHandler(
         BotState.QUESTIONING: [question_handler],
     },
     fallbacks=[
-        make_message_handler(BTN_START_MENU, back_to_start_menu),
+        # make_message_handler(BTN_START_MENU, back_to_start_menu),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
