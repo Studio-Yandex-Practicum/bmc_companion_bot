@@ -2,21 +2,11 @@ x-base-service: &base-service
     env_file: ./.env
     environment:
         - DOCKER_BUILDKIT=1
-        - ENVIRONMENT=development
-#        - ALLOWED_HOSTS=adminpanel 158.160.12.237
-#        - ADMINPANEL_HOST=adminpanel
-#        - ADMINPANEL_PORT=8000
-#        - ADMINPANEL_WEB_PROTOCOL=http
-#        - ADMINPANEL_LISTEN_PORT=80
+        - ENVIRONMENT=production
         - ADMIN=ADMIN
         - ROOT=ROOT
         - USER=USER
-#        - REDIS_HOST=redis
-#        - REDIS_PORT=6379
-#        - CELERY_BEAT_SCHEDULER=django_celery_beat.schedulers:DatabaseScheduler
-#        - CELERY_BROKER_URL=redis://redis:6379
-#        - CELERY_RESULT_BACKEND=redis://redis:6379
-#    restart: on-failure
+    restart: on-failure
 
 services:
     postgres:
@@ -51,11 +41,9 @@ services:
             - postgres
             - redis
         volumes:
-            - ./adminpanel/src:/src
+            - ./adminpanel/static:/BMC/staticfiles/
         expose:
             - 8000
-#        ports:
-#            - 8000:8000
         command:
             - /scripts/entrypoint_all_in_one.sh
 
@@ -65,7 +53,7 @@ services:
         volumes:
             - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
             - ./docker/nginx/templates:/etc/nginx/templates
-#            - static_value:/var/html/static/
+            - ./adminpanel/static:/var/html/static/
         ports:
             - 80:80
         depends_on:
@@ -75,4 +63,3 @@ services:
 volumes:
     pgdata:
     redis_data:
-    static_value:
