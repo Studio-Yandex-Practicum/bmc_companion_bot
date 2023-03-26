@@ -1,7 +1,6 @@
 from core.constants import BotState
 from decorators import at
 from handlers.questioning.root_handlers import api_client, test_questioning_section
-from handlers.root_handlers import error_restart
 from request.exceptions import NoNextQuestion
 from schemas.requests import (
     UceTestRequest,
@@ -60,14 +59,13 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
     answers = context_manager.get_answers(context)
     if not answers:
-        error_restart(update, context)
+        return BotState.STOPPING
     if answer_text not in context_manager.get_answers(context):
         await update.message.reply_text(
             "Выберите ответ из предложенных вариантов",
             reply_markup=context_manager.get_keys(context),
         )
-        bot_state = await next_question(update, context)
-        return bot_state
+        return BotState.QUESTIONING
     answer_id = context_manager.get_answers(context)[answer_text]
     api_client.submit_answer(
         UserTestQuestionAnswerSpecificRequest(
