@@ -6,7 +6,9 @@ from app import schedule_service_v1, user_service_v1
 from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
 from decorators import at, t
 from handlers.handlers_utils import make_message_for_active_meeting
+from handlers.questioning.root_handlers import api_client
 from handlers.questioning.uce_test_selection import uce_test_section
+from schemas.requests import UceTestRequest, UserTestSpecificRequest
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_START_MENU
@@ -128,8 +130,14 @@ def ask_for_input(state: str):
 
         elif state == States.TYPING_COMMENT:
             uce_score = update.message.text
-            if uce_score != DO_NOTHING_SIGN:
+            if uce_score != DO_NOTHING_SIGN and uce_score.isnumeric():
                 user = user_service_v1.update_user(user.id, uce_score=uce_score)
+            else:
+                uce_test_id = api_client.uce_test_id(UceTestRequest()).id
+                uce_test_result = api_client.test_result(
+                    UserTestSpecificRequest(user_id=user.id, test_id=uce_test_id)
+                )
+                user = user_service_v1.update_user(user.id, uce_score=uce_test_result)
             text = "О чем бы вы хотели поговорить с психологом?"
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
