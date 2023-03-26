@@ -130,15 +130,21 @@ def ask_for_input(state: str):
 
         elif state == States.TYPING_COMMENT:
             uce_score = update.message.text
-            if uce_score != DO_NOTHING_SIGN and uce_score.isnumeric():
-                user = user_service_v1.update_user(user.id, uce_score=uce_score)
-            else:
-                uce_test_id = api_client.uce_test_id(UceTestRequest()).id
-                uce_test_result = api_client.test_result(
-                    UserTestSpecificRequest(user_id=user.id, test_id=uce_test_id)
+            uce_test_id = api_client.uce_test_id(UceTestRequest()).id
+            db_uce_score = api_client.test_result(
+                UserTestSpecificRequest(user_id=user.id, test_id=uce_test_id)
+            )
+
+            if uce_score != DO_NOTHING_SIGN and not db_uce_score:
+                text = make_ask_for_input_information(
+                    "Нажмите кнопку 'Не знаю' и пройдите тест НДО",
+                    db_uce_score,
                 )
-                if uce_test_result:
-                    user = user_service_v1.update_user(user.id, uce_score=uce_test_result.value)
+                next_state = States.TYPING_TEST_SCORE
+
+            if uce_score.isnumeric() and int(uce_score) == db_uce_score.value:
+                user = user_service_v1.update_user(user.id, uce_score=db_uce_score.value)
+
             text = "О чем бы вы хотели поговорить с психологом?"
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
