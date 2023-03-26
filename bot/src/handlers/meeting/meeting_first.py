@@ -50,7 +50,7 @@ def ask_for_input(state: str):
             text = make_message_for_active_meeting(user_active_meeting)
             await update.message.reply_text(text=text)
             await back_to_start_menu(update, context)
-            return BotState.END
+            return BotState.STOPPING
 
         timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
         if not timeslots:
