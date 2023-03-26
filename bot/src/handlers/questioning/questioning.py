@@ -36,6 +36,8 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
 async def next_question(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
+    if not test_id:
+        return await test_questioning_section(update, context)
     try:
         next_question = api_client.next_question(
             UserTestSpecificRequest(user_id=user_id, test_id=test_id)
