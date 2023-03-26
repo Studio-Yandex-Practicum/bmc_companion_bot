@@ -18,7 +18,7 @@ async def test_selector(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
         await update.message.reply_text(
             "выберите тест из списка", reply_markup=context_manager.get_keys(context)
         )
-        return BotState.MENU_START_SELECTING_LEVEL
+        return BotState.MENU_TEST_SELECTING_LEVEL
     test_id = context_manager.get_tests(context)[selected_text]
     context_manager.set_test_id(context, test_id)
     await update.message.reply_text(f"Вы выбрали тест «{selected_text}». Приступим!")
