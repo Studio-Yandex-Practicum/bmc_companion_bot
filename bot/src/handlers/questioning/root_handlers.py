@@ -23,6 +23,7 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
             telegram_login=telegram_login, first_name=chat_data.first_name, chat_id=chat_data.id
         )
     user_id = user.id
+    context_manager.set_tests(context, {})
     test_statuses = api_client.all_test_statuses(UserSpecificRequest(user_id=user_id))
     context_manager.set_user_id(context, user_id)
     if test_statuses.active.items:
@@ -35,7 +36,7 @@ async def test_questioning_section(update: Update, context: ContextTypes.DEFAULT
     else:
         text = "Вы уже прошли все доступные тесты."
     buttons = []
-    context_manager.set_tests(context, {})
+    context_manager.set_tests(context, test_list)
     for test in test_list:
         buttons.append([KeyboardButton(text=test.name)])
         context_manager.get_tests(context)[test.name] = test.id
