@@ -2,7 +2,6 @@ from app import user_service_v1
 from core.constants import APIVersion, BotState
 from decorators import at
 from handlers.meeting.buttons import BTN_I_DONT_KNOW
-from handlers.meeting.enums import States
 from handlers.questioning.questioning import next_question, question_handler
 from handlers.questioning.root_handlers import back_to_start_menu
 from request.clients import TestAPIClient
@@ -44,6 +43,6 @@ uce_test_section = ConversationHandler(
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
-        BotState.END: States.TYPING_COMMENT,
+        BotState.END: BotState.MENU_START_SELECTING_LEVEL,
     },
 )
