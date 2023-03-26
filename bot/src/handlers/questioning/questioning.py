@@ -61,7 +61,7 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     answer_text = update.message.text
     answers = context_manager.get_answers(context)
     if not answers:
-        return await test_questioning_section(update, context)
+        return await next_question(update, context)
     if answer_text not in context_manager.get_answers(context):
         await update.message.reply_text(
             "Выберите ответ из предложенных вариантов",
