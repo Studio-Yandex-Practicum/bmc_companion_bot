@@ -137,7 +137,8 @@ def ask_for_input(state: str):
                 uce_test_result = api_client.test_result(
                     UserTestSpecificRequest(user_id=user.id, test_id=uce_test_id)
                 )
-                user = user_service_v1.update_user(user.id, uce_score=uce_test_result)
+                if uce_test_result:
+                    user = user_service_v1.update_user(user.id, uce_score=uce_test_result.value)
             text = "О чем бы вы хотели поговорить с психологом?"
 
             btns = [[buttons.BTN_I_DONT_KNOW]]
