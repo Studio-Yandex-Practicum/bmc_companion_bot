@@ -17,6 +17,8 @@ from utils import context_manager
 async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
     user_id = context_manager.get_user_id(context)
     test_id = context_manager.get_test_id(context)
+    if not test_id:
+        return await test_questioning_section(update, context)
     test_result = api_client.test_result(UserTestSpecificRequest(user_id=user_id, test_id=test_id))
     uce_test_id = api_client.uce_test_id(UceTestRequest()).id
     text = f"В тесте «{test_result.name}» вы набрали {test_result.value} баллов."
