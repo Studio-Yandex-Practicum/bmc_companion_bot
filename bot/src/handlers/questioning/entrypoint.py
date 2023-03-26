@@ -12,6 +12,7 @@ from utils import make_message_handler
 questioning_section = ConversationHandler(
     entry_points=[
         make_message_handler(BTN_SELECT_TEST, test_questioning_section),
+        question_handler,
     ],
     states={
         BotState.MENU_TEST_SELECTING_LEVEL: [test_selection],

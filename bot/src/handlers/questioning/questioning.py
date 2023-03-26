@@ -32,7 +32,7 @@ async def show_result(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str
         text += "\nРекомендуем записаться на консультацию!"
         await update.message.reply_text(text)
         await back_to_start_menu(update, context)
-        return BotState.MENU_TEST_SELECTING_LEVEL
+        return BotState.END
     context_manager.set_test_id(context, None)
     await update.message.reply_text(text)
     bot_state = await test_questioning_section(update, context)
