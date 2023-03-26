@@ -66,7 +66,8 @@ async def submit_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Выберите ответ из предложенных вариантов",
             reply_markup=context_manager.get_keys(context),
         )
-        return BotState.QUESTIONING
+        bot_state = await next_question(update, context)
+        return bot_state
     answer_id = context_manager.get_answers(context)[answer_text]
     api_client.submit_answer(
         UserTestQuestionAnswerSpecificRequest(
