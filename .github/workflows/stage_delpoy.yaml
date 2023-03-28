@@ -3,8 +3,8 @@ name: Deploy workflow
 on:
   pull_request:
     branches:
-      - develop
-    # types: [closed]
+      - master
+    types: [closed]
 
 env:
   REGISTRY: ghcr.io
