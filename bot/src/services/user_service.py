@@ -8,7 +8,7 @@ from utils import make_random_password
 
 
 @dataclass
-class UserService(PydanticApiService):
+class UserApiService(PydanticApiService):
     url_path = "profiles/"
 
     def get_user(self, **kwargs) -> UserResponse | None:
