@@ -1,10 +1,10 @@
 from http import HTTPStatus
-from typing import Dict, Optional, Type, TypeVar, Union
+from typing import Dict, Optional, Type, TypeVar
 from urllib.parse import urljoin
 
 import httpx
-from core.constants import APIVersion, Endpoint, HTTPMethod, UserRole
-from core.settings import WEB_API_URL, settings
+from core.constants import APIVersion, Endpoint, HTTPMethod
+from core.settings import WEB_API_URL
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
     APIClientRequestError,
@@ -30,8 +30,6 @@ from schemas.responses import (
     TestStatusResponse,
     UceTestResponse,
     UserIdResponse,
-    UserListResponse,
-    UserResponse,
 )
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -79,89 +77,6 @@ class BaseAPIClient:
         except httpx.RequestError as e:
             raise APIClientRequestError(f"Error while requesting {e.request.url}")
         return response
-
-
-class ObjAPIClient(BaseAPIClient):
-    """
-    Класс обвязки HTTP-запросов к Web-API. Конструктор принимает адрес эндпойнта, тип
-    pydantic-модели отдельного объекта и тип pydantic-модели их набора. Поддерживаются методы
-    get(), create(), patch() и delete().
-    """
-
-    def __init__(
-        self,
-        api_version: APIVersion,
-        endpoint: Endpoint,
-        model: Type[ModelType],
-        many_model: Type[ModelType],
-    ) -> None:
-        self.model = model
-        self.many_model = many_model
-        self.base_url = f"http://{WEB_API_URL}/api{api_version}{endpoint}"
-
-    def _obj_url(self, id: Union[int, str]) -> str:
-        """Конструирует URL конкретного ресурса, используя переданный id."""
-        return f"{self.base_url}/{id}"
-
-    def get(
-        self,
-        id: Optional[Union[int, str]] = None,
-        offset: Optional[int] = None,
-        limit: Optional[int] = None,
-    ) -> ModelType:
-        """
-        Получение объекта(-ов). Принимает id объекта или необязательные значения offset и/или
-        limit, возвращает pydantic-модель одиночного объекта или их набора.
-        """
-        if id is not None:
-            response = self._safe_request(HTTPMethod.GET, self._obj_url(id))
-            obj = self._process_response(response, self.model)
-            return obj
-        params = {}
-        if limit:
-            params["limit"] = limit
-        if offset:
-            params["offset"] = offset
-        response = self._safe_request(HTTPMethod.GET, self.base_url, params=params)
-        objs = self._process_response(response, self.many_model)
-        return objs
-
-    def create(self, obj: ModelType) -> ModelType:
-        """
-        Создание объекта. Принимает pydantic-модель одиночного объекта, возвращает pydantic-модель
-        одиночного объекта, сконструированную по json-данным ответа Web-API.
-        """
-        response = self._safe_request(HTTPMethod.POST, self.base_url, json=obj.json())
-        obj = self._process_response(response, self.model)
-        return obj
-
-    def update(self, id: Union[int, str], obj: ModelType) -> ModelType:
-        """
-        Редактирование объекта. Принимает id объекта в базе и pydantic-модель одиночного объекта,
-        возвращает pydantic-модель, сконструированную по json-данным ответа Web-API.
-        """
-        response = self._safe_request(HTTPMethod.PATCH, self._obj_url(id), json=obj.json())
-        obj = self._process_response(response, self.model)
-        return obj
-
-    def delete(self, id: Union[int, str]) -> ModelType:
-        """
-        Удаление объектов. Принимает id объекта в базе, возвращает pydantic-модель,
-        сконструированную по json-данным ответа Web-API.
-        """
-        response = self._safe_request(HTTPMethod.DELETE, self._obj_url(id))
-        obj = self._process_response(response, self.model)
-        return obj
-
-    def is_staff(self, telegramm_id: int) -> bool:
-        """Проверка роли пользователя на администратора."""
-        for user in self.get().data:
-            if telegramm_id == dict(user).get("telegram_id"):
-                user_role = UserRole(dict(user).get("role_id")).name.lower()
-                if user_role == settings.ADMIN.lower() or user_role == settings.ROOT.lower():
-                    return True
-                return False
-        return False
 
 
 class TestAPIClient(BaseAPIClient):
@@ -227,11 +142,3 @@ class TestAPIClient(BaseAPIClient):
         url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, CheckAnswerResponse)
-
-
-user_service = ObjAPIClient(
-    api_version="/v1",
-    endpoint="/users/",
-    model=UserResponse,
-    many_model=UserListResponse,
-)
