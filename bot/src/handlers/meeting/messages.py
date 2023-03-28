@@ -5,7 +5,7 @@ FORMAT_ONLINE = "Онлайн"
 FORMAT_OFFLINE = "Очно"
 ADDRESS = "Адрес: "
 DEFAULT_ADDRESS = "ул. Дуки, д.86"
-PSYCOLOGIST = "Психолог: "
+PSYCHOLOGIST = "Психолог: "
 DATE = "Дата и время: "
 YOU_WERE = "Вы уже были у этих психологов:"
 YOU_WERENT = "\nУ этих психологов Вы еще не были:"
@@ -39,7 +39,7 @@ async def user_check_meeting_message(format, first_name, last_name, date, addres
             ADDRESS + f"{address}",
         ]
     text += [
-        PSYCOLOGIST + f"{first_name} {last_name}",
+        PSYCHOLOGIST + f"{first_name} {last_name}",
     ]
     text += [
         DATE + f"{date}",
