@@ -34,12 +34,6 @@ class HTTPMethod(str, Enum):
     TRACE = "TRACE"
 
 
-class TestStatus(str, Enum):
-    AVAILABLE = "available"
-    ACTIVE = "active"
-    COMPLETED = "completed"
-
-
 class BotState(str, Enum):
     MENU_START_SELECTING_LEVEL = "MENU_START_SELECTING_LEVEL"
     MENU_ADMIN_SELECTING_LEVEL = "MENU_ADMIN_SELECTING_LEVEL"
@@ -49,12 +43,6 @@ class BotState(str, Enum):
     STOPPING = "STOPPING"
     END = ConversationHandler.END
     ERROR = "ERROR"
-
-
-class UserRole(int, Enum):
-    ROOT = 1
-    ADMIN = 2
-    USER = 3
 
 
 class MeetingFormat(int, Enum):
