@@ -14,22 +14,16 @@ from request.exceptions import (
 )
 from schemas.requests import (
     UceTestRequest,
-    UserIdRequestFromTelegram,
     UserSpecificRequest,
     UserTestQuestionAnswerSpecificRequest,
-    UserTestQuestionSpecificRequest,
     UserTestSpecificRequest,
 )
 from schemas.responses import (
-    AllTestResultsResponse,
     AllTestStatusesResponse,
-    CheckAnswerResponse,
     QuestionResponse,
     SubmitAnswerResponse,
     TestResultResponse,
-    TestStatusResponse,
     UceTestResponse,
-    UserIdResponse,
 )
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
@@ -87,12 +81,6 @@ class TestAPIClient(BaseAPIClient):
     def __init__(self, api_version: APIVersion) -> None:
         self._base_url = f"http://{WEB_API_URL}/api{api_version}/"
 
-    def user_id_from_chat_id(self, request: UserIdRequestFromTelegram) -> UserIdResponse:
-        """Получение user_id по chat_id."""
-        url = urljoin(self._base_url, Endpoint.USER_ID_FROM_CHAT_ID)
-        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        return self._process_response(response, UserIdResponse)
-
     def uce_test_id(self, request: UceTestRequest) -> UceTestResponse:
         url = urljoin(self._base_url, Endpoint.UCE_TEST)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
@@ -103,12 +91,6 @@ class TestAPIClient(BaseAPIClient):
         url = urljoin(self._base_url, Endpoint.ALL_TEST_STATUSES)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, AllTestStatusesResponse)
-
-    def test_status(self, request: UserTestSpecificRequest) -> TestStatusResponse:
-        """Запрос статуса конкретного теста для данного пользователя."""
-        url = urljoin(self._base_url, Endpoint.TEST_STATUS)
-        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        return self._process_response(response, TestStatusResponse)
 
     def next_question(self, request: UserTestSpecificRequest) -> QuestionResponse:
         """Запрос следующего вопроса для данного пользователя в данном тесте."""
@@ -129,16 +111,3 @@ class TestAPIClient(BaseAPIClient):
         url = urljoin(self._base_url, Endpoint.TEST_RESULT)
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, TestResultResponse)
-
-    def all_test_results(self, request: UserSpecificRequest) -> AllTestResultsResponse:
-        """Запрос результатов всех тестов для данного пользователя."""
-        url = urljoin(self._base_url, Endpoint.ALL_TEST_RESULTS)
-        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        return self._process_response(response, AllTestResultsResponse)
-
-    def check_answer(self, request: UserTestQuestionSpecificRequest) -> CheckAnswerResponse:
-        """Запрос ранее полученного ответа на данный вопрос данного теста
-        от имени данного пользователя."""
-        url = urljoin(self._base_url, Endpoint.CHECK_ANSWER)
-        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
-        return self._process_response(response, CheckAnswerResponse)
