@@ -13,7 +13,7 @@ async def test_selector(update: Update, context: ContextTypes.DEFAULT_TYPE) -> s
     selected_text = update.message.text
     tests = context_manager.get_tests(context)
     if not tests:
-        error_restart()
+        await error_restart(update, context)
     if selected_text not in context_manager.get_tests(context):
         await update.message.reply_text(
             "выберите тест из списка", reply_markup=context_manager.get_keys(context)

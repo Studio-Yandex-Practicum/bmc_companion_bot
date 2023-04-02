@@ -12,9 +12,6 @@ class Settings(BaseSettings):
     ADMINPANEL_HOST: str
     ADMINPANEL_PORT: str
     ADMINPANEL_WEB_PROTOCOL: str
-    ADMIN: str
-    ROOT: str
-    USER: str
 
     class Config:
         env_file = ROOT_DIR / ".env"
@@ -22,8 +19,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-print(settings)
 
 API_PATH_PREFIX = "api/"
 API_V1_PATH_PREFIX = "v1/"

@@ -3,9 +3,6 @@ x-base-service: &base-service
     environment:
         - DOCKER_BUILDKIT=1
         - ENVIRONMENT=production
-        - ADMIN=ADMIN
-        - ROOT=ROOT
-        - USER=USER
     restart: on-failure
 
 services:
