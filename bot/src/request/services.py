@@ -51,6 +51,9 @@ class PydanticApiService:
     def _send_request(self, method: str, url: str, model: Type[BaseModel], **kwargs):
         response = getattr(self.api_client, method)(url, **kwargs)
 
+        if method == "get" and response.status_code == HTTPStatus.NO_CONTENT:
+            return None
+
         if method == "delete" and response.status_code == HTTPStatus.NO_CONTENT:
             return None
 
