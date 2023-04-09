@@ -127,9 +127,9 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
+                meeting_format=MeetingFormat.ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else MeetingFormat.MEETING_FORMAT_OFFLINE,
+                else MeetingFormat.OFFLINE,
                 timeslot=timeslot.id,
                 comment="Повторная запись",
             )

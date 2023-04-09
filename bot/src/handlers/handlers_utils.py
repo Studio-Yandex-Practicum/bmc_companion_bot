@@ -9,7 +9,7 @@ def make_message_for_active_meeting(user_active_meeting: list[MeetingResponse]) 
     meeting_time = meeting_obj.date_start
     meeting_format = (
         buttons.BTN_MEETING_FORMAT_ONLINE.text
-        if meeting_obj.format == MeetingFormat.MEETING_FORMAT_ONLINE
+        if meeting_obj.format == MeetingFormat.ONLINE
         else buttons.BTN_MEETING_FORMAT_OFFLINE.text
     )
     ps = user_service_v1.get_user(id=meeting_obj.psychologist)
