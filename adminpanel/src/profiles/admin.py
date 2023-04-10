@@ -83,7 +83,7 @@ def export_table_to_excel(modeladmin, request, queryset):
 
 @admin.register(models.Profile)
 class ProfileAdmin(UserAdmin):
-    list_display = ("id", "first_name", "last_name", "telegram_login", "phone")
+    list_display = ("id", "first_name", "last_name", "telegram_login", "phone", "address")
     search_fields = (
         "username",
         "email",
@@ -93,6 +93,7 @@ class ProfileAdmin(UserAdmin):
         "phone",
         "telegram_id",
         "chat_id",
+        "address",
     )
     actions = [export_table_to_excel]
     list_filter = ("is_staff", "is_active")
@@ -112,6 +113,7 @@ class ProfileAdmin(UserAdmin):
                     "phone",
                     "age",
                     "uce_score",
+                    "address",
                 )
             },
         ),

@@ -21,11 +21,11 @@ class ProfileViewSet(ModelViewSet):
         "telegram_id",
         "chat_id",
         "telegram_login",
+        "address",
     ]
 
     def get_queryset(self):
         qs = self.queryset
-        id = self.request.query_params.get("id", None)
-        if id:
-            qs = qs.filter(id=id)
+        if _id := self.request.query_params.get("id", None):
+            qs = qs.filter(id=_id)
         return qs
