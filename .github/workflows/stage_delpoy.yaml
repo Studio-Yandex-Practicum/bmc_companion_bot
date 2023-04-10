@@ -3,7 +3,7 @@ name: Deploy workflow
 on:
   pull_request:
     branches:
-      - master
+      - develop
     types: [closed]
 
 env:
