@@ -101,6 +101,7 @@ class UserResponse(BaseModel):
     chat_id: str | None = ""
     telegram_login: str | None = ""
     telegram_id: str | None = ""
+    address: str | None = ""
 
 
 class TimeslotResponse(BaseModel):

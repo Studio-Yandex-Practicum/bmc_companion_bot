@@ -177,6 +177,7 @@ def ask_for_input(state: str):
                 timeslot.profile.first_name,
                 timeslot.profile.last_name,
                 timeslot.date_start,
+                timeslot.profile.address,
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING], [buttons.BTN_NOT_CONFIRM_MEETING]]
