@@ -1,4 +1,5 @@
 from app import questioning_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState
 from decorators import at
 from handlers.questioning.root_handlers import (
@@ -9,7 +10,6 @@ from request.exceptions import NoNextQuestion
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, MessageHandler, filters
 from ui.buttons import BTN_START_MENU
-from utils import context_manager
 
 
 @at

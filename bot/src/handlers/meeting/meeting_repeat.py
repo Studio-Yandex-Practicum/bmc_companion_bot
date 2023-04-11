@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState, MeetingFormat
 from decorators import at
 from handlers.handlers_utils import make_message_for_active_meeting
@@ -12,7 +13,6 @@ from utils import make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States
-from .helpers import context_manager
 from .messages import (
     psychologist_meeting_message,
     user_check_meeting_message,

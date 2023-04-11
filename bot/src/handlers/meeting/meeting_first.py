@@ -3,6 +3,7 @@ from datetime import datetime
 
 import phonenumbers
 from app import schedule_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import DO_NOTHING_SIGN, BotState, MeetingFormat
 from decorators import at, t
 from handlers.handlers_utils import make_message_for_active_meeting
@@ -18,7 +19,6 @@ from utils import (
 
 from . import buttons
 from .enums import States
-from .helpers import context_manager
 from .messages import (
     psychologist_meeting_message,
     user_check_meeting_message,
@@ -199,7 +199,7 @@ def process_meeting_confirm(confirm: bool):
             user = context_manager.get_user(context)
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
-            comment = context_manager.get_comment(context)
+            comment = context_manager.get_meeting_comment(context)
             schedule_service_v1.create_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,

@@ -1,11 +1,11 @@
 from app import questioning_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState
 from decorators import at
 from handlers.root_handlers import start
 from telegram import KeyboardButton, ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
-from utils import context_manager
 
 
 @at

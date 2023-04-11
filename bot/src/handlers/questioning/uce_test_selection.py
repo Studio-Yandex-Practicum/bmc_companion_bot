@@ -1,11 +1,12 @@
 from app import questioning_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState
 from decorators import at
 from handlers.meeting.buttons import BTN_I_DONT_KNOW
 from handlers.questioning.questioning import next_question, question_handler
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
-from utils import context_manager, make_message_handler
+from utils import make_message_handler
 
 
 @at

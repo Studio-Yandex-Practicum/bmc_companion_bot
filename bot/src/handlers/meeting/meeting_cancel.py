@@ -1,13 +1,14 @@
 from datetime import datetime, timedelta
 
 from app import schedule_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState, MeetingFormat
 from decorators import at
 from handlers.meeting.root_handlers import back_to_start_menu
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_START_MENU
-from utils import context_manager, make_message_handler, make_text_handler
+from utils import make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States

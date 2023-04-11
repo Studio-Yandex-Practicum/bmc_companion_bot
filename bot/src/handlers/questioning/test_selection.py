@@ -1,3 +1,4 @@
+from context_manager import context_manager
 from core.constants import BotState
 from decorators import at
 from handlers.questioning.questioning import next_question
@@ -5,7 +6,6 @@ from handlers.root_handlers import error_restart
 from telegram import Update
 from telegram.ext import ContextTypes, MessageHandler, filters
 from ui.buttons import BTN_START_MENU
-from utils import context_manager
 
 
 @at
