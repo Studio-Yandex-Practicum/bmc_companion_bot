@@ -12,7 +12,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = config.ALLOWED_HOSTS.split(" ")
 
-
 # Security
 # https://docs.djangoproject.com/en/3.2/topics/security/
 
@@ -24,4 +23,6 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SECURE_SSL_REDIRECT = False
 
 SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = False
+
+CSRF_TRUSTED_ORIGINS = [config.ALLOWED_HOSTS.split(" ")]
