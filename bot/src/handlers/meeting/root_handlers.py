@@ -10,7 +10,7 @@ from ui.buttons import BTN_START_MENU
 from . import buttons
 
 
-async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> BotState:
     text = "Выберите, что нужно сделать:"
     chat_data_id = update.message.chat.id
     user = user_service_v1.get_user(chat_id=chat_data_id)
@@ -35,6 +35,6 @@ async def meetings_main_menu(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return BotState.MENU_MEETING_SELECTING_LEVEL
 
 
-async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def back_to_start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> BotState:
     await start(update, context)
     return BotState.END

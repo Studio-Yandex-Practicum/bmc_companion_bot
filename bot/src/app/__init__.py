@@ -1,12 +1,14 @@
 from core.settings import BASE_API_URL_V1, settings
 from request.base import ApiClient
+from services.questioning_service import QuestioningApiService
 from services.schedule_service import ScheduleApiService
-from services.user_service import UserService
+from services.user_service import UserApiService
 from telegram.ext import ApplicationBuilder
 
 api_client_v1 = ApiClient(base_url=BASE_API_URL_V1)
-user_service_v1 = UserService(api_client=api_client_v1)
+user_service_v1 = UserApiService(api_client=api_client_v1)
 schedule_service_v1 = ScheduleApiService(api_client=api_client_v1)
+questioning_service_v1 = QuestioningApiService(api_client=api_client_v1)
 
 
 def create_app():

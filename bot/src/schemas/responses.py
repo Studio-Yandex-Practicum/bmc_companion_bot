@@ -1,11 +1,4 @@
-from core.constants import TestStatus
 from pydantic import BaseModel
-
-
-class UserIdResponse(BaseModel):
-    """Модель информации о id юзера."""
-
-    user_id: int
 
 
 class TestInfo(BaseModel):
@@ -42,13 +35,6 @@ class TestResultList(BaseModel):
         return self.__root__
 
 
-class TestStatusResponse(TestInfo):
-    """Модель ответа с информацией о статусе конкретного теста для данного юзера."""
-
-    user_id: int
-    status: TestStatus
-
-
 class AllTestStatusesResponse(BaseModel):
     """Модель ответа с информацией о статусе всех тестов для данного юзера."""
 
@@ -62,13 +48,6 @@ class TestResultResponse(TestResult):
     """Модель ответа с результатом конкретного теста для данного юзера."""
 
     user_id: int
-
-
-class AllTestResultsResponse(BaseModel):
-    """Модель ответа с результатом всех тестов для данного юзера."""
-
-    user_id: int
-    results: TestResultList
 
 
 class AnswerInfo(BaseModel):
@@ -107,13 +86,6 @@ class SubmitAnswerResponse(BaseModel):
     answer_id: int
 
 
-class CheckAnswerResponse(SubmitAnswerResponse):
-    """Модель ответа на запрос ответа, данного указанным юзером на указанный вопрос теста."""
-
-    text: str
-    value: int
-
-
 class UserResponse(BaseModel):
     """Модель для получения краткой информации о пользователе."""
 
@@ -129,6 +101,7 @@ class UserResponse(BaseModel):
     chat_id: str | None = ""
     telegram_login: str | None = ""
     telegram_id: str | None = ""
+    address: str | None = ""
 
 
 class TimeslotResponse(BaseModel):
@@ -151,18 +124,6 @@ class MeetingResponse(BaseModel):
     timeslot: int | None
 
 
-class UserListResponse(BaseModel):
-    """Модель для получения списка пользователей."""
-
-    data: list[UserResponse]
-
-
-class MeetingListResponse(BaseModel):
-    """Модель для получения списка митингов (встреч)."""
-
-    data: list[MeetingResponse]
-
-
 class FeedbackResponse(BaseModel):
     """Модель для получения краткой информации о отзыве."""
 
@@ -172,12 +133,6 @@ class FeedbackResponse(BaseModel):
     text: str | None = None
     comfort_score: int | None = None
     better_score: int | None = None
-
-
-class FeedbackListResponse(BaseModel):
-    """Модель для получения списка отзывов."""
-
-    data: list[FeedbackResponse]
 
 
 class UceTestResponse(BaseModel):

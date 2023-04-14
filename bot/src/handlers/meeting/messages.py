@@ -5,7 +5,7 @@ FORMAT_ONLINE = "Онлайн"
 FORMAT_OFFLINE = "Очно"
 ADDRESS = "Адрес: "
 DEFAULT_ADDRESS = "ул. Дуки, д.86"
-PSYCOLOGIST = "Психолог: "
+PSYCHOLOGIST = "Психолог: "
 DATE = "Дата и время: "
 YOU_WERE = "Вы уже были у этих психологов:"
 YOU_WERENT = "\nУ этих психологов Вы еще не были:"
@@ -26,20 +26,20 @@ async def psychologist_meeting_message(format, user, timeslot, header=NEW_MEETIN
     return "\n".join(text)
 
 
-async def user_check_meeting_message(format, first_name, last_name, date, address=DEFAULT_ADDRESS):
+async def user_check_meeting_message(_format, first_name, last_name, date, address=DEFAULT_ADDRESS):
     text = [
         LETS_CHECK,
         LENGTH,
     ]
     text += [
-        FORMAT + f"{format}",
+        FORMAT + f"{_format}",
     ]
-    if format == FORMAT_OFFLINE:
+    if _format == FORMAT_OFFLINE:
         text += [
             ADDRESS + f"{address}",
         ]
     text += [
-        PSYCOLOGIST + f"{first_name} {last_name}",
+        PSYCHOLOGIST + f"{first_name} {last_name}",
     ]
     text += [
         DATE + f"{date}",

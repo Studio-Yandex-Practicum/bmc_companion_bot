@@ -1,15 +1,12 @@
-from app import user_service_v1
-from core.constants import APIVersion, BotState
+from app import questioning_service_v1, user_service_v1
+from context_manager import context_manager
+from core.constants import BotState
 from decorators import at
 from handlers.meeting.buttons import BTN_I_DONT_KNOW
 from handlers.questioning.questioning import next_question, question_handler
-from request.clients import TestAPIClient
-from schemas.requests import UceTestRequest
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
-from utils import context_manager, make_message_handler
-
-api_client = TestAPIClient(APIVersion.V1.value)
+from utils import make_message_handler
 
 
 @at
@@ -24,7 +21,7 @@ async def go_to_uce_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     user_id = user.id
     context_manager.set_user_id(context, user_id)
-    uce_test_id = api_client.uce_test_id(UceTestRequest()).id
+    uce_test_id = questioning_service_v1.uce_test_id().id
     context_manager.set_test_id(context, uce_test_id)
     await update.message.reply_text(text)
     await next_question(update, context)

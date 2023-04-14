@@ -2,18 +2,17 @@ import re
 from datetime import datetime, timedelta
 
 from app import schedule_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState, MeetingFormat
 from decorators import at, t
 from handlers.meeting.root_handlers import back_to_start_menu
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
 from ui.buttons import BTN_START_MENU
-from utils import context_manager as cm
 from utils import make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States
-from .helpers import context_manager
 from .messages import (
     psychologist_meeting_message,
     user_check_meeting_message,
@@ -106,13 +105,14 @@ def ask_for_reschedule(state: str):
                 timeslot.profile.first_name,
                 timeslot.profile.last_name,
                 timeslot.date_start,
+                timeslot.profile.address,
             )
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
             keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
-        cm.set_meetings(context, meetings)
+        context_manager.set_meetings(context, meetings)
 
         if text_parts:
             await update.message.reply_text(text_parts, reply_markup=keyboard)
@@ -137,7 +137,7 @@ def meeting_update(confirm: bool):
             user = context_manager.get_user(context)
             timeslot = context_manager.get_timeslot(context)
             meeting_format = context_manager.get_meeting_format(context)
-            meetings = cm.get_meetings(context)
+            meetings = context_manager.get_meetings(context)
             meeting = meetings[0]
             schedule_service_v1.update_meeting(
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),

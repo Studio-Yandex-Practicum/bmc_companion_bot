@@ -64,11 +64,11 @@ def get_next_question(request: Request):
     ]
 )
 def post_answer(request):
-    user_id = request.query_params.get("user_id")
-    test_id = request.query_params.get("test_id")
-    question_id = request.query_params.get("question_id")
-    answer_id = request.query_params.get("answer_id")
-    if any([id is None for id in [user_id, test_id, question_id, answer_id]]):
+    user_id = request.data.get("user_id")
+    test_id = request.data.get("test_id")
+    question_id = request.data.get("question_id")
+    answer_id = request.data.get("answer_id")
+    if not all([user_id, test_id, question_id, answer_id]):
         return Response(status=HTTPStatus.BAD_REQUEST)
     try:
         confirmation_data = submit_answer(user_id, test_id, question_id, answer_id)

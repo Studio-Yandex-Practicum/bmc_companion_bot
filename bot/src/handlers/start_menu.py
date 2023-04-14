@@ -1,5 +1,4 @@
 from core.constants import BotState
-from handlers.admin.entrypoint import admin_section
 from handlers.base import BaseCommand
 from handlers.meeting.entrypoint import feedback_section, meeting_section
 from handlers.questioning.entrypoint import questioning_section
@@ -11,7 +10,6 @@ class StartCommand(BaseCommand):
     @classmethod
     def get_handler(cls):
         selection_handlers = [
-            admin_section,
             questioning_section,
             meeting_section,
             feedback_section,

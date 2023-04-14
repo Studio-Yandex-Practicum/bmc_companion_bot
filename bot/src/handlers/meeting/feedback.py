@@ -1,6 +1,7 @@
 import re
 
 from app import schedule_service_v1, user_service_v1
+from context_manager import context_manager
 from core.constants import BotState
 from decorators import at, t
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -8,7 +9,6 @@ from telegram.ext import ContextTypes
 from ui.buttons import BTN_START_MENU
 
 from .enums import States
-from .helpers import context_manager
 from .messages import psychologist_meeting_message
 from .root_handlers import back_to_start_menu
 
