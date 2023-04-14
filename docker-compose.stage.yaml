@@ -1,0 +1,65 @@
+x-base-service: &base-service
+    env_file: ./.env
+    environment:
+        - DOCKER_BUILDKIT=1
+        - ENVIRONMENT=production
+        - ADMIN=ADMIN
+        - ROOT=ROOT
+        - USER=USER
+    restart: on-failure
+
+services:
+    postgres:
+        <<: *base-service
+        image: postgres:14.3-alpine
+        ports:
+            - 6100:6100
+        command: -p 6100
+        volumes:
+            - pgdata:/var/lib/postgresql/data
+
+    redis:
+        <<: *base-service
+        image: redis:7-alpine
+        expose:
+            - 6379
+        volumes:
+            - redis_data:/data
+
+    bot:
+        <<: *base-service
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_bot:latest
+        container_name: bmc_bot
+        depends_on:
+            - adminpanel
+
+    adminpanel:
+        <<: *base-service
+        image: ghcr.io/studio-yandex-practicum/bmc_companion_adminpanel:latest
+        container_name: bmc_adminpanel
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - ./adminpanel/static:/BMC/staticfiles/
+        expose:
+            - 8000
+        command:
+            - /scripts/entrypoint_all_in_one.sh
+
+    nginx:
+        <<: *base-service
+        image: nginx:1.21.6-alpine
+        volumes:
+            - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+            - ./docker/nginx/templates:/etc/nginx/templates
+            - ./adminpanel/static:/var/html/static/
+        ports:
+            - 80:80
+        depends_on:
+            - adminpanel
+
+
+volumes:
+    pgdata:
+    redis_data:

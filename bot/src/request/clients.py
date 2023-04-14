@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 import httpx
 from core.constants import APIVersion, Endpoint, HTTPMethod, UserRole
-from core.settings import settings
+from core.settings import WEB_API_URL, settings
 from pydantic import BaseModel, ValidationError
 from request.exceptions import (
     APIClientRequestError,
@@ -13,6 +13,7 @@ from request.exceptions import (
     NoNextQuestion,
 )
 from schemas.requests import (
+    UceTestRequest,
     UserIdRequestFromTelegram,
     UserSpecificRequest,
     UserTestQuestionAnswerSpecificRequest,
@@ -27,12 +28,11 @@ from schemas.responses import (
     SubmitAnswerResponse,
     TestResultResponse,
     TestStatusResponse,
+    UceTestResponse,
     UserIdResponse,
     UserListResponse,
     UserResponse,
 )
-
-WEB_API_URL = f"{settings.APP_HOST}:{settings.APP_PORT}"
 
 ModelType = TypeVar("ModelType", bound=BaseModel)
 
@@ -178,6 +178,11 @@ class TestAPIClient(BaseAPIClient):
         response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
         return self._process_response(response, UserIdResponse)
 
+    def uce_test_id(self, request: UceTestRequest) -> UceTestResponse:
+        url = urljoin(self._base_url, Endpoint.UCE_TEST)
+        response = self._safe_request(HTTPMethod.GET, url=url, params=request.dict())
+        return self._process_response(response, UceTestResponse)
+
     def all_test_statuses(self, request: UserSpecificRequest) -> AllTestStatusesResponse:
         """Запрос статуса всех тестов для данного пользователя."""
         url = urljoin(self._base_url, Endpoint.ALL_TEST_STATUSES)
@@ -225,5 +230,8 @@ class TestAPIClient(BaseAPIClient):
 
 
 user_service = ObjAPIClient(
-    api_version="/v1", endpoint="/users/", model=UserResponse, many_model=UserListResponse
+    api_version="/v1",
+    endpoint="/users/",
+    model=UserResponse,
+    many_model=UserListResponse,
 )

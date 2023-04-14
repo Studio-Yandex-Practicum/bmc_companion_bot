@@ -1,21 +1,32 @@
+import re
 from datetime import datetime
 
 from app import schedule_service_v1, user_service_v1
-from core.constants import BotState
+from core.constants import BotState, MeetingFormat
+from decorators import at
+from handlers.handlers_utils import make_message_for_active_meeting
 from telegram import ReplyKeyboardMarkup, Update
 from telegram.ext import ContextTypes, ConversationHandler
+from ui.buttons import BTN_START_MENU
 from utils import make_message_handler, make_text_handler
 
 from . import buttons
 from .enums import States
 from .helpers import context_manager
+from .messages import (
+    psychologist_meeting_message,
+    user_check_meeting_message,
+    user_choose_timeslot_message,
+)
 from .root_handlers import back_to_start_menu
 
 
 def ask_for_repeat_meeting(state: str):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         text = ""
-        keyboard = None
+        btns = [[BTN_START_MENU]]
+        keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
         chat_data = update.message.chat
         telegram_login = chat_data.username
 
@@ -23,65 +34,71 @@ def ask_for_repeat_meeting(state: str):
         if user is None:
             text = "Ваших данных нет в базе"
             await update.message.reply_text(text=text, reply_markup=keyboard)
-            return BotState.MENU_START_SELECTING_LEVEL
+            return BotState.STOPPING
+
+        user_active_meeting = schedule_service_v1.get_meetings_by_user(
+            user=user.id, is_active="True"
+        )
+        if user_active_meeting:
+            text = make_message_for_active_meeting(user_active_meeting)
+            await update.message.reply_text(text=text)
+            await back_to_start_menu(update, context)
+            return BotState.STOPPING
 
         if state == States.TYPING_MEETING_FORMAT:
             text = "Выберите формат участия:"
             btns = [[buttons.BTN_MEETING_FORMAT_ONLINE, buttons.BTN_MEETING_FORMAT_OFFLINE]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
-        elif state == States.TYPING_TIME_SLOT:
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
+
+        if state == States.TYPING_TIME_SLOT:
             meeting_format = update.message.text
             context_manager.set_meeting_format(context, meeting_format)
 
-            text = f"{'Выберите дату и время записи:'}\n"
-            text_was = f"{'Вы уже были у этих психологов:'}\n"
-            text_wasnt = f"\n\n{'У этих психологов Вы еще не были:'}"
+            meetings = schedule_service_v1.get_meetings_by_user(user=user.id, is_active="False")
+            is_sixth_meeting = False
+            if len(meetings) > 4:
+                is_sixth_meeting = True
+            psycho_set = {meeting.psychologist for meeting in meetings}
 
-            timeslots = schedule_service_v1.get_actual_timeslots()
-            meetings = schedule_service_v1.get_meetings_by_user(user=user.id)
-            list_ps = []
-            for meeting in meetings:
-                user_id = meeting.psychologist
-                ps_name = user_service_v1.get_user(id=user_id)
-                list_ps.append(ps_name.id)
+            timeslots = schedule_service_v1.get_actual_timeslots(is_free="True")
+            if not timeslots:
+                text = "Сейчас нет свободных слотов для записи. Попробуйте посмотреть позже."
+                await update.message.reply_text(text=text)
+                await back_to_start_menu(update, context)
+                return BotState.STOPPING
 
-            for index, timeslot in enumerate(timeslots):
-                add_ps = (
-                    f"\n{index + 1}. {timeslot.profile.first_name} "
-                    f"{timeslot.profile.last_name}: "
-                    f"{timeslot.date_start}"
-                )
-                if timeslot.date_start and timeslot.profile:
-                    ts_ps = timeslot.profile.id
-                    if ts_ps in list_ps:
-                        if text_was not in text:
-                            text += text_was
-                            text += add_ps
-                        else:
-                            text += add_ps
-                    elif ts_ps not in list_ps:
-                        if text_wasnt not in text:
-                            text += text_wasnt
-                            text += add_ps
-                        else:
-                            text += add_ps
+            timeslots = sorted(timeslots, key=lambda x: (x.profile.id not in psycho_set))
+
+            text = await user_choose_timeslot_message(
+                timeslots, psycho_set, is_sixth_meeting=is_sixth_meeting
+            )
             context_manager.set_timeslots(context, timeslots)
 
-        elif state == States.TYPING_MEETING_CONFIRM:
-            number_of_timeslot = int(update.message.text)
+        if state == States.TYPING_MEETING_CONFIRM:
+            number_of_timeslot = re.findall("\\d+", update.message.text) or []
+            timeslots = context_manager.get_timeslots(context) or []
+            if not number_of_timeslot or int(number_of_timeslot[0]) > len(timeslots):
+                text = "Введен неправильный номер !\nНет таймслота под таким номером."
+                await update.message.reply_text(text=text, reply_markup=keyboard)
+                await back_to_start_menu(update, context)
+                return BotState.STOPPING
+            else:
+                number_of_timeslot = int(number_of_timeslot[0])
             meeting_format = context_manager.get_meeting_format(context)
             timeslots = context_manager.get_timeslots(context) or []
             timeslot = timeslots[number_of_timeslot - 1] if timeslots else {}
 
             context_manager.set_timeslot(context, timeslot)
 
-            text = "Давайте все проверим:\n"
-            text += f"\nФормат записи: {meeting_format}"
-            text += f"\nПсихолог: {timeslot.profile.first_name} {timeslot.profile.last_name}"
-            text += f"\nДата: {timeslot.date_start}"
+            text = await user_check_meeting_message(
+                meeting_format,
+                timeslot.profile.first_name,
+                timeslot.profile.last_name,
+                timeslot.date_start,
+            )
 
             btns = [[buttons.BTN_CONFIRM_MEETING, buttons.BTN_NOT_CONFIRM_MEETING]]
-            keyboard = ReplyKeyboardMarkup(btns, one_time_keyboard=True)
+            keyboard = ReplyKeyboardMarkup(btns, resize_keyboard=True)
 
         context_manager.set_user(context, user)
 
@@ -92,6 +109,7 @@ def ask_for_repeat_meeting(state: str):
     return inner
 
 
+@at
 async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = "выполняется переход на прохождение теста НДО:"
     await update.message.reply_text(text)
@@ -99,6 +117,7 @@ async def go_to_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def process_meeting_confirm(confirm: bool):
+    @at
     async def inner(update: Update, context: ContextTypes.DEFAULT_TYPE) -> str:
         if confirm:
             user = context_manager.get_user(context)
@@ -108,20 +127,16 @@ def process_meeting_confirm(confirm: bool):
                 date_start=str(datetime.strptime(timeslot.date_start, "%d.%m.%Y %H:%M")),
                 psychologist_id=timeslot.profile.id,
                 user_id=user.id,
-                meeting_format=10
+                meeting_format=MeetingFormat.MEETING_FORMAT_ONLINE
                 if meeting_format == buttons.BTN_MEETING_FORMAT_ONLINE.text
-                else 20,
+                else MeetingFormat.MEETING_FORMAT_OFFLINE,
+                timeslot=timeslot.id,
+                comment="Повторная запись",
             )
 
             psychologist_chat_id = timeslot.profile.chat_id
             if psychologist_chat_id:
-                meeting_text = (
-                    f"У вас новая запись:\n\n"
-                    f"кто: {user.first_name} {user.last_name}\n"
-                    f"телефон: {user.phone}\n"
-                    f"когда: {timeslot.date_start}\n"
-                    f"где: {meeting_format}\n"
-                )
+                meeting_text = await psychologist_meeting_message(meeting_format, user, timeslot)
                 await context.bot.send_message(chat_id=psychologist_chat_id, text=meeting_text)
 
             text = "Вы успешно записаны к психологу!"
@@ -161,10 +176,12 @@ meeting_repeat_section = ConversationHandler(
         ],
     },
     fallbacks=[
+        make_message_handler(BTN_START_MENU, back_to_start_menu),
         # make_message_handler(BTN_ADMIN_MENU, back_to_admin),
         # make_message_handler(BTN_TESTS_MENU, menu_tests),
     ],
     map_to_parent={
         BotState.STOPPING: BotState.END,
+        BotState.END: BotState.MENU_MEETING_SELECTING_LEVEL,
     },
 )

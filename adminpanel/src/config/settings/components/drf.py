@@ -14,6 +14,17 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
     ),
     "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
+    # "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.NamespaceVersioning",
     "DATETIME_FORMAT": "%d.%m.%Y %H:%M",
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "BMC Companion API",
+    "DESCRIPTION": (
+        'API для доступа к базе данных телеграм бота "Ты в порядке" '
+        "Брянского молодежного центра."
+    ),
+    "VERSION": "v1",
+    "SERVE_INCLUDE_SCHEMA": False,
 }

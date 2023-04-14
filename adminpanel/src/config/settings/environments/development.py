@@ -16,6 +16,7 @@ ALLOWED_HOSTS = config.ALLOWED_HOSTS.split(" ")
 # Installed apps for development only:
 INSTALLED_APPS += [
     "debug_toolbar",
+    "drf_spectacular",
 ]
 
 # Django debug toolbar:
@@ -36,3 +37,5 @@ def _custom_show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": _custom_show_toolbar}
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+APPEND_SLASH = False

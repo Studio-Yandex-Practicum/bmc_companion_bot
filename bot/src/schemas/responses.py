@@ -148,9 +148,39 @@ class MeetingResponse(BaseModel):
     comment: str | None = ""
     format: int | None = None
     date_start: str | None = ""
+    timeslot: int | None
 
 
 class UserListResponse(BaseModel):
     """Модель для получения списка пользователей."""
 
     data: list[UserResponse]
+
+
+class MeetingListResponse(BaseModel):
+    """Модель для получения списка митингов (встреч)."""
+
+    data: list[MeetingResponse]
+
+
+class FeedbackResponse(BaseModel):
+    """Модель для получения краткой информации о отзыве."""
+
+    id: int | None
+    meeting: int | None = None
+    user: int | None = None
+    text: str | None = None
+    comfort_score: int | None = None
+    better_score: int | None = None
+
+
+class FeedbackListResponse(BaseModel):
+    """Модель для получения списка отзывов."""
+
+    data: list[FeedbackResponse]
+
+
+class UceTestResponse(BaseModel):
+    """Модель информации о id теста."""
+
+    id: int

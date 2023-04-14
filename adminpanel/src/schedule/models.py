@@ -1,4 +1,5 @@
 from django.db import models
+from django_celery_beat.models import PeriodicTask
 from profiles.models import Profile
 
 
@@ -11,6 +12,9 @@ class TimeSlot(models.Model):
     class Meta:
         verbose_name = "Таймслот"
         verbose_name_plural = "Таймслоты"
+
+    def __str__(self):
+        return f"{self.date_start} {self.profile.last_name} {self.profile.first_name}"
 
 
 class Meeting(models.Model):
@@ -49,8 +53,60 @@ class Meeting(models.Model):
         default=MEETING_FORMAT_ONLINE,
         verbose_name="Формат встречи",
     )
+    timeslot = models.OneToOneField(
+        TimeSlot,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="timeslot_meetings",
+        verbose_name="Таймслот",
+    )
+
+    def __str__(self):
+        return f"{self.id}"
 
     class Meta:
         verbose_name = "Консультация"
         verbose_name_plural = "Консультации"
         ordering = ["id"]
+
+
+class MeetingPeriodicTask(PeriodicTask):
+    meeting = models.ForeignKey(
+        Meeting,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="meeting_periodic_task",
+        verbose_name="Консультация",
+    )
+
+
+class MeetingFeedback(models.Model):
+    user = models.ForeignKey(
+        Profile,
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="feedbacks",
+        verbose_name="Пациент",
+    )
+    meeting = models.ForeignKey(
+        Meeting,
+        blank=True,
+        null=True,
+        on_delete=models.CASCADE,
+        related_name="feedbacks",
+        verbose_name="Консультация",
+    )
+    text = models.TextField(null=True, blank=True, verbose_name="Текст отзыва")
+    comfort_score = models.SmallIntegerField(
+        null=True, blank=True, verbose_name="Оценка комфорта на консультации"
+    )
+    better_score = models.SmallIntegerField(
+        null=True, blank=True, verbose_name="Оценка улучшений после консультации"
+    )
+
+    class Meta:
+        verbose_name = "Отзыв"
+        verbose_name_plural = "Отзывы"

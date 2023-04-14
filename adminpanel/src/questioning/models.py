@@ -19,8 +19,8 @@ class TestProgress(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        verbose_name = "Результат теста"
-        verbose_name_plural = "Результаты тестов"
+        verbose_name = "Ответ на вопрос теста"
+        verbose_name_plural = "Ответы на вопрос теста"
 
 
 class TestCompleted(models.Model):

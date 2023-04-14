@@ -35,10 +35,12 @@ def finalize_test(user_id: int, test_id: int) -> None:
 
 def all_test_statuses(user_id: int) -> dict:
     """Получение статусов всех тестов для данного юзера."""
-    completed_test_id = TestCompleted.objects.values_list("test_id", flat=True)
-    active_question_id = TestProgress.objects.filter(answer_id__isnull=True).values_list(
-        "question_id", flat=True
+    completed_test_id = TestCompleted.objects.filter(profile=user_id).values_list(
+        "test_id", flat=True
     )
+    active_question_id = TestProgress.objects.filter(
+        answer_id__isnull=True, profile=user_id
+    ).values_list("question_id", flat=True)
     active_test_id = Question.objects.filter(Q(id__in=active_question_id)).values_list(
         "test_id", flat=True
     )

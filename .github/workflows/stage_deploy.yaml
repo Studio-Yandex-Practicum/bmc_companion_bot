@@ -1,0 +1,136 @@
+name: Deploy workflow
+
+on:
+  pull_request:
+    branches:
+      - master
+    types: [closed]
+
+env:
+  REGISTRY: ghcr.io
+  REP_OWNER: studio-yandex-practicum
+  BOT_IMAGE_NAME: bmc_companion_bot
+  ADMINPANEL_IMAGE_NAME: bmc_companion_adminpanel
+  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+  WORK_DIR: /BMC
+
+defaults:
+  run:
+    working-directory: .
+
+jobs:
+  build_and_push_docker_image:
+    name: Push Docker image to GitHub Packages
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment:
+      name: stage_deploy
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push (bot container)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/bot/Dockerfile
+          labels: runnumber=${GITHUB_RUN_ID}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:stage,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:${{ github.sha }}
+      - name: Build and push (adminpanel container)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: ./docker/adminpanel/Dockerfile
+          labels: runnumber=${GITHUB_RUN_ID}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:stage,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:latest,
+            ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:${{ github.sha }}
+  deploy:
+    name: Deploy
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    needs: build_and_push_docker_image
+    environment:
+      name: stage_deploy
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Copy docker-compose and nginx files
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "docker-compose.stage.yaml, docker/nginx/"
+          target: ${{ env.DEPLOY_PATH }}
+
+      - name: Create .env file
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            mv docker-compose.stage.yaml docker-compose.yaml
+            rm -f .env
+            touch .env
+            echo TZ=${{ secrets.TZ }} >> .env
+            echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
+            echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
+            echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
+            echo POSTGRES_HOST=${{ secrets.POSTGRES_HOST }} >> .env
+            echo POSTGRES_PORT=${{ secrets.POSTGRES_PORT }} >> .env
+            echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
+            echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
+            echo ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }} >> .env
+            echo ADMINPANEL_HOST=${{ secrets.ADMINPANEL_HOST }} >> .env
+            echo ADMINPANEL_PORT=${{ secrets.ADMINPANEL_PORT }} >> .env
+            echo ADMINPANEL_WEB_PROTOCOL=${{ secrets.ADMINPANEL_WEB_PROTOCOL }} >> .env
+            echo ADMINPANEL_LISTEN_PORT=${{ secrets.ADMINPANEL_LISTEN_PORT }} >> .env
+            echo REDIS_HOST=${{ secrets.REDIS_HOST }} >> .env
+            echo REDIS_PORT=${{ secrets.REDIS_PORT }} >> .env
+            echo CELERY_BEAT_SCHEDULER=${{ secrets.CELERY_BEAT_SCHEDULER }} >> .env
+            echo CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }} >> .env
+            echo CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }} >> .env
+
+  start_application:
+    name: Start application
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment:
+      name: stage_deploy
+    needs: deploy
+    steps:
+      - name: Start application
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ${{ env.DEPLOY_PATH }}
+            docker image prune -f
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.BOT_IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.REP_OWNER }}/${{ env.ADMINPANEL_IMAGE_NAME }}:latest
+
+            docker-compose stop
+            docker-compose rm bot
+            docker-compose rm adminpanel
+            docker-compose rm nginx
+            docker-compose up -d

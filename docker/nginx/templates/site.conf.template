@@ -1,6 +1,6 @@
 server {
-    listen       ${APP_LISTEN_PORT} default_server;
-    listen       [::]:${APP_LISTEN_PORT} default_server;
+    listen       ${ADMINPANEL_LISTEN_PORT} default_server;
+    listen       [::]:${ADMINPANEL_LISTEN_PORT} default_server;
     server_name  _;
     access_log  /var/log/nginx/access.log main;
 
@@ -10,7 +10,11 @@ server {
     rewrite ^([^.\?]*[^/])$ $1/;
 
     location / {
-        proxy_pass http://${APP_HOST}:${APP_PORT}/;
+        proxy_pass http://${ADMINPANEL_HOST}:${ADMINPANEL_PORT}/;
+    }
+
+    location /static/ {
+        root /var/html/;
     }
 
     error_page   404              /404.html;
